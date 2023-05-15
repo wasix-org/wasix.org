@@ -1,5 +1,39 @@
-import { Callout } from "nextra-theme-docs";
+## `args_get()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Read command-line argument data.
+
+### Description
+
+The `args_get()` function is used to read the command-line argument data provided to the WebAssembly module. The sizes of the buffers should match the values returned by the `args_sizes_get()` function.
+
+### Syntax
+
+```rust
+pub fn args_get<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    argv: WasmPtr<WasmPtr<u8, M>, M>,
+    argv_buf: WasmPtr<u8, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `argv`: A WebAssembly pointer to a buffer where the argument pointers will be written.
+- `argv_buf`: A WebAssembly pointer to a buffer where the argument string data will be written.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `args`: The command-line arguments in the WebAssembly module.
+
+Please make sure the logging configuration is properly set up to capture the desired logs.
+
+### Note
+
+The `args_get()` function reads the command-line argument data provided to the WebAssembly module. The argument pointers and string data are written to the specified buffers. The actual data is retrieved from the WebAssembly module's state.

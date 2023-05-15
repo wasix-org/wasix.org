@@ -1,5 +1,54 @@
-import { Callout } from "nextra-theme-docs";
+## `path_link()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Create a hard link.
+
+### Description
+
+The `path_link()` function creates a hard link between two files. It creates a new directory entry with the specified name in the destination directory, which refers to the same underlying file as the source file.
+
+On POSIX systems, a similar functionality is provided by the `link()` function. It creates a new link (directory entry) for an existing file. The new link and the original file refer to the same inode and share the same content.
+
+### Syntax
+
+```rust
+pub fn path_link<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    old_fd: WasiFd,
+    old_flags: LookupFlags,
+    old_path: WasmPtr<u8, M>,
+    old_path_len: M::Offset,
+    new_fd: WasiFd,
+    new_path: WasmPtr<u8, M>,
+    new_path_len: M::Offset,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `old_fd`: The file descriptor representing the directory that the `old_path` is relative to.
+- `old_flags`: Flags to control how the `old_path` is understood.
+- `old_path`: A wasm pointer to a null-terminated string containing the old file path.
+- `old_path_len`: The length of the `old_path` string.
+- `new_fd`: The file descriptor representing the directory that the `new_path` is relative to.
+- `new_path`: A wasm pointer to a null-terminated string containing the new file path.
+- `new_path_len`: The length of the `new_path` string.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%old_fd`: The file descriptor representing the source directory.
+- `%new_fd`: The file descriptor representing the destination directory.
+- `old_path`: The old file path.
+- `new_path`: The new file path.
+
+### Note
+
+The `path_link()` function creates a hard link between two files. It checks if the necessary rights are present on both the source and target directories. It then creates a new directory entry in the target directory with the specified name, linking it to the source file.
+
+On POSIX systems, a similar functionality is provided by the `link()` function.

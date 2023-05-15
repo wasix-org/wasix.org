@@ -1,5 +1,35 @@
-import { Callout } from "nextra-theme-docs";
+## `environ_get()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Read environment variable data.
+
+### Description
+
+The `environ_get()` function is used to read the environment variable data. It writes the environment variable pointers and string data to the specified buffers. The sizes of the buffers should match the values returned by the `environ_sizes_get()` function.
+
+### Syntax
+
+```rust
+pub fn environ_get<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    environ: WasmPtr<WasmPtr<u8, M>, M>,
+    environ_buf: WasmPtr<u8, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `environ`: A WebAssembly pointer to a buffer where the environment variable pointers will be written.
+- `environ_buf`: A WebAssembly pointer to a buffer where the environment variable string data will be written.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Logging
+
+This function has been instrumented with debug-level logging.
+
+### Note
+
+The `environ_get()` function reads the environment variable data and writes the environment variable pointers and string data to the specified buffers. The actual data is retrieved from the WebAssembly module's state.

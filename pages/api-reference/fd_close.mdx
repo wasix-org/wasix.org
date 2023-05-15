@@ -1,5 +1,44 @@
-import { Callout } from "nextra-theme-docs";
+## `fd_close()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Close an open file descriptor.
+
+### Description
+
+The `fd_close()` function is used to close an open file descriptor. For sockets, this function will flush the data before closing the socket.
+
+### Syntax
+
+```rust
+pub fn fd_close(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor mapping to an open file to close.
+
+### Return Value
+
+The function returns a `Result` containing an `Errno` value indicating the success or failure of the operation. An `Errno::Success` value indicates a successful closure.
+
+### Errors
+
+The function can return the following errors:
+
+- `Errno::Isdir`: If the provided `fd` corresponds to a directory.
+- `Errno::Badf`: If the provided `fd` is invalid or not open.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `pid`: The process ID of the current execution context.
+- `%fd`: The file descriptor being closed.
+- `err`: Any encountered error during the closing process.
+
+### Note
+
+The `fd_close()` function is used to close an open file descriptor. It releases any resources associated with the file descriptor. For sockets, it ensures that any pending data is flushed before closing the socket.

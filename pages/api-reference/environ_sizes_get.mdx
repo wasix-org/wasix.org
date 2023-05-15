@@ -1,5 +1,38 @@
-import { Callout } from "nextra-theme-docs";
+## `environ_sizes_get()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Return environment variable data sizes.
+
+### Description
+
+The `environ_sizes_get()` function is used to retrieve the sizes of the environment variable data. It returns the number of environment variables and the size of the environment variable string data.
+
+### Syntax
+
+```rust
+pub fn environ_sizes_get<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    environ_count: WasmPtr<M::Offset, M>,
+    environ_buf_size: WasmPtr<M::Offset, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `environ_count`: A WebAssembly pointer to a memory location where the number of environment variables will be written.
+- `environ_buf_size`: A WebAssembly pointer to a memory location where the size of the environment variable string data will be written.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `%env_var_count`: The number of environment variables.
+- `%env_buf_size`: The size of the environment variable string data.
+
+### Note
+
+The `environ_sizes_get()` function returns the sizes of the environment variable data provided to the WebAssembly module. The number of environment variables and the size of the environment variable string data are written to the specified memory locations.

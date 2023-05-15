@@ -1,5 +1,42 @@
-import { Callout } from "nextra-theme-docs";
+## `path_remove_directory()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Remove a directory.
+
+### Description
+
+The `path_remove_directory()` function removes a directory specified by the given path. It requires the `PATH_REMOVE_DIRECTORY` right to be set on the directory.
+
+On POSIX systems, a similar functionality is provided by the `rmdir()` function. It removes an empty directory with the specified path. The `rmdir()` function is part of the POSIX standard and is widely supported across different platforms.
+
+### Syntax
+
+```rust
+pub fn path_remove_directory<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    path: WasmPtr<u8, M>,
+    path_len: M::Offset,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor representing the base directory from which the path is resolved.
+- `path`: A wasm pointer to a null-terminated string containing the path of the directory to remove.
+- `path_len`: The length of the `path` string.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%fd`: The file descriptor representing the base directory.
+- `path`: The path string.
+
+### Note
+
+The `path_remove_directory()` function removes a directory specified by the given path. It checks if the directory is empty and has the necessary rights to be removed. On POSIX systems, a similar functionality is provided by the `rmdir()` function.

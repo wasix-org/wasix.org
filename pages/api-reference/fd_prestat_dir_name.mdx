@@ -1,5 +1,42 @@
-import { Callout } from "nextra-theme-docs";
+## `fd_prestat_dir_name()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Get the directory name associated with a preopened file descriptor.
+
+### Description
+
+The `fd_prestat_dir_name()` function is used to retrieve the directory name associated with a preopened file descriptor (`fd`). It retrieves the directory name from the file system and writes it into the provided buffer (`path`) up to the specified length (`path_len`). The function returns an error code indicating the success or failure of the operation.
+
+When working with preopened file descriptors, which represent files opened by the WebAssembly module's host environment, it can be useful to obtain information about the directory from which the file was opened. The `fd_prestat_dir_name()` function provides a convenient way to retrieve the directory name associated with a preopened file descriptor.
+
+### Syntax
+
+```rust
+pub fn fd_prestat_dir_name<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    path: WasmPtr<u8, M>,
+    path_len: M::Offset,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The preopened file descriptor to query.
+- `path`: A pointer to a buffer where the directory name will be written.
+- `path_len`: The maximum length of the buffer.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation. If successful, it returns `Errno::Success`. Otherwise, it returns an appropriate error code.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `%fd`: The preopened file descriptor being queried.
+- `path`: The directory name associated with the preopened file descriptor.
+
+### Note
+
+The `fd_prestat_dir_name()` function retrieves the directory name associated with a preopened file descriptor. It writes the directory name into the provided buffer (`path`) up to the specified length (`path_len`). The function returns an error code to indicate the success or failure of the operation. If the directory name is successfully written into the buffer, it returns `Errno::Success`. Otherwise, it returns an appropriate error code.
