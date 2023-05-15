@@ -1,5 +1,38 @@
-import { Callout } from "nextra-theme-docs";
+## `stack_restore()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Restores the current stack to a previous stack described by its stack hash.
+
+### Description
+
+The `stack_restore()` function restores the current stack to a previously captured stack state, allowing you to resume execution from that point. It is used in conjunction with the `stack_checkpoint()` function, which captures a stack snapshot for later restoration.
+
+When restoring a stack, the function verifies the integrity of the stack snapshot by comparing its hash value. If the hash value matches the expected value, the stack is restored to its previous state, including the stack memory, global variables, and other relevant data.
+
+### Syntax
+
+```rust
+pub fn stack_restore<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    snapshot_ptr: WasmPtr<StackSnapshot, M>,
+    mut val: Longsize,
+) -> Result<(), WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `snapshot_ptr`: A pointer to the previously captured stack snapshot.
+- `val`: The return value that will be used when resuming execution from the restored stack.
+
+### Return Value
+
+The function returns `Ok(())` if the stack restoration is successful. If an error occurs, it returns a `WasiError` value.
+
+### Notes
+
+- The `stack_restore()` function is used to restore the current stack to a previously captured state, allowing you to resume execution from that point. It is typically used in scenarios where you need to implement custom control flow mechanisms or handle exceptional situations.
+- The stack restoration process relies on the integrity of the captured stack snapshot. The function verifies the correctness of the stack snapshot by comparing its hash value with the expected value. If the hash value does not match, the restoration process fails.
+- The captured stack snapshot is passed to the `stack_restore()` function via the `snapshot_ptr` parameter. It contains the necessary information to restore the stack to its previous state, including the stack memory, global variables, and other relevant data.
+- The return value specified by `val` is used when resuming execution from the restored stack. It allows you to provide a specific return value for the restored stack.
+- It is important to ensure that the stack snapshot provided to `stack_restore()` matches the expected stack state. If the snapshot is not found or does not match the expected state, the restoration process fails.
+- The behavior and limitations of the `stack_restore()` function may vary depending on the specific runtime environment and underlying operating system. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

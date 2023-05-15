@@ -1,5 +1,42 @@
-import { Callout } from "nextra-theme-docs";
+## `sock_send_file()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Sends the entire contents of a file down a socket.
+
+### Description
+
+The `sock_send_file()` function is used to send the entire contents of a file down a socket. It reads the data from the file and transmits it over the socket. The function returns the number of bytes transmitted.
+
+### Syntax
+
+```rust
+pub fn sock_send_file<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    in_fd: WasiFd,
+    offset: Filesize,
+    mut count: Filesize,
+    ret_sent: WasmPtr<Filesize, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The file descriptor of the socket to send on.
+- `in_fd`: The file descriptor of the open file that has the data to be transmitted.
+- `offset`: The offset into the file to start reading at.
+- `count`: The number of bytes to be sent.
+- `ret_sent`: A pointer to store the number of bytes transmitted.
+
+### Return Value
+
+The function returns a `Result` containing an `Errno` value. If the operation is successful, `Errno::Success` is returned. Otherwise, an appropriate `Errno` value indicating the error is returned.
+
+### Notes
+
+- The `sock_send_file()` function sends the entire contents of a file down a socket.
+- It starts reading from the specified offset within the file.
+- The `count` parameter specifies the number of bytes to be sent. It is decremented as data is transmitted.
+- The function enters a loop to process the data in chunks. Each chunk is read from the file and sent over the socket.
+- The function supports reading data from different types of files, including regular files, standard input, and pipes.
+- The specific behavior of the `sock_send_file()` function may vary depending on the runtime environment and underlying networking implementation.

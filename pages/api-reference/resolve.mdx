@@ -1,5 +1,47 @@
-import { Callout } from "nextra-theme-docs";
+## `resolve()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Resolves a hostname and a port to one or more IP addresses.
+
+### Description
+
+The `resolve()` function resolves a hostname and a port to one or more IP addresses. It is similar to the `getaddrinfo` function in POSIX. The function performs a DNS resolution for the specified hostname and retrieves the corresponding IP addresses.
+
+The resolved IP addresses are stored in the output buffer provided by the `addrs` parameter. Each IP address entry is represented by an `__wasi_addr_t` object. The function fills the output buffer with as many IP addresses as possible.
+
+### Syntax
+
+```rust
+pub fn resolve<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    host: WasmPtr<u8, M>,
+    host_len: M::Offset,
+    port: u16,
+    addrs: WasmPtr<__wasi_addr_t, M>,
+    naddrs: M::Offset,
+    ret_naddrs: WasmPtr<M::Offset, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `host`: A pointer to the hostname to resolve.
+- `host_len`: The length of the hostname string.
+- `port`: The port hint to use during resolution. Use zero if no hint is supplied.
+- `addrs`: The buffer where the resolved IP addresses will be stored.
+- `naddrs`: The maximum number of IP addresses that the buffer can hold.
+- `ret_naddrs`: A pointer to store the number of IP addresses returned during the DNS resolution.
+
+### Return Value
+
+The function returns a `Result` containing an `Errno` value. If the operation is successful, `Errno::Success` is returned. Otherwise, an appropriate `Errno` value indicating the error is returned.
+
+### Notes
+
+- The `resolve()` function performs a DNS resolution for the specified hostname and retrieves the corresponding IP addresses.
+- The resolved IP addresses are stored in the output buffer provided by the `addrs` parameter.
+- The `naddrs` parameter specifies the maximum number of IP addresses that the buffer can hold.
+- The function will fill the output buffer with as many IP addresses as possible, up to the limit specified by `naddrs`.
+- The resolved IP addresses are represented by `__wasi_addr_t` objects.
+- The `port` parameter is a hint for the desired port associated with the IP addresses. Use zero if no hint is supplied.
+- The specific behavior of the `resolve()` function may vary depending on the runtime environment and the underlying DNS resolution implementation.

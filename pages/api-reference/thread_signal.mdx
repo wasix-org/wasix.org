@@ -1,5 +1,52 @@
-import { Callout } from "nextra-theme-docs";
+## `thread_signal()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Send a signal to a particular thread in the current process.
+
+### Description
+
+The `thread_signal()` function sends a signal to a specific thread within the current process. It takes a `Tid` as input, representing the thread identifier, and a `Signal` indicating the signal to be raised for the thread.
+
+This function is similar to the `signal` function in POSIX, which allows sending signals to specific threads or processes.
+
+### Syntax
+
+```rust
+pub fn thread_signal(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    tid: Tid,
+    sig: Signal,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `tid`: The thread identifier (Tid) of the target thread to which the signal should be sent.
+- `sig`: The signal to be raised for the target thread.
+
+### Return Value
+
+The function returns `Ok(Errno::Success)` if the operation is successful. Otherwise, it returns an appropriate `WasiError` value.
+
+### Logging
+
+This function is instrumented with `debug` level logging. It includes the following fields for debugging purposes:
+
+- `tid`: The thread identifier (Tid) of the target thread.
+- `sig`: The signal to be raised for the target thread.
+
+### Note
+
+- The `thread_signal()` function allows sending a signal to a particular thread within the current process.
+- It uses the `signal_thread()` method of the current process to send the signal to the specified thread.
+- This function is similar to the `signal` function in POSIX, which enables sending signals to specific threads or processes.
+- After sending the signal, the function calls `WasiEnv::process_signals_and_exit()` to process any pending signals and handle process termination if necessary.
+- Proper handling and interpretation of signals is important for synchronization, communication, and control between threads within an application.
+- Signals provide a way to communicate specific instructions or events to threads or processes, enabling various behaviors such as termination, interruption, or custom actions.
+- The `thread_signal()` function in the WASI environment allows you to send signals to individual threads, providing flexibility and control over thread-level operations.
+- It's important to note that the behavior and handling of signals may vary depending on the underlying operating system and signal implementation.
+- Understanding the semantics and implications of signals in the target platform is crucial for correct and reliable signal handling in multi-threaded environments.
+- The `thread_signal()` function provides a convenient and consistent way to send signals to specific threads in the WASI environment.
+- Thread signals can be used for various purposes such as thread synchronization, interruption, termination, or customized thread-specific actions.
+- Signal handling should be carefully designed and implemented to ensure correct and reliable behavior in multi-threaded applications.
+- The `thread_signal()` function is a powerful tool for managing and controlling threads by sending signals to specific threads in the current process.

@@ -1,5 +1,45 @@
-import { Callout } from "nextra-theme-docs";
+## `sock_send()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Send a message on a socket.
+
+### Description
+
+The `sock_send()` function is used to send a message on a socket. It is similar to the `send` function in POSIX, but it also supports writing the data from multiple buffers in the manner of `writev`.
+
+The function sends a message using the provided scatter/gather vectors. It retrieves the data from the buffers specified by the scatter/gather vectors and transmits it on the socket. The number of bytes transmitted is returned.
+
+### Syntax
+
+```rust
+pub fn sock_send<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    si_data: WasmPtr<__wasi_ciovec_t<M>, M>,
+    si_data_len: M::Offset,
+    si_flags: SiFlags,
+    ret_data_len: WasmPtr<M::Offset, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The file descriptor of the socket to send on.
+- `si_data`: A list of scatter/gather vectors containing the data to be sent.
+- `si_data_len`: The length of the scatter/gather vector list.
+- `si_flags`: Message flags.
+- `ret_data_len`: A pointer to store the number of bytes transmitted.
+
+### Return Value
+
+The function returns a `Result` containing an `Errno` value. If the operation is successful, `Errno::Success` is returned. Otherwise, an appropriate `Errno` value indicating the error is returned.
+
+### Notes
+
+- The `sock_send()` function sends a message on a socket using the provided scatter/gather vectors.
+- The function supports writing the data from multiple buffers.
+- The `si_data` parameter represents a list of scatter/gather vectors, where each vector contains a buffer and its length.
+- The `si_data_len` parameter specifies the length of the scatter/gather vector list.
+- The data to be sent is retrieved from the buffers specified by the scatter/gather vectors.
+- The number of bytes transmitted is stored in `ret_data_len`.
+- The specific behavior of the `sock_send()` function may vary depending on the runtime environment and underlying networking implementation.

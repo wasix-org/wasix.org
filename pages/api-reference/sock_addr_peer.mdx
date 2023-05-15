@@ -1,5 +1,35 @@
-import { Callout } from "nextra-theme-docs";
+## `sock_addr_peer()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Returns the remote address to which the socket is connected to.
+
+### Description
+
+The `sock_addr_peer()` function retrieves the remote address to which the socket identified by the file descriptor `sock` is connected and stores the address in the `ro_addr` memory location.
+
+### Syntax
+
+```rust
+pub fn sock_addr_peer<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    ro_addr: WasmPtr<__wasi_addr_port_t, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The file descriptor of the socket.
+- `ro_addr`: A WebAssembly pointer to a memory location where the remote address will be stored.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `sock_addr_peer()` function retrieves the remote address to which the socket identified by the file descriptor `sock` is connected.
+- The remote address consists of an IP address (either IPv4 or IPv6) and a port number.
+- The remote address is stored in the `ro_addr` memory location, which should be a `WasmPtr<__wasi_addr_port_t>` pointing to a writable memory region.
+- The function `sock_addr_peer()` is similar to the `getpeername` function in POSIX.
+- The behavior and limitations of the `sock_addr_peer()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

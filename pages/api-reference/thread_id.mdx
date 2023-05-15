@@ -1,5 +1,46 @@
-import { Callout } from "nextra-theme-docs";
+## `thread_id()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Returns the index of the current thread.
+
+### Description
+
+The `thread_id()` function retrieves the index of the current thread. Thread indices are sequential and start from zero, incrementing with each new thread that is created. This function can be used to identify and distinguish different threads in a multi-threaded application.
+
+In POSIX systems, thread identification is commonly achieved using thread IDs, which are unique identifiers assigned to each thread.
+
+### Syntax
+
+```rust
+pub fn thread_id<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    ret_tid: WasmPtr<Tid, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `ret_tid`: A WebAssembly pointer to the memory location where the thread ID should be written.
+
+### Return Value
+
+The function returns `Errno::Success` if the operation is successful. The thread ID is written to the memory location specified by `ret_tid`.
+
+### Logging
+
+This function is instrumented with `trace` level logging.
+
+### Note
+
+- The `thread_id()` function retrieves the index of the current thread. Thread indices are sequential and start from zero.
+- Thread identification is useful in multi-threaded applications to differentiate between different threads and perform thread-specific operations or tracking.
+- The thread ID returned by `thread_id()` represents the index of the current thread.
+- Thread IDs are unique identifiers assigned to each thread, allowing applications to identify and distinguish between multiple threads.
+- In POSIX systems, thread IDs are commonly used for thread identification and management.
+- The `thread_id()` function provides a convenient way to retrieve the index of the current thread in the WASI environment.
+- The thread ID can be used for various purposes such as logging, debugging, thread-specific operations, or synchronization.
+- Properly managing thread IDs and thread-specific operations is crucial for the correct behavior and synchronization of multi-threaded applications.
+- It's important to note that thread IDs are assigned by the underlying operating system and may have implementation-specific behaviors or limitations.
+- The `thread_id()` function allows you to retrieve the thread ID in the form of an index, which can be used for application-specific purposes.
+- Thread indices starting from zero provide a simple and consistent way to identify threads within the application.
+- The `thread_id()` function is a useful tool for thread identification and management in the WASI environment.

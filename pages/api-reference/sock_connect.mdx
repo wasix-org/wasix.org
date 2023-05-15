@@ -1,5 +1,37 @@
-import { Callout } from "nextra-theme-docs";
+## `sock_connect()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Initiate a connection on a socket to the specified address.
+
+### Description
+
+The `sock_connect()` function is used to initiate a connection on a socket to the specified address. It is similar to the `connect` function in POSIX.
+
+Once the connection is initiated, the socket handle can be polled to wait for data to arrive or for the socket status to change, which can be queried using the `sock_status()` function.
+
+### Syntax
+
+```rust
+pub fn sock_connect<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    addr: WasmPtr<__wasi_addr_port_t, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The file descriptor of the socket to connect.
+- `addr`: The address of the socket to connect to.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned.
+
+### Notes
+
+- The `sock_connect()` function initiates a connection on a socket to the specified address.
+- The function blocks until the connection is established or an error occurs.
+- The address of the remote socket is specified by `addr`.
+- Once the connection is established, the socket handle can be polled to wait for data to arrive or for the socket status to change.
+- The specific behavior of the `sock_connect()` function may vary depending on the runtime environment and underlying networking implementation.

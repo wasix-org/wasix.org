@@ -1,5 +1,36 @@
-import { Callout } from "nextra-theme-docs";
+## `sock_set_opt_size()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Sets the size of a particular option for the socket.
+
+### Description
+
+The `sock_set_opt_size()` function sets the size of a specific socket option for the given socket descriptor.
+
+### Syntax
+
+```rust
+pub fn sock_set_opt_size(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    opt: Sockoption,
+    size: Filesize,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The socket descriptor.
+- `opt`: The socket option to be set.
+- `size`: The size value to set for the option.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `sock_set_opt_size()` function sets the size of a specific socket option for the specified socket descriptor.
+- The specific socket option to set is determined by the `opt` parameter.
+- The size value to set for the option is specified by the `size` parameter.
+- The behavior and limitations of the `sock_set_opt_size()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

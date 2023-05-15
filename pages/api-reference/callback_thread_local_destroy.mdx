@@ -1,5 +1,49 @@
-import { Callout } from "nextra-theme-docs";
+## `callback_thread_local_destroy()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Sets the callback to invoke for the destruction of thread local variables.
+
+### Description
+
+The `callback_thread_local_destroy()` function sets the callback function that will be invoked when thread local variables are destroyed. Thread local variables are variables that have separate instances for each thread in a multi-threaded program. When a thread is terminated or exits, the thread local variables associated with that thread are destroyed.
+
+This function provides a way to customize the behavior when thread local variables are destroyed within the WASI environment. By setting a custom callback function, applications can define their own logic to perform cleanup tasks or handle specific actions when thread local variables are destroyed.
+
+The function takes the name of the callback function as input and sets it as the thread local destroy callback. The callback function will be invoked when thread local variables are destroyed within the environment.
+
+### Syntax
+
+```rust
+pub fn callback_thread_local_destroy<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    name: WasmPtr<u8, M>,
+    name_len: M::Offset,
+) -> Result<(), MemoryAccessError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `name`: A pointer to a null-terminated string that represents the name of the callback function.
+- `name_len`: The length of the name string.
+
+### Return Value
+
+The function returns `Result<(), MemoryAccessError>`. If the operation is successful, it returns `Ok(())`. Otherwise, it returns a `MemoryAccessError` indicating the reason for the failure.
+
+### Logging
+
+This function is instrumented with `debug` level logging. It includes the following fields for debugging purposes:
+
+- `name`: The name of the thread local destroy callback function.
+- `funct_is_some`: Indicates whether the callback function is available (`Some`) or not (`None`).
+
+### Note
+
+- The `callback_thread_local_destroy()` function sets the callback function that will be invoked for the destruction of thread local variables within the WASI environment.
+- It retrieves the name string from the memory using the provided `name` pointer and `name_len`.
+- The function then attempts to find the typed function with the specified name in the exports of the WebAssembly instance associated with the WASI environment. If the function is found, it sets it as the thread local destroy callback.
+- The callback function will be invoked when thread local variables are destroyed within the WASI environment.
+- By setting a custom thread local destroy callback, applications can define their own logic to perform cleanup tasks or handle specific actions when thread local variables are destroyed.
+- The `callback_thread_local_destroy()` function updates the `thread_local_destroy` field in the inner data of the WASI environment to set the callback function.
+- If the typed function with the specified name is not found in the exports of the WebAssembly instance, the callback is not set, and the default behavior for thread local variable destruction will be applied.
+- Utilizing the `callback_thread_local_destroy()` function allows applications to customize the handling of thread local variable destruction within the WASI runtime, providing flexibility and control over cleanup tasks and specific actions associated with thread termination.

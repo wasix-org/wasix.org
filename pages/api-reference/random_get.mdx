@@ -1,5 +1,44 @@
-import { Callout } from "nextra-theme-docs";
+## `random_get()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Fill a buffer with high-quality random data. This function may be slow and block.
+
+### Description
+
+The `random_get()` function is used to fill a buffer with high-quality random data. It takes a pointer to a buffer and the number of bytes to be written as input. The function will generate random bytes and write them to the specified buffer.
+
+Generating high-quality random data may be a slow operation and may block in certain cases, especially when the system's entropy pool is depleted. Therefore, this function should be used with caution in performance-sensitive scenarios.
+
+### Syntax
+
+```rust
+pub fn random_get<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    buf: WasmPtr<u8, M>,
+    buf_len: M::Offset,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: The function environment.
+- `buf`: A pointer to the buffer where the random bytes will be written.
+- `buf_len`: The number of bytes to be written.
+
+### Return Value
+
+The function returns an `Errno` value indicating the result of the operation. If the operation is successful and the random data is generated and written to the buffer, it returns `Errno::Success`. If there is an error generating the random data, it returns `Errno::Io`.
+
+### Logging
+
+This function is instrumented with `trace` level logging. It includes the following field for debugging purposes:
+
+- `buf_len`: The length of the buffer in bytes.
+
+### Note
+
+- The `random_get()` function fills a buffer with high-quality random data.
+- It uses the `getrandom` crate to generate the random data.
+- The function creates a `u8` buffer with the specified length and calls `getrandom::getrandom()` to generate random bytes.
+- If the random data is generated successfully, it writes the data to the buffer specified by `buf`.
+- The function returns `Errno::Success` if the operation is successful.
+- If there is an error generating the random data, such as when the system's entropy pool is depleted, it returns `Errno::Io`.

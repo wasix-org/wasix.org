@@ -1,5 +1,51 @@
-import { Callout } from "nextra-theme-docs";
+## `proc_exec()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Replaces the current process with a new process.
+
+### Description
+
+The `proc_exec()` function is used to replace the current process with a new process. It takes the name of the process to be spawned and a list of arguments as input. The new process will be executed with the specified name and arguments.
+
+On POSIX systems, a similar functionality is provided by the `execve()` function. It replaces the current process image with a new process image specified by the given executable file. The `execve()` function is part of the POSIX standard and is widely supported across different platforms.
+
+### Syntax
+
+```rust
+pub fn proc_exec<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    name: WasmPtr<u8, M>,
+    name_len: M::Offset,
+    args: WasmPtr<u8, M>,
+    args_len: M::Offset,
+) -> Result<(), WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `name`: A wasm pointer to a null-terminated UTF-8 string representing the name of the process to be spawned.
+- `name_len`: The length of the `name` string.
+- `args`: A wasm pointer to a null-terminated UTF-8 string representing the arguments to pass to the process. Multiple arguments are separated by line feeds.
+- `args_len`: The length of the `args` string.
+
+### Return Value
+
+The function returns `Ok(())` if the operation is successful. Otherwise, it returns an appropriate `WasiError` value.
+
+### Logging
+
+This function is instrumented with `debug` level logging. It includes the following fields for debugging purposes:
+
+- `name`: The name of the process to be spawned.
+- `args_len`: The length of the arguments string.
+
+### Notes
+
+- The `proc_exec()` function replaces the current process with a new process.
+- It takes the name and arguments of the new process as input.
+- On POSIX systems, a similar functionality is provided by the `execve()` function, which replaces the current process image with a new process image specified by the given executable file.
+- Executing a new process allows for dynamic program execution, enabling the running program to be replaced with a different program specified by the name and arguments.
+- The function converts relative paths into absolute paths before executing the new process.
+- The process execution involves preparing the environment, creating a new process, and switching the execution to the new process.
+- If the function is called within a `vfork` context, a subprocess is spawned with the forked `WasiEnv`, and a longjmp is performed back to the `vfork` point.
+- The `proc_exec()` function can be used to invoke calls on the new process by using the returned bus process ID.

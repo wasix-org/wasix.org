@@ -1,5 +1,45 @@
-import { Callout } from "nextra-theme-docs";
+## `port_bridge()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Securely connects to a particular remote network.
+
+### Description
+
+The `port_bridge()` function establishes a secure connection to a specific remote network. It securely bridges the local network with the remote network, allowing communication between them.
+
+### Syntax
+
+```rust
+pub fn port_bridge<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    network: WasmPtr<u8, M>,
+    network_len: M::Offset,
+    token: WasmPtr<u8, M>,
+    token_len: M::Offset,
+    security: Streamsecurity,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `network`: A pointer to the memory location holding the fully qualified identifier for the network.
+- `network_len`: The length of the network identifier.
+- `token`: A pointer to the memory location holding the access token used to authenticate with the network.
+- `token_len`: The length of the access token.
+- `security`: The level of encryption to encapsulate the network connection with.
+
+### Return Value
+
+The function returns a `Result` indicating the outcome of the operation. If the operation is successful, `Ok(Errno::Success)` is returned. If an error occurs, an appropriate `WasiError` is returned.
+
+### Errors
+
+- `Errno::Inval`: If an invalid `Streamsecurity` value is provided for the `security` parameter.
+
+### Notes
+
+- The `port_bridge()` function establishes a secure connection to a remote network, allowing communication between the local and remote networks.
+- It takes the fully qualified identifier for the network as a string input through the `network` and `network_len` parameters.
+- The access token used to authenticate with the network is provided as a string input through the `token` and `token_len` parameters.
+- The `security` parameter specifies the level of encryption to be used for the network connection. It accepts one of the `Streamsecurity` values: `Unencrypted`, `AnyEncryption`, `ClassicEncryption`, or `DoubleEncryption`.
+- The behavior and limitations of the `port_bridge()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

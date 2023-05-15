@@ -1,5 +1,35 @@
-import { Callout } from "nextra-theme-docs";
+## `thread_exit()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Terminates the current running thread, and if this is the last thread, it also causes the process to exit with the specified exit code. An exit code of 0 indicates successful termination of the thread, while the meanings of other values depend on the specific environment or runtime.
+
+### Description
+
+The `thread_exit()` function is used to explicitly terminate the execution of the current thread. When called, the current thread will cease execution and be terminated. If this is the last running thread in the process, the entire process will also exit, with the specified exit code being returned to the operating system.
+
+This function is similar to the POSIX `pthread_exit()` function, which terminates the calling thread and returns the specified exit code.
+
+### Syntax
+
+```rust
+pub fn thread_exit(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    exitcode: ExitCode,
+) -> Result<(), WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `exitcode`: The exit code returned by the thread or process.
+
+### Return Value
+
+The function returns `Ok(())` if the operation is successful. If an error occurs, it returns a `WasiError` value.
+
+### Notes
+
+- The `thread_exit()` function is used to gracefully terminate the execution of a thread, allowing it to clean up its resources and perform any necessary cleanup actions before termination.
+- When called, this function immediately ends the execution of the current thread, so any code following the `thread_exit()` call will not be executed.
+- If the `thread_exit()` function is called by the last running thread in the process, the process will also exit with the specified exit code. The exit code is returned to the operating system, providing a way to communicate the termination status of the process.
+- The meanings of the exit codes are environment-specific and can vary between different platforms and runtime environments. It is important to consult the documentation or specifications of the specific environment or runtime to determine the meaning of exit codes in that context.
+- Proper handling of thread termination and exit codes is essential for managing resources, ensuring orderly shutdown of threads and processes, and communicating the status of the application to the operating system or other components in the execution environment.

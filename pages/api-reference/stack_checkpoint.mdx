@@ -1,5 +1,39 @@
-import { Callout } from "nextra-theme-docs";
+## `stack_checkpoint()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Creates a snapshot of the current stack, allowing it to be restored later using its stack hash.
+
+### Description
+
+The `stack_checkpoint()` function captures a snapshot of the current stack, including its contents and the state of the program, and allows it to be restored at a later point. This can be useful in scenarios where you need to save the current execution state and resume it at a later time, such as in cooperative multitasking or exception handling mechanisms.
+
+The function creates a snapshot by capturing the stack memory, global variables, and other relevant data. It computes a hash value for the captured stack to ensure integrity and security. The captured stack snapshot is stored for future restoration.
+
+### Syntax
+
+```rust
+pub fn stack_checkpoint<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    snapshot_ptr: WasmPtr<StackSnapshot, M>,
+    ret_val: WasmPtr<Longsize, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `snapshot_ptr`: A pointer to the location where the stack snapshot will be stored.
+- `ret_val`: A pointer to the location where the return value indicating the checkpoint status will be stored.
+
+### Return Value
+
+The function returns `Ok(Errno::Success)` if the checkpoint operation is successful. If an error occurs, it returns a `WasiError` value.
+
+### Notes
+
+- The `stack_checkpoint()` function allows you to create a snapshot of the current stack and store it for later restoration. This can be useful in scenarios where you need to implement custom control flow mechanisms or handle exceptional situations.
+- The captured stack snapshot includes the stack memory, global variables, and other relevant data. It provides a complete representation of the program state at the time of the checkpoint.
+- The function computes a hash value for the captured stack, ensuring the integrity and security of the snapshot. This hash value is used during the restoration process to verify the correctness of the restored stack.
+- The captured stack snapshot is stored in the memory location specified by `snapshot_ptr`. It is recommended to allocate a sufficient amount of memory to store the snapshot.
+- The return value of the function is stored in the memory location specified by `ret_val`. It indicates the status of the checkpoint operation. A value of `0` indicates a successful checkpoint, while other values may indicate errors or specific conditions.
+- Restoring a stack snapshot is done using the `stack_rewind()` function. It allows you to restore the program state to the point captured by the stack snapshot and resume execution from there.
+- The behavior and limitations of the `stack_checkpoint()` function may vary depending on the specific runtime environment and underlying operating system. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

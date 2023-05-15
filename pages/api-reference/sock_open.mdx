@@ -1,5 +1,40 @@
-import { Callout } from "nextra-theme-docs";
+## `sock_open()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Create an endpoint for communication.
+
+### Description
+
+The `sock_open()` function creates an endpoint for communication and returns a file descriptor that refers to that endpoint. The file descriptor returned by a successful call will be the lowest-numbered file descriptor not currently open for the process.
+
+### Syntax
+
+```rust
+pub fn sock_open<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    af: Addressfamily,
+    ty: Socktype,
+    pt: SockProto,
+    ro_sock: WasmPtr<WasiFd, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `af`: The address family of the socket.
+- `ty`: The socket type, either datagram or stream.
+- `pt`: The socket protocol.
+- `ro_sock`: A WebAssembly pointer to a memory location where the file descriptor of the opened socket will be stored.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `sock_open()` function creates an endpoint for communication.
+- The endpoint is created using the specified address family (`af`), socket type (`ty`), and socket protocol (`pt`).
+- The file descriptor returned by the function refers to the opened socket endpoint.
+- The file descriptor will be the lowest-numbered file descriptor not currently open for the process.
+- The function `sock_open()` is similar to the `socket` function in POSIX, using the `PF_INET` address family.
+- The behavior and limitations of the `sock_open()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

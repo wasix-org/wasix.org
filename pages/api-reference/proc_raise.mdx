@@ -1,5 +1,40 @@
-import { Callout } from "nextra-theme-docs";
+## `proc_raise()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Send a signal to the process of the calling thread.
+
+### Description
+
+The `proc_raise()` function sends a signal to the process of the calling thread. It takes a `Signal` as input, which represents the signal to be raised for the process.
+
+This function is similar to the `raise` function in POSIX, which sends a signal to the current process or a specific process.
+
+### Syntax
+
+```rust
+pub fn proc_raise(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sig: Signal,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sig`: The signal to be raised for the process.
+
+### Return Value
+
+The function returns `Ok(Errno::Success)` if the operation is successful. Otherwise, it returns an appropriate `WasiError` value.
+
+### Logging
+
+This function is instrumented with `debug` level logging. It includes the following field for debugging purposes:
+
+- `sig`: The signal to be raised.
+
+### Notes
+
+- The `proc_raise()` function sends a signal to the process of the calling thread.
+- It uses the `signal_process()` method of the current process to send the signal.
+- This function is similar to the `raise` function in POSIX, which sends a signal to the current process or a specific process.
+- After sending the signal, the function calls `WasiEnv::process_signals_and_exit()` to process any pending signals and handle process termination if necessary.
