@@ -1,5 +1,48 @@
-import { Callout } from "nextra-theme-docs";
+### `proc_fork()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Forks the current process into a new subprocess. If the function returns zero, it indicates the new subprocess. If it returns a positive number, it represents the current process, and the `$pid` value represents the child.
+
+### Description
+
+The `proc_fork()` function is used to create a new process by duplicating the existing process. It creates an identical copy of the current process, known as the child process, which starts executing from the same point as the parent process. The function returns different values in the parent and child processes, allowing them to distinguish between each other.
+
+### Syntax
+
+```rust
+pub fn proc_fork<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    mut copy_memory: Bool,
+    pid_ptr: WasmPtr<Pid, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `copy_memory`: A Boolean value indicating whether to copy the memory of the current process. If set to `Bool::False`, the function behaves like a `vfork`.
+- `pid_ptr`: A wasm pointer to a `Pid` object where the result of the fork will be stored.
+
+### Return Value
+
+The function returns `Result<Errno, WasiError>`. If the fork operation is successful, it returns `Ok(Errno::Success)`. Otherwise, it returns an appropriate `WasiError` indicating the cause of the failure.
+
+### Logging
+
+This function is instrumented with `debug` level logging. It includes the following fields for debugging purposes:
+
+- `pid`: The raw PID of the process.
+
+### Notes
+
+- The behavior of `proc_fork()` is similar to the `fork()` function in POSIX systems, which creates a new process by duplicating the existing process.
+- The `fork()` function is commonly used in Unix-like operating systems to implement process creation and multitasking.
+- In the parent process, the `fork()` function returns the process ID (PID) of the newly created child process. In the child process, it returns 0.
+- The `copy_memory` parameter determines whether the memory of the current process is copied to the child process. If set to `Bool::True`, the memory is copied, and both the parent and child processes have separate memory spaces. If set to `Bool::False`, the function behaves like a `vfork`, where the child process shares the memory space with the parent process until it calls `proc_exec()`.
+- The `pid_ptr` parameter is a wasm pointer to a `Pid` object that is used to store the result of the fork operation. In the parent process, the PID of the child process is written to the `Pid` object, while in the child process, the value remains as 0.
+- The function performs necessary operations to handle process signals and exits if required.
+- If the function is called within a `vfork`, it handles the process forking differently to ensure proper execution flow.
+- After forking, the child process is associated with a new process handle, which represents the child process in the parent process context.
+- If the memory copying is disabled (`copy_memory == Bool::False`), the function acts like a `vfork`, where the child process pretends to be the new process until `proc_exec()` is called, at which point the actual fork occurs.
+- If the return value offset is within the memory stack, the function updates it with the new PID value. Otherwise, an appropriate error is returned.
+- The child process starts execution from the same point as the parent process, including the call stack, registers, and program counter.
+- The child process

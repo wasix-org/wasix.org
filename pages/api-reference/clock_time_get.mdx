@@ -1,5 +1,40 @@
-import { Callout } from "nextra-theme-docs";
+## `clock_time_get()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Get the time of the specified clock.
+
+### Description
+
+The `clock_time_get()` function is used to retrieve the time of the specified clock. It returns the value of the clock in nanoseconds.
+
+### Syntax
+
+```rust
+pub fn clock_time_get<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    clock_id: Snapshot0Clockid,
+    precision: Timestamp,
+    time: WasmPtr<Timestamp, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `clock_id`: The ID of the clock to query.
+- `precision`: The maximum amount of error the reading may have.
+- `time`: A WebAssembly pointer to a memory location where the value of the clock will be written.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `?clock_id`: The ID of the clock being queried.
+- `%precision`: The maximum amount of error for the reading.
+
+### Note
+
+The `clock_time_get()` function retrieves the time of the specified clock. The time value is returned in nanoseconds and is written to the specified memory location.

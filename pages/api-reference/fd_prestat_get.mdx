@@ -1,5 +1,39 @@
-import { Callout } from "nextra-theme-docs";
+## `fd_prestat_get()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Get metadata about a preopened file descriptor.
+
+### Description
+
+The `fd_prestat_get()` function is used to retrieve metadata about a preopened file descriptor (`fd`). Preopened file descriptors represent files or directories that are provided to a WebAssembly module at startup. This function allows obtaining information about such preopened file descriptors.
+
+The function takes the file descriptor as input and writes the corresponding metadata into the provided buffer (`buf`) of type `__wasi_prestat`. The metadata includes information such as the type of the preopened resource.
+
+### Syntax
+
+```rust
+pub fn fd_prestat_get<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    buf: WasmPtr<Prestat, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The preopened file descriptor to query.
+- `buf`: A pointer to a `Prestat` structure where the metadata will be written.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation. If successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `%fd`: The preopened file descriptor being queried.
+
+### Note
+
+The `fd_prestat_get()` function is used to retrieve metadata about a preopened file descriptor. Preopened file descriptors are files or directories that are available to the WebAssembly module at startup. The function takes the preopened file descriptor as input and writes the corresponding metadata into the provided buffer. The metadata provides information about the type of the preopened resource.

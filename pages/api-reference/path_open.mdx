@@ -1,5 +1,58 @@
-import { Callout } from "nextra-theme-docs";
+## `path_open()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Open a file located at the given path.
+
+### Description
+
+The `path_open()` function opens a file or directory at the specified path relative to the given directory. It provides various options for how the file will be opened, including read and write access, creation flags, and file descriptor flags.
+
+On POSIX systems, a similar functionality is provided by the `open()` function. It opens a file or directory with the specified flags and mode. The `open()` function is a widely used system call for file operations in POSIX-compliant operating systems.
+
+### Syntax
+
+```rust
+pub fn path_open<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    dirfd: WasiFd,
+    dirflags: LookupFlags,
+    path: WasmPtr<u8, M>,
+    path_len: M::Offset,
+    o_flags: Oflags,
+    fs_rights_base: Rights,
+    fs_rights_inheriting: Rights,
+    fs_flags: Fdflags,
+    fd: WasmPtr<WasiFd, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `dirfd`: The file descriptor representing the directory that the file is located in.
+- `dirflags`: Flags specifying how the path will be resolved.
+- `path`: A wasm pointer to a null-terminated string containing the path of the file or directory to open.
+- `path_len`: The length of the `path` string.
+- `o_flags`: Flags specifying how the file will be opened.
+- `fs_rights_base`: The rights of the created file descriptor.
+- `fs_rights_inheriting`: The rights of file descriptors derived from the created file descriptor.
+- `fs_flags`: The flags of the file descriptor.
+- `fd`: A wasm pointer to a `WasiFd` variable where the new file descriptor will be stored.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%dirfd`: The file descriptor representing the source directory.
+- `path`: The path of the file or directory to open.
+- `follow_symlinks`: A boolean indicating whether to follow symbolic links.
+- `ret_fd`: The new file descriptor.
+
+### Note
+
+The `path_open()` function opens a file or directory located at the specified path. It provides options for controlling how the file will be opened, including read and write access, creation flags, and file descriptor flags. The function checks the necessary rights and permissions before opening the file.
+
+On POSIX systems, a similar functionality is provided by the `open()` function.

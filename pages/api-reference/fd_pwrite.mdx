@@ -1,5 +1,47 @@
-import { Callout } from "nextra-theme-docs";
+## `fd_pwrite()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Write to a file without adjusting its offset.
+
+### Description
+
+The `fd_pwrite()` function is used to write data to a file identified by the provided file descriptor (`fd`) without modifying its offset. It takes an array of `__wasi_ciovec_t` structures (`iovs`) describing the buffers from which data will be read, the number of vectors (`iovs_len`) in the `iovs` array, the offset indicating the position at which the data will be written, and a pointer to store the number of bytes written. The function writes the data to the file at the specified offset and returns the number of bytes written.
+
+In POSIX systems, writing data to a file typically involves updating the file cursor, which determines the next position at which data will be written. However, the `fd_pwrite()` function provides a way to write data to a file without adjusting its offset. This can be useful in scenarios where applications need to write data at a specific location in a file without modifying the file cursor's state.
+
+### Syntax
+
+```rust
+pub fn fd_pwrite<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    iovs: WasmPtr<__wasi_ciovec_t<M>, M>,
+    iovs_len: M::Offset,
+    offset: Filesize,
+    nwritten: WasmPtr<M::Offset, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor of the file to write to.
+- `iovs`: A pointer to an array of `__wasi_ciovec_t` structures describing the buffers from which data will be read.
+- `iovs_len`: The number of vectors (`__wasi_ciovec_t`) in the `iovs` array.
+- `offset`: The offset indicating the position at which the data will be written.
+- `nwritten`: A pointer to store the number of bytes written.
+
+### Return Value
+
+The function returns a `Result` indicating the success or failure of the operation. If successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `%fd`: The file descriptor being written to.
+- `%offset`: The offset indicating the position at which the data will be written.
+- `?nwritten`: The number of bytes written.
+
+### Note
+
+The `fd_pwrite()` function allows writing data to a file identified by the file descriptor `fd` without adjusting its offset. It takes the file descriptor, an array of buffers from which data will be read, the number of vectors in the `iovs` array, the offset indicating the position at which the data will be written, and a pointer to store the number of bytes written. The function writes the data to the file at the specified offset without modifying the file cursor's state. It returns an error code to indicate the success or failure of the operation. If the data is successfully written to the file, it returns `Errno::Success`. Otherwise, it returns an appropriate error code.

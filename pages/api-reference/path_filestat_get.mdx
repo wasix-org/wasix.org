@@ -1,5 +1,46 @@
-import { Callout } from "nextra-theme-docs";
+## `path_filestat_get()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Access metadata about a file or directory.
+
+### Description
+
+The `path_filestat_get()` function allows accessing metadata (file statistics) for a file or directory specified by a path relative to the given directory. It retrieves information such as the size, timestamps, and file type.
+
+On POSIX systems, a similar functionality is provided by the `stat()` or `lstat()` functions, depending on whether symbolic links should be followed or not. These functions retrieve information about a file or symbolic link and store it in a `struct stat` object.
+
+### Syntax
+
+```rust
+pub fn path_filestat_get<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    flags: LookupFlags,
+    path: WasmPtr<u8, M>,
+    path_len: M::Offset,
+    buf: WasmPtr<Filestat, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor representing the directory that the `path` is relative to.
+- `flags`: Flags to control how the `path` is understood.
+- `path`: A wasm pointer to a null-terminated string containing the file path.
+- `path_len`: The length of the `path` string.
+- `buf`: A wasm pointer to a `Filestat` object where the metadata will be stored.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `%fd`: The file descriptor representing the directory.
+- `path`: The path string.
+
+### Note
+
+The `path_filestat_get()` function allows accessing metadata (file statistics) for a file or directory specified by a path relative to the given directory. It checks if the specified directory has the necessary rights and retrieves the file statistics accordingly. On POSIX systems, a similar functionality is provided by the `stat()` or `lstat()` functions.

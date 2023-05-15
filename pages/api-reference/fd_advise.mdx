@@ -1,5 +1,46 @@
-import { Callout } from "nextra-theme-docs";
+## `fd_advise()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Advise the system about how a file will be used.
+
+### Description
+
+The `fd_advise()` function is used to provide advice to the operating system about the intended usage of a file. This advice can help the system optimize performance or memory usage based on the specified parameters.
+
+### Syntax
+
+```rust
+pub fn fd_advise(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    offset: Filesize,
+    len: Filesize,
+    advice: Advice,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor to which the advice applies.
+- `offset`: The offset from which the advice applies.
+- `len`: The length from the offset to which the advice applies.
+- `advice`: The advice to be given to the operating system.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Note
+
+The `fd_advise()` function allows applications to inform the operating system about the expected usage patterns of a file. The actual impact of the advice depends on the underlying operating system and filesystem implementation.
+
+The implementation of this function currently returns `Errno::Success` to indicate a valid implementation, although the advice may not be actively utilized.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `fd`: The file descriptor provided.
+- `offset`: The offset from which the advice applies.
+- `len`: The length from the offset to which the advice applies.
+- `advice`: The advice given.

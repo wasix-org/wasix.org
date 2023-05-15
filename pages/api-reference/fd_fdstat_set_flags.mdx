@@ -1,5 +1,43 @@
-import { Callout } from "nextra-theme-docs";
+Certainly! Here's an updated version of the `fd_fdstat_set_flags()` function with additional POSIX context:
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+## `fd_fdstat_set_flags()`
+
+Set file descriptor flags for a file descriptor.
+
+### Description
+
+The `fd_fdstat_set_flags()` function is used to set the file descriptor flags for a given file descriptor. File descriptor flags modify the behavior and characteristics of the file descriptor, allowing applications to customize its behavior according to specific requirements.
+
+In POSIX systems, file descriptors are associated with a set of flags that control various aspects of their behavior. These flags provide additional control over file descriptor operations, such as non-blocking mode, close-on-exec behavior, or file status flags. The `fd_fdstat_set_flags()` function allows applications to modify these flags for a particular file descriptor, altering its behavior as needed.
+
+### Syntax
+
+```rust
+pub fn fd_fdstat_set_flags(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    flags: Fdflags,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor to apply the new flags to.
+- `flags`: The flags to apply to the file descriptor.
+
+### Return Value
+
+The function returns a `Result` containing an `Errno` value indicating the success or failure of the operation. An `Errno::Success` value indicates a successful flag modification.
+
+### POSIX Context
+
+In POSIX-compliant systems, file descriptor flags are crucial for controlling the behavior of file descriptors. They allow applications to customize how file descriptors operate, enabling features such as non-blocking I/O or close-on-exec behavior.
+
+The `fd_fdstat_set_flags()` function corresponds to the POSIX `fcntl()` system call with the `F_SETFL` command. It allows applications to set or modify the flags associated with a file descriptor. By using this function, applications can fine-tune the behavior of file descriptors to suit their specific needs.
+
+### Note
+
+The `fd_fdstat_set_flags()` function is used to modify the flags associated with a file descriptor. By providing the desired flags, applications can customize the behavior and characteristics of the file descriptor to suit their specific requirements.
+
+Please let me know if there's anything else I can assist you with.

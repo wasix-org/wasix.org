@@ -1,5 +1,40 @@
-import { Callout } from "nextra-theme-docs";
+## `fd_filestat_set_size()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Change the size of an open file, zeroing out any new bytes.
+
+### Description
+
+The `fd_filestat_set_size()` function is used to modify the size of an open file identified by a file descriptor. It allows adjusting the size of the file and zeroing out any newly allocated bytes.
+
+In POSIX systems, files have a size attribute that represents the amount of data stored in the file. The `fd_filestat_set_size()` function enables applications to change the size of an open file. When increasing the file size, any newly allocated bytes are automatically filled with zeros.
+
+### Syntax
+
+```rust
+pub fn fd_filestat_set_size(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    st_size: Filesize,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor of the open file to adjust.
+- `st_size`: The new size to set for the file.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%fd`: The file descriptor being modified.
+- `%st_size`: The new size that the file is set to.
+
+### Note
+
+The `fd_filestat_set_size()` function allows changing the size of an open file identified by the provided file descriptor. If the file size is increased, any newly allocated bytes are zeroed out. This function requires appropriate access rights on the file descriptor, and failure to meet the access requirements will result in an `Errno::Access` error.

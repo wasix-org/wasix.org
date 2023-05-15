@@ -1,5 +1,51 @@
-import { Callout } from "nextra-theme-docs";
+## `fd_sync()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Synchronize file and metadata to disk.
+
+### Description
+
+The `fd_sync()` function synchronizes the file and metadata associated with a file descriptor to disk. This ensures that any changes made to the file and its metadata are persisted and visible to other processes.
+
+### Syntax
+
+```rust
+pub fn fd_sync(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor to sync.
+
+### Return Value
+
+The function returns a `Result` indicating the success or failure of the operation. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%fd`: The file descriptor being synchronized.
+
+### Note
+
+The `fd_sync()` function synchronizes the file and metadata associated with the specified file descriptor (`fd`) to disk.
+
+The function first retrieves the memory view and file system state from the WASI environment using the function context.
+
+Next, it retrieves the file descriptor entry for the specified file descriptor from the file system state using the `get_fd()` method.
+
+If the file descriptor does not have the `FD_SYNC` right, the function returns `Errno::Access` to indicate an access error.
+
+The function then handles different cases based on the kind of the file descriptor's associated inode:
+
+- `Kind::File`: For file descriptors associated with regular files, the function retrieves the file handle and flushes it to ensure all pending changes are written to disk. It also updates the `FileStat` structure of the inode to reflect the correct current size of the file.
+
+- `Kind::Root` or `Kind::Dir`: For file descriptors associated with directories, the function returns `Errno::Isdir` to indicate that synchronization is not applicable.
+
+- Other kinds: For file descriptors associated with other types of inodes such as buffers, symlinks, sockets, pipes, or event notifications, the function returns `Errno::Inval` to indicate an invalid operation.
+
+Finally, the function returns `Errno::Success` to indicate a successful operation.

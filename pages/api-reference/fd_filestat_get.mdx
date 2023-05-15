@@ -1,5 +1,39 @@
-import { Callout } from "nextra-theme-docs";
+## `fd_filestat_get()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Get the metadata of an open file.
+
+### Description
+
+The `fd_filestat_get()` function is used to retrieve the metadata of an open file identified by a file descriptor. It provides information about the file's attributes, such as its size, timestamps, and permissions.
+
+In POSIX systems, file descriptors are used to perform I/O operations on files. The `fd_filestat_get()` function allows applications to obtain the metadata of an open file, providing access to important details about the file.
+
+### Syntax
+
+```rust
+pub fn fd_filestat_get<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    buf: WasmPtr<Filestat, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor of the open file whose metadata will be read.
+- `buf`: A WebAssembly pointer to a memory location where the metadata will be written.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%fd`: The file descriptor whose metadata is being retrieved.
+
+### Note
+
+The `fd_filestat_get()` function retrieves the metadata of an open file identified by the provided file descriptor. The metadata includes information about the file's attributes, such as its size, timestamps, and permissions. The retrieved metadata is written to the specified memory location.

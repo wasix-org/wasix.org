@@ -1,5 +1,54 @@
-import { Callout } from "nextra-theme-docs";
+## `fd_event()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Creates a file handle for event notifications.
+
+### Description
+
+The `fd_event()` function creates a file handle that can be used for event notifications. Event notifications allow synchronization and communication between different parts of an application.
+
+### Syntax
+
+```rust
+pub fn fd_event<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    initial_val: u64,
+    flags: EventFdFlags,
+    ret_fd: WasmPtr<WasiFd, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `initial_val`: The initial value for the event.
+- `flags`: Flags for the event file handle.
+- `ret_fd`: A WebAssembly memory pointer where the new file handle will be stored.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%initial_val`: The initial value for the event.
+- `ret_fd`: The file handle created for the event.
+
+### Note
+
+The `fd_event()` function creates a file handle for event notifications. It takes the initial value for the event, flags for the event file handle, and a WebAssembly memory pointer `ret_fd` where the new file handle will be stored.
+
+The function retrieves the memory view, file system state, and inodes from the WASI environment using the function context.
+
+The function determines whether the event is a semaphore event based on the `EVENT_FD_FLAGS_SEMAPHORE` flag in the `flags` parameter.
+
+It creates an `EventNotifications` kind with an `Arc` wrapping a `NotificationInner` that holds the event state. The `NotificationInner` is initialized with the provided `initial_val` and the `is_semaphore` flag.
+
+The `EventNotifications` kind is then used to create an inode using the `create_inode_with_default_stat()` method of the file system state. The `create_inode_with_default_stat()` method generates a default stat structure for the inode.
+
+Next, the function creates a file descriptor (`fd`) using the `create_fd()` method of the file system state. The file descriptor is created with the specified rights, flags, and inode.
+
+The created file handle is stored in the WebAssembly memory using the provided memory pointer `ret_fd`.
+
+The function returns an `Errno` value to indicate the success or failure of the operation. If the file handle for event notifications is successfully created, it returns `Errno::Success`. Otherwise, it returns an appropriate error code.
