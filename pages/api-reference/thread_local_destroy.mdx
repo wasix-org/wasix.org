@@ -1,5 +1,45 @@
-import { Callout } from "nextra-theme-docs";
+## `thread_local_destroy()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Destroys a thread local variable.
+
+### Description
+
+The `thread_local_destroy()` function destroys a thread local variable within the WASI environment. Thread local variables are variables that are local to each thread and have their own separate instances in each thread's memory. When a thread local variable goes out of scope, its destructor function is invoked, if available, to perform any necessary cleanup operations.
+
+This function is analogous to the POSIX `pthread_key_delete()` function, which deletes a thread-specific data key that was previously created.
+
+### Syntax
+
+```rust
+pub fn thread_local_destroy(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    key: TlKey,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `key`: The thread key that was previously created for the thread local variable.
+
+### Return Value
+
+The function returns `Errno::Success` if the operation is successful. Otherwise, it returns an appropriate `Errno` value indicating the reason for the failure.
+
+### Logging
+
+This function is instrumented with `trace` level logging.
+
+### Note
+
+- The `thread_local_destroy()` function destroys a thread local variable within the WASI environment.
+- Thread local variables are variables that are local to each thread and have their own separate instances in each thread's memory.
+- When a thread local variable goes out of scope, its destructor function is invoked, if available, to perform any necessary cleanup operations.
+- The `thread_local_destroy()` function takes the thread key as input, which identifies the thread local variable to be destroyed.
+- After the thread local variable is destroyed, any associated memory or resources are released, and the variable is no longer accessible.
+- If a destructor function is provided for the thread local variable, it is invoked during the destruction process to perform custom cleanup operations.
+- The `thread_local_destroy()` function is analogous to the POSIX `pthread_key_delete()` function, which deletes a thread-specific data key that was previously created.
+- Proper management of thread local variables is essential to ensure correct memory deallocation and resource cleanup.
+- Thread local variables are commonly used in multi-threaded applications to store thread-specific data and facilitate thread-safe operations.
+- When using thread local variables, it is important to ensure that resources associated with the variable are properly released to avoid memory leaks or resource leaks.
+- The `thread_local_destroy()` function provides a way to destroy thread local variables in the WASI environment, enabling proper cleanup and deallocation of thread-specific data.

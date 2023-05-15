@@ -1,5 +1,35 @@
-import { Callout } from "nextra-theme-docs";
+## `futex_wake()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Wakes up one thread that is blocked on a `futex_wait()` operation on the specified futex.
+
+### Description
+
+The `futex_wake()` function wakes up one thread that is waiting on the specified futex. It returns `true` if a thread was successfully woken up, or `false` if no thread was waiting on the futex.
+
+### Syntax
+
+```rust
+pub fn futex_wake<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    futex_ptr: WasmPtr<u32, M>,
+    ret_woken: WasmPtr<Bool, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `futex_ptr`: A pointer to the memory location holding the futex.
+- `ret_woken`: A pointer to a Boolean value that will be set to `true` if a thread was woken up, or `false` otherwise.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `futex_wake()` function is used to wake up a thread that is blocked on a `futex_wait()` operation.
+- It takes a pointer to the memory location holding the futex as the `futex_ptr` parameter.
+- If a thread is waiting on the specified futex, `futex_wake()` wakes up one thread and returns `true`. If no thread is waiting on the futex, it returns `false`.
+- The `ret_woken` parameter is a pointer to a Boolean value that indicates whether a thread was woken up. If `true`, it means a thread was woken up. If `false`, it means no thread was waiting on the futex.
+- The behavior and limitations of the `futex_wake()` function may vary depending on the specific runtime environment and underlying operating system. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

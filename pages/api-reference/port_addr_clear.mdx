@@ -1,5 +1,27 @@
-import { Callout } from "nextra-theme-docs";
+## `port_addr_clear()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Clears all the addresses on the local port.
+
+### Description
+
+The `port_addr_clear()` function is used to clear all the addresses on the local port. This removes all the IP addresses that the port is currently bound to.
+
+### Syntax
+
+```rust
+pub fn port_addr_clear(mut ctx: FunctionEnvMut<'_, WasiEnv>) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+
+### Return Value
+
+The function returns a `Result` indicating the outcome of the operation. If the operation is successful, `Ok(Errno::Success)` is returned. If an error occurs, an appropriate `WasiError` is returned.
+
+### Notes
+
+- The `port_addr_clear()` function clears all the IP addresses that the local port is currently bound to.
+- After calling this function, the local port will have no addresses assigned to it.
+- The behavior and limitations of the `port_addr_clear()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

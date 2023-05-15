@@ -1,5 +1,38 @@
-import { Callout } from "nextra-theme-docs";
+## `proc_id()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Returns the handle of the current process.
+
+### Description
+
+The `proc_id()` function is used to retrieve the handle of the current process. It returns the process identifier (PID) of the calling process.
+
+In POSIX systems, a process ID is a unique identifier assigned to each running process. The PID is used by the operating system to track and manage processes.
+
+### Syntax
+
+```rust
+pub fn proc_id<M: MemorySize>(ctx: FunctionEnvMut<'_, WasiEnv>, ret_pid: WasmPtr<Pid, M>) -> Errno
+```
+
+### Parameters
+
+- `ctx`: The function environment.
+- `ret_pid`: Pointer to store the returned process ID.
+
+### Return Value
+
+The function returns an `Errno` value indicating the result of the operation. If the operation is successful, it returns `Errno::Success`.
+
+### Logging
+
+This function is instrumented with `debug` level logging. It includes the following field for debugging purposes:
+
+- `pid`: The process ID of the current process.
+
+### Note
+
+- The `proc_id()` function is used to retrieve the handle of the current process.
+- It accesses the process identifier (PID) of the calling process using the `pid()` method of the current process.
+- The function stores the process ID in the specified `ret_pid` pointer.
+- The process ID is a unique identifier assigned to each running process.
+- The function does not raise any errors and always returns `Errno::Success`.

@@ -1,5 +1,48 @@
-import { Callout } from "nextra-theme-docs";
+## `thread_local_get()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Gets the value of a thread local variable.
+
+### Description
+
+The `thread_local_get()` function retrieves the value of a thread local variable associated with the current thread within the WASI environment. Thread local variables are variables that are local to each thread and have their own separate instances in each thread's memory. This function allows you to retrieve the value associated with a specific thread local variable key.
+
+This function is analogous to the POSIX `pthread_getspecific()` function, which retrieves the value of a thread-specific data key for the current thread.
+
+### Syntax
+
+```rust
+pub fn thread_local_get<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    key: TlKey,
+    ret_val: WasmPtr<TlVal, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `key`: The thread key associated with the thread local variable.
+- `ret_val`: A WebAssembly pointer to store the retrieved value of the thread local variable.
+
+### Return Value
+
+The function returns `Errno::Success` if the operation is successful. Otherwise, it returns an appropriate `Errno` value indicating the reason for the failure.
+
+### Logging
+
+This function is instrumented with `trace` level logging.
+
+### Note
+
+- The `thread_local_get()` function retrieves the value of a thread local variable associated with the current thread within the WASI environment.
+- Thread local variables are variables that are local to each thread and have their own separate instances in each thread's memory.
+- This function allows you to retrieve the value associated with a specific thread local variable key.
+- The value retrieved using `thread_local_get()` corresponds to the value previously set using the `thread_local_set()` function.
+- The `thread_local_get()` function takes the thread key as input and retrieves the value associated with the specified thread local variable key for the current thread.
+- Each thread has its own separate instance of the thread local variable, and the value retrieved will be specific to the current thread.
+- If no value is associated with the given thread local variable key for the current thread, the default value of the thread local variable type will be returned.
+- Proper management of thread local variables is essential to ensure thread-safety and prevent data races in multi-threaded applications.
+- The `thread_local_get()` function is analogous to the POSIX `pthread_getspecific()` function, which retrieves the value of a thread-specific data key for the current thread.
+- Thread local variables are commonly used in multi-threaded applications to store thread-specific data and provide thread-local storage for efficient and thread-safe operations.
+- When using thread local variables, it is important to ensure that proper synchronization mechanisms are in place to avoid data races and ensure consistent behavior across threads.
+- The `thread_local_get()` function provides a way to retrieve the value of thread local variables in the WASI environment, enabling access to thread-specific data and facilitating thread-safe operations.

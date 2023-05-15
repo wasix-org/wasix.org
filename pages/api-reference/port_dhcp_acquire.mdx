@@ -1,5 +1,26 @@
-import { Callout } from "nextra-theme-docs";
+## `port_dhcp_acquire()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Acquires a set of IP addresses using DHCP.
+
+### Description
+
+The `port_dhcp_acquire()` function is used to acquire a set of IP addresses using the DHCP (Dynamic Host Configuration Protocol) protocol. DHCP allows a device to automatically obtain IP addresses and other network configuration parameters from a DHCP server.
+
+### Syntax
+
+```rust
+pub fn port_dhcp_acquire(mut ctx: FunctionEnvMut<'_, WasiEnv>) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+
+### Return Value
+
+The function returns a `Result` indicating the outcome of the operation. If the operation is successful, `Ok(Errno::Success)` is returned. If an error occurs, an appropriate `WasiError` is returned.
+
+### Notes
+
+- The `port_dhcp_acquire()` function initiates the DHCP process to acquire IP addresses and other network configuration parameters.
+- The behavior and limitations of the `port_dhcp_acquire()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

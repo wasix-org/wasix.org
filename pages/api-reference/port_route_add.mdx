@@ -1,5 +1,39 @@
-import { Callout } from "nextra-theme-docs";
+## `port_route_add()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Adds a new route to the local port.
+
+### Description
+
+The `port_route_add()` function adds a new route to the routing table of the local port. A route specifies how network traffic should be forwarded based on the destination IP address.
+
+### Syntax
+
+```rust
+pub fn port_route_add<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    cidr: WasmPtr<__wasi_cidr_t, M>,
+    via_router: WasmPtr<__wasi_addr_t, M>,
+    preferred_until: WasmPtr<OptionTimestamp, M>,
+    expires_at: WasmPtr<OptionTimestamp, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `cidr`: A `WasmPtr` pointing to the memory location where the CIDR (Classless Inter-Domain Routing) notation of the destination IP address range is stored.
+- `via_router`: A `WasmPtr` pointing to the memory location where the IP address of the next hop router is stored.
+- `preferred_until`: A `WasmPtr` pointing to the memory location where the preferred duration for the route is stored.
+- `expires_at`: A `WasmPtr` pointing to the memory location where the expiration time of the route is stored.
+
+### Return Value
+
+The function returns a `Result` indicating the outcome of the operation. If the operation is successful, `Ok(Errno::Success)` is returned. If an error occurs, an appropriate `WasiError` is returned.
+
+### Notes
+
+- The `port_route_add()` function adds a new route to the routing table of the local port, specifying how network traffic should be forwarded for the specified destination IP address range.
+- The CIDR notation of the destination IP address range is provided through the `cidr` parameter, which should point to a memory location that stores the CIDR in the `__wasi_cidr_t` format.
+- The IP address of the next hop router is provided through the `via_router` parameter, which should point to a memory location that stores the IP address in the `__wasi_addr_t` format.
+- The preferred duration for the route and the expiration time of the route can be optionally specified through the `preferred_until` and `expires_at` parameters, respectively. These parameters should point to memory locations that store `OptionTimestamp` values.
+- The behavior and limitations of the `port_route_add()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

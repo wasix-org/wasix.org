@@ -1,5 +1,32 @@
-import { Callout } from "nextra-theme-docs";
+## `port_mac()`
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this API Reference
-</Callout>
+Returns the MAC address of the local port.
+
+### Description
+
+The `port_mac()` function retrieves the MAC address of the local port and stores it in the memory location pointed to by `ret_mac`.
+
+### Syntax
+
+```rust
+pub fn port_mac<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    ret_mac: WasmPtr<__wasi_hardwareaddress_t, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `ret_mac`: A `WasmPtr` pointing to the memory location where the MAC address will be stored.
+
+### Return Value
+
+The function returns a `Result` indicating the outcome of the operation. If the operation is successful, `Ok(Errno::Success)` is returned. If an error occurs, an appropriate `WasiError` is returned.
+
+### Notes
+
+- The `port_mac()` function retrieves the MAC address of the local port, which is a unique identifier assigned to the network interface.
+- The MAC address is typically represented as a sequence of hexadecimal digits separated by colons (e.g., `00:11:22:33:44:55`).
+- The retrieved MAC address is stored in the memory location pointed to by `ret_mac`, which should have enough space to accommodate the MAC address.
+- The behavior and limitations of the `port_mac()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.
