@@ -1,5 +1,6 @@
 {
-  "index": "Introduction",
+  "introduction": "Introduction",
+  "installation-n-usage": "Installation & Usage",
   "another": "Another Page",
   "advanced": "Advanced (A Folder)",
   "about": {

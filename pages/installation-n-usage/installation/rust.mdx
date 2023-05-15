@@ -1,0 +1,36 @@
+import { Callout } from "nextra-theme-docs";
+
+<Callout type="default" emoji="⚙">
+  Wasix depends on the `rustup` toolchain manager. If you don't have `rustup`
+  installed, you can install it by following the instructions at
+  [rust-lang.org](https://www.rust-lang.org/tools/install).
+</Callout>
+
+To install the Wasix toolchain for Rust, run the following command:
+
+```console copy
+$ cargo install cargo-wasix
+```
+
+The above command will install four things:
+
+1. The `cargo-wasix` command-line tool
+2. The `wasix` toolchain for `rustup`
+3. The `wasm32-wasi` target for `rustup`
+4. The `wasm32-wasi` target for `rustc`
+
+#### Verifying the Installation
+
+Verify that the `cargo-wasix` command-line tool was installed correctly by
+
+```shell
+$ cargo wasix --version
+cargo-wasix 0.1.17
+```
+
+Check that the `wasix` toolchain was installed correctly by running:
+
+```shell
+$ rustup target list | grep wasix
+wasix
+```

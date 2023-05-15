@@ -1,0 +1,29 @@
+# Features of WASIX
+
+1. Full Support for Efficient **Multithreading**: WASIX enables applications to better utilize system resources and achieve superior performance.
+
+2. Full Support for **Sockets**: WASIX supports functions like socket, bind, connect, and types including IPv4, IPv6, UDP, TCP, Multicast, Anycast, and RAW sockets.
+
+3. **Directory Support**: WASIX introduces `chdir` function for handling the current directory.
+
+4. Support for **`setjmp`** and **`longjmp`**: These functions, used extensively in libc, are supported via asyncify.
+
+5. Support for **`pthreads`**: WASIX supports the POSIX thread libraries, enabling concurrent processing.
+
+6. Support for **Process Forking**: Functions such as fork and vfork are supported, allowing a process to replicate itself.
+
+7. **Subprocess** Spawning and Waiting: WASIX supports the exec and wait functions for handling subprocesses.
+
+8. TTY Support: WASIX provides functions to control terminal I/O.
+
+9. **Asynchronous** Polling of Sockets and Files: This feature enhances application responsiveness and performance.
+
+10. **Pipe** and **Event** Support: WASIX supports pipe and event functions for interprocess communication.
+
+11. **DNS Resolution** Support: WASIX introduces the resolve function for DNS resolution.
+
+12. **Compiler Support**: WASIX provides toolchains for Rust and C, including support for Zig and AssemblyScript.
+
+13. **Runtime Support**: WASIX supports the Wasmer runtime, with expectations for more runtimes to join soon.
+
+14. **Uniform Support Across Environments**: All features are supported on both the browser and the server (except for sockets and DNS resolution on the browser, with updates forthcoming).
