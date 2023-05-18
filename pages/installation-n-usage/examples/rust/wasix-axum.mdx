@@ -37,8 +37,8 @@ Your `wasix-axum` directory structure should look like this:
 
 ```shell
 $ cd wasix-axum
-$ cargo add axum
-$ cargo add tokio
+$ cargo add axum --features tokio
+$ cargo add tokio --features full
 ```
 
 Now your `Cargo.toml` should look like this:
@@ -53,12 +53,6 @@ edition = "2021"
 axum = { version = "0.6.18", features = ["tokio"] }
 tokio = { version = "1.28.1", features = ["full"] }
 ```
-
-<Callout type="default" emoji="📦">
-  As you can see above we are using the `full` feature of `tokio` to enable all
-  the features of the library. We used this to show that the whole tokio library
-  works with **WASIX**.
-</Callout>
 
 ### Writing the Application
 
@@ -204,7 +198,8 @@ error: failed to execute "wasmer" "--enable-threads" "--" "target/wasm32-wasmer-
 ```
 
 <Callout type="warning" emoji="🚧">
-  TODO: Currently, we need to run it using `wasmer run`
+  TODO: Currently, we need to run it using `wasmer run`. See the
+  [issue](https://github.com/wasmerio/cargo-wasix/issues/13)
 </Callout>
 
 Let's try to run it with wasmer:
@@ -234,7 +229,7 @@ Yay, it works! 🎉
 In this tutorial, we learned:
 
 - How to build a simple web server using axum and **compile it with wasix**.
-- How to **patch** dependencies to make them work with wasix.
+- How to **patch** dependencies add WASIX support until changes are adopted upstream.
 - How to run wasix based `.wasm` files with **Wasmer**.
 - How to enable **networking** and **threading** support for wasm files.
 
