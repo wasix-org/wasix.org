@@ -1,0 +1,12 @@
+---
+name: dynamite-bud/wasix-docs
+workload:
+  runner:
+    web_proxy:
+      source:
+        webc:
+          repository: "https://wapm.dev/"
+          namespace: dynamite-bud
+          name: wasix-docs
+          tag: 0.7.0
+  capabilities: {}
