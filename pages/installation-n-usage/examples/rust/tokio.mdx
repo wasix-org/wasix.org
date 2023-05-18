@@ -1,7 +1,339 @@
-# Tokio Example
+## Tokio with WASIX
 
-import { Callout } from "nextra-theme-docs";
+This is a sample project that shows how to use features such as threading and sleep with tokio on WASIX.
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this example
+### Prerequisites
+
+The project requires the following tools to be installed on your system:
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [WASIX](TODO: link to WASIX Installation with RUST)
+
+import { Steps } from "nextra-theme-docs";
+import { Callout, FileTree } from "nextra-theme-docs";
+
+<Steps>
+
+### Start a new project
+
+```shell
+$ cargo new --bin wasix-tokio
+     Created binary (application) `wasix-tokio` package
+```
+
+Your `wasix-tokio` directory structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="wasix-tokio" defaultOpen>
+    <FileTree.Folder name="src" defaultOpen>
+      <FileTree.File name="main.rs" />
+    </FileTree.Folder>
+    <FileTree.File name=".gitignore" />
+    <FileTree.File name="Cargo.toml" />
+  </FileTree.Folder>
+</FileTree>
+
+### Add dependencies
+
+```shell
+$ cd wasix-tokio
+$ cargo add tokio --features full
+```
+
+Now your `Cargo.toml` should look like this:
+
+```toml filename="Cargo.toml"
+[package]
+name = "wasix-tokio"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { version = "1.28.1", features = ["full"] }
+```
+
+### Writing the Application
+
+#### Basic Application Setup
+
+We will create a tokio channel that has a buffer size of 1. We will send and receive data from the channel. As we will we showcasing a blocking behaviour in our thread, we would also use `tokio::time::timeout` to make sure that we don't block forever.
+
+Let's write code for the above:
+
+```rust copy filename="src/main.rs"
+use std::time::Duration;
+use tokio::{sync::mpsc::Receiver, time::timeout};
+
+// Using only using a single thread
+#[tokio::main(flavor = "current_thread")]
+async fn main() {
+
+    // We create a pipe which will create blocking behavior, using the multi-producer, single-consumer channel
+    let (tx, mut rx) = tokio::sync::mpsc::channel(1);
+
+    // Perform a nonblocking read on the socket
+    eprintln!("step-1",);
+    read_again(&mut rx).await;
+
+    // Write some data and make sure its reading correctly
+    eprintln!("step-2",);
+    // send the data to the channel after 1 second
+    timeout(Duration::from_secs(1), tx.send(vec![1u8; 128]))
+        .await
+        .unwrap()
+        .unwrap();
+
+    eprintln!("step-3",);
+    // compare the previous data with the data we received
+    read_compare(&mut rx, &[1u8; 128]).await;
+
+    eprintln!("step-4",);
+    // This should error out as there's no data in the channel
+    read_again(&mut rx).await;
+
+    // Read the data (which should not fail as we are blocking)
+    eprintln!("step-5",);
+
+    // We are good
+    eprintln!("all done");
+}
+
+// Read from the channel and check for the WouldBlock error
+pub async fn read_again(rx: &mut Receiver<Vec<u8>>) {
+    match rx.try_recv() {
+        Err(err) => {
+            eprintln!("received ErrorKind::WouldBlock - {}", err);
+        }
+        ret => {
+            panic!("expected ErrorKind::WouldBlock but received {:?}", ret);
+        }
+    }
+}
+
+// Read from the channel and compare the data
+pub async fn read_compare(rx: &mut Receiver<Vec<u8>>, data: &[u8]) {
+    let ret = timeout(Duration::from_secs(1), rx.recv()).await;
+    match ret {
+        Ok(Some(test_buf)) => {
+            assert_eq!(test_buf.len(), data.len());
+            if data.iter().zip(test_buf.iter()).all(|(a, b)| *a == *b) == false {
+                panic!("data does not match");
+            }
+            // Data matches
+            eprintln!("data match verified (len={})", data.len());
+        }
+        ret => {
+            panic!("expected data(len={}) but received {:?}", data.len(), ret);
+        }
+    }
+}
+```
+
+Breakdown of main function:
+
+1. We create a channel with a buffer size of 1.
+2. We call `read_again` which will try to read from the channel and will error out with `ErrorKind::WouldBlock`. After this, we will write the data, a vector of length 128 made up of all 1's to the channel.
+3. We call `read_compare` which will read from the channel and compare the data to the vector.
+4. We call `read_again` again which will try to read from the channel and will error out with `ErrorKind::WouldBlock`.
+
+#### Running the Application
+
+Run the application with the `cargo`:
+
+```shell
+$ cargo run
+   Compiling wasix-tokio v0.1.0 (/wasix-tokio)
+   ...
+    Finished dev [unoptimized + debuginfo] target(s) in 0.04s
+     Running `target/debug/wasix-tokio`
+step-1
+received ErrorKind::WouldBlock - receiving on an empty channel
+step-2
+step-3
+all done
+```
+
+Let's compile it with `wasix` now. As talked in our tutorial [`wasix-axum`](/link/to/wasix-axum), we need to patch some dependencies. See our list of [patched dependencies](/link/to/patched-dependencies) for more information.
+
+#### Compiling with WASIX
+
+<Callout type="info" emoji="ℹ️">
+  Tokio requires a patch to work and needs to be pinned to `1.24.2`.
 </Callout>
+
+Let's add the following patch to our `Cargo.toml`:
+
+```toml copy filename="Cargo.toml"
+[package]
+name = "wasix-tokio"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+tokio = { version = "=1.24.2", git = "https://github.com/theduke/tokio.git", branch = "wasix-1.24.2-fixed", features = [
+    "full",
+] } # ← Updated Line
+```
+
+Now, let's try to build it with wasix:
+
+```shell
+$ cargo wasix build
+   Compiling libc v0.2.139 (https://github.com/john-sharratt/libc.git#682f9e91)
+   Compiling syn v1.0.109
+   Compiling syn v2.0.16
+   Compiling memchr v2.5.0
+   Compiling tokio v1.24.2 (https://github.com/theduke/tokio.git?branch=wasix-1.24.2-fixed#d66600d6)
+   Compiling wasix v0.11.65 (https://github.com/john-sharratt/wasix.git#329f83f5)
+   Compiling socket2 v0.4.7 (https://github.com/john-sharratt/socket2.git?branch=v0.4.7#b9c1ef25)
+   Compiling mio v0.8.3 (https://github.com/john-sharratt/mio.git?branch=wasix#ec970219)
+   Compiling tokio-macros v1.8.0 (https://github.com/theduke/tokio.git?branch=wasix-1.24.2-fixed#d66600d6)
+   Compiling tracing-attributes v0.1.24
+   Compiling tracing v0.1.37
+   Compiling tracing-subscriber v0.3.17
+   Compiling wasix-tokio v0.1.0 (/wasix-tokio)
+    Finished dev [unoptimized + debuginfo] target(s) in 6.26s
+info: Post-processing WebAssembly files
+```
+
+Yay, it builds! Now, let's try to run it:
+
+<Callout type="error" emoji="🚨">
+  It could happen that the above command might fail for you, this is because of
+  dependencies not resolving correctly. You can easily fix this by running
+  `cargo update` and then running `cargo wasix build` again.
+</Callout>
+
+```shell
+$ cargo wasix run
+    Finished dev [unoptimized + debuginfo] target(s) in 0.09s
+     Running `cargo-wasix target/wasm32-wasmer-wasi/debug/wasix-tokio.wasm`
+info: Post-processing WebAssembly files
+     Running `target/wasm32-wasmer-wasi/debug/wasix-tokio.wasm`
+step-1
+received ErrorKind::WouldBlock - receiving on an empty channel
+step-2
+step-3
+data match verified (len=128)
+step-4
+all done
+```
+
+Yay, it works! 🎉
+
+#### Making it Async
+
+Let's perform some async operations on our channel and merge them together with tokio's `thread::join`.
+
+```rust copy filename="src/main.rs"
+...
+    // Read the data (which should not fail as we are blocking)
+    eprintln!("step-5",);
+    tokio::join! {
+        async {
+            eprintln!("step-A1");
+            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
+            eprintln!("step-A2");
+            read_compare(&mut rx, &[2u8; 128]).await;
+
+            eprintln!("step-A3");
+            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
+            eprintln!("step-A4");
+            read_compare(&mut rx, &[3u8; 128]).await;
+
+            eprintln!("step-A5");
+            read_again(&mut rx).await;
+
+            eprintln!("step-A6");
+            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+
+            eprintln!("step-A7");
+            read_again(&mut rx).await;
+
+            eprintln!("step-A8");
+        },
+        async {
+            println!("step-B1");
+            tx.send(vec![2u8; 128]).await.unwrap();
+
+            println!("step-B2");
+            tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+
+            println!("step-B3");
+            tx.send(vec![3u8; 128]).await.unwrap();
+
+            println!("step-B4");
+        }
+    };
+
+    // We are good
+    eprintln!("all done");
+}
+```
+
+Now we have two async tasks running. We write and compare the data sent from the same task as well as other task and use `tokio::time::sleep` to make sure that the tasks are interleaved.
+
+```shell
+$ cargo wasix run
+    Finished dev [unoptimized + debuginfo] target(s) in 0.04s
+     Running `cargo-wasix target/wasm32-wasmer-wasi/debug/wasix-tokio.wasm`
+info: Post-processing WebAssembly files
+     Running `target/wasm32-wasmer-wasi/debug/wasix-tokio.wasm`
+step-1
+received ErrorKind::WouldBlock - receiving on an empty channel
+step-2
+step-3
+data match verified (len=128)
+step-4
+received ErrorKind::WouldBlock - receiving on an empty channel
+step-5
+step-A1
+step-B1
+step-B2
+step-A2
+data match verified (len=128)
+step-A3
+step-B3
+step-B4
+step-A4
+data match verified (len=128)
+step-A5
+received ErrorKind::WouldBlock - receiving on an empty channel
+step-A6
+step-A7
+received ErrorKind::WouldBlock - receiving on an empty channel
+step-A8
+all done
+```
+
+</Steps>
+
+## Conclusion
+
+In this tutorial, we saw that `threading` and `sleep` work flawlessly in `wasix` and we learned:
+
+- How to use the **tokio** library with wasix.
+- How to simulate non-blocking behaviour with tokio's mpsc channel.
+
+import { Card, Cards } from "nextra-theme-docs";
+
+<Card
+  icon={
+    <svg viewBox="0 0 24 24" className=" transform scale-[120%] mr-2">
+      <path
+        fill="currentColor"
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
+    </svg>
+  }
+  title="Check the example code"
+  href="https://www.github.com/"
+/>
+
+```
+
+```
