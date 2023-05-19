@@ -1,0 +1,40 @@
+## FAQs
+
+### 1. If WASI adds functionality into the stabilized ABI what does that mean for the WASIX extension that also has this capability ?
+
+WASIX is committed to the standardization process of WASI while protecting the progress already made in the external code bases that rely on WASI - thus when a new WASI capability is added to the ABI that honors the forwards and backwards compatibility principle then this ABI should be fully supported also by all runtimes that support WASIX.
+
+A real life example of this approach is the new threads proposal that WASI recently announced; the Wasmer runtime also added support for this ABI while continuing to support the WASIX extension hence both are now supported. This approach of duel support is recommend for other runtimes as it gives the opportunity for those that don’t want to wait to deliver functionality today while also giving time for these external code bases that depend on stability to to make the migration themselves at their own pace.
+
+### 2. How long will WASIX be supported ?
+
+Lets ask the question another way, how long will POSIX be supported? Obviously if the question were worded like this it would feel like an illogical question and the reason for this is because it makes the “cost of change” much more obvious. Changes in the ABI of WASI have huge impact to code bases everywhere just like if someone were to rename posix::write to posix::out . It’s thus the intent to WASIX to freeze the ABI and adopt a hard rules on forwards and backwards compatibility so that standard libraries and code bases out there who have already built support for WASI and now WASIX can.
+
+### 3. What are the long term plans for WASIX ?
+
+WASIX aims to avert refactoring fatigue that is impending on WASI, locking in the existing ABI for long term support and extension. WASIX guarantees that the existing ABI will be supported for many years only extending it with missing functionality in a forwards and backwards compatible way.
+
+The genuine long term plans for the future of WASIX are to merge it back into WASI; there are no plans to maintain an indefinate fork as this does not serve the community having multiple ABI interfaces to maintain and costs a lot of time and energy of the WASIX maintainers to upkeep it.
+
+As the global WASM community builds and compiles more and more code bases against WASIX which is just a super-set of WASI that supports the key missing critical features, it is hoped that the WASI standards team will see clearly that the wider community really need closer POSIX aligned standardized into WASI at which point the WASIX maintainers will be more than happy to make changes required to bring things back together in close collaboration.
+
+### 4. Security aspects of WASIX ?
+
+WASIX continues to honor the principle of a fully sandboxed security boundary however it takes a more pragmatic approach to permissions that is more coarse grained with some of the additional functionality. Take for instance the sockets - all socket syscalls are exported by all WASIX compiled programs however they are not natively connected to the underlying host. Instead the runtime must explicitely passthrough the socket, in the case of wasmer this is done using the --net parameter. An alternative would have been to create fine grained control at a protocol level (port/URL) which is considered excessive and counter productive.
+
+WASIX uses vectored IO for its sockets in a similar way to WASI read and write, this allows it to improve performance through zero copy capabilities. The disadvantage with this is that it means the host is making direct memory access to the WASM memory for its IO operations which must be implemented carefully in the runtime to avoid leaking data back to the sandboxed WASM app.
+
+### 5. What is the target for WASIX ?
+
+The target for compiling against WASIX is `wasm32-wasmer-wasi` - the rationale for this is two fold:
+
+1. The vendor name in the target makes it clear that this is a ABI has long term support by an organization but still allows code to have conditional paths between the two ABI’s.
+2. Keeping the `-wasi` postfix means that all code that already compiles against WASI will already work with WASIX, hence the migration path for existing code bases becomes simplier. In most cases one can just take a code based that compiles against `wasm32-unknown-wasi` and compile it against `wasm32-wasmer-wasi` without any code changes required.
+
+### 6. What are these references to `wasm64-wasmer-wasi` ?
+
+WASIX has been built with future support of 64-bit compilation in mind; when that happens the target will be wasm64-wasmer-wasi . If you are interested in helping us drive this forward then reach out to us and we’ll share what the progress there is and whats left to do.
+
+### 7. What should other runtimes do to support WASIX ?
+
+WASIX is forwards and backwards compatible with the existing WASI ABI thus for a large part the main action is for other runtimes to continue to support the current WASI ABI in the long term. However to enable WASM applications that have been compiled agaisnt WASIX to take advantaged of the extensions they would need to implement the extra syscalls that are published on the standard.

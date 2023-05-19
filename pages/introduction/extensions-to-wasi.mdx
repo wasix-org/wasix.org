@@ -1,0 +1,96 @@
+## Non-Invasive extensions added to WASI
+
+```rust
+// Its now possible to duplicate file handles
+pub use x::fd_dup;
+
+// Events are used by polling functions that can be interrupted such
+// as `tokio` and `mio`
+pub use x::fd_event;
+
+// Pipes are required to stream data to and from subprocesses
+pub use x::fd_pipe;
+
+// Yields CPU time without the bloat of `poll_oneoff`
+pub use x::sched_yield;
+
+// Getting and setting the TTY properties
+pub use x::tty_get;
+pub use x::tty_set;
+
+// Changing the current directory is now natively supported
+pub use x::getcwd;
+pub use x::chdir;
+
+// Signals can be blocked (needed by `libc`)
+pub use x::callback_signal;
+
+// Spawning threads as per the experimental threads spec
+pub use x::thread_spawn;
+
+// Extra thread related functions
+pub use x::thread_sleep;
+pub use x::thread_id;
+pub use x::thread_join;
+pub use x::thread_parallelism;
+pub use x::thread_signal;
+pub use x::thread_exit;
+
+// Operating system futex support used for multithread constructs
+pub use x::futex_wait;
+pub use x::futex_wake;
+pub use x::futex_wake_all;
+
+// Longjmp and setjmp used by `libc`
+pub use x::stack_checkpoint;
+pub use x::stack_restore;
+
+// Subprocess support
+pub use x::proc_raise_interval;
+pub use x::proc_fork;
+pub use x::proc_exec;
+pub use x::proc_spawn;
+pub use x::proc_id;
+pub use x::proc_parent;
+pub use x::proc_join;
+pub use x::proc_signal;
+
+// Interface support
+pub use x::port_bridge;
+pub use x::port_unbridge;
+pub use x::port_dhcp_acquire;
+pub use x::port_addr_add;
+pub use x::port_addr_remove;
+pub use x::port_addr_clear;
+pub use x::port_mac;
+pub use x::port_addr_list;
+pub use x::port_gateway_set;
+pub use x::port_route_add;
+pub use x::port_route_remove;
+pub use x::port_route_clear;
+pub use x::port_route_list;
+
+// All the missing socket functionality
+pub use x::sock_status;
+pub use x::sock_addr_local;
+pub use x::sock_addr_peer;
+pub use x::sock_set_opt_flag;
+pub use x::sock_get_opt_flag;
+pub use x::sock_set_opt_time;
+pub use x::sock_get_opt_time;
+pub use x::sock_set_opt_size;
+pub use x::sock_get_opt_size;
+pub use x::sock_join_multicast_v4;
+pub use x::sock_leave_multicast_v4;
+pub use x::sock_join_multicast_v6;
+pub use x::sock_leave_multicast_v6;
+pub use x::sock_bind;
+pub use x::sock_listen;
+pub use x::sock_connect;
+pub use x::sock_recv_from;
+pub use x::sock_send_to;
+pub use x::sock_send_file;
+
+// Ability to perform DNS queries
+pub use x::resolve;
+```

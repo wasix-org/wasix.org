@@ -1,3 +1,5 @@
 {
-  "features": "Features"
+  "features": "Features",
+  "extensions-to-wasi": "Extensions to WASI",
+  "faqs": "FAQs"
 }
