@@ -5,8 +5,8 @@ workload:
     web_proxy:
       source:
         webc:
-          repository: "https://wapm.dev/"
+          repository: "https://wapm.io/"
           namespace: dynamite-bud
           name: wasix-docs
-          tag: 0.7.0
+          tag: 0.10.0
   capabilities: {}

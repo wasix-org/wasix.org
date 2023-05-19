@@ -1,6 +1,6 @@
 [package]
 name = "dynamite-bud/wasix-docs"
-version = "0.7.0"
+version = "0.10.0"
 description = "Documentation for WASIX"
 
 [dependencies]
