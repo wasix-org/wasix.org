@@ -4,7 +4,7 @@
   "description": "Nextra docs template",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "next build && next export -o wasix-docs/public",
     "start": "next start"
   },
   "repository": {
