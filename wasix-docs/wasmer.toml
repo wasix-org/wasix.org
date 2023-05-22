@@ -1,0 +1,10 @@
+[package]
+name = "dynamite-bud/wasix-docs"
+version = "0.19.0"
+description = "Documentation for WASIX"
+
+[dependencies]
+"sharrattj/static-web-server" = "1"
+
+[fs]
+public = "public"
