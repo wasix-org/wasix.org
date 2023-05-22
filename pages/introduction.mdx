@@ -20,11 +20,14 @@ import WasixExplained from "../components/wasixExplained";
 
 <WasixExplained />
 
-WASIX (aka. WASI Extended), an initiative by the Wasmer team, is an extension to the WebAssembly System Interface (WASI). It aims to enhance the compatibility of WebAssembly (Wasm) with POSIX (Portable Operating System Interface) programs, pushing towards more extensive use of Wasm in both browser and server environments.
+WASIX is the long term stabiliization and support of the existing WASI ABI plus additional non-invasive syscall extensions that complete the missing gaps sufficiently enough to enable real, practical and useful applications to be compiled now. It aims to speed up the ecosystem around the WASI so that the WASM’ification of code bases around the world can really start today.
 
-WASIX is a superset of WASI (preview1) that fills in many of the critical missing POSIX features, enabling more complex applications, such as a bash shell, to run fully on it. It also includes a toolchain for Rust, C (including support for Zig!), and AssemblyScript, along with tokio changes to work with wasix.
+In addition to toolchain support that we hope to upstream.
 
-The goal of WASIX is to make WebAssembly a universal target that developers don't have to specifically adapt their programs to, facilitating widespread adoption of WebAssembly.
+- rust compiler support (including an installable toolchain)
+- rust `tokio` support (`async` runtime in the browser)
+- rust `mio` support (abstraction of Wasm sockets)
+- C compiler support (including an installable toolchain)
 
 ## Extension for WASI (TODO: WASI-Extended?)
 
@@ -36,13 +39,23 @@ WASIX is also designed for high performance and is completely open-source. Its a
 
 In a nutshell, WASIX enables functionalities in Wasm that are not currently possible with WASI alone.
 
-## How WASIX compares with Emscripten?
+### What are the design decisions for WASIX?
+
+- Backwards compatibility with WASI codebase - WASI code should compile against WASIX
+- Forwards compatibility with WASI - WASIX will incorporate future additions of WASI)
+- ABI additions are frozen when published, they will be served indefinitely by standalone or native runtimes.
+- WASIX must provide the minimum capabilities to compile “useful” apps and components, in this case useful means (`http servers`, `bash`, `curl`, `coreutils`, `nano` , `tokio` , `mio` )
+- There should be minimum code changes when compiling existing code bases (excluding standard library updates of course) - a code change needed in a code base is a flaw in WASIX.
+- The ABI is to remain long term stable - no major refactoring is planned (including big refactors of WASI itself) - rather the plan is to stabilize the ABI for long-term and build out the support for existing code bases and standard libraries instead.
+- When in doubt; copy POSIX syscalls.
+
+### How WASIX compares with Emscripten?
 
 - Emscripten toolchain is complicated to iterate on, it requires a complex installation and dependency chain while also having non-standarized systemcall convention
 - It is difficult to optimize Emscripten as the interface is bloated.
 - Emscripten is mainly focused on running things on the web, while WASIX is specialized to run on both web and non-web environments uniformly. This also gives an advantage to Emscripten if you want to include the runtime with the codebase, as they will ship a more minimal package
 
-## How to use WASIX ?
+### How to use WASIX ?
 
 Writing programs that use WASIX is very similar to writing normal programs in languages like Rust or C. The key difference is that you'll use the WASIX toolchain during compilation.
 
@@ -53,8 +66,14 @@ WASIX currently supports the following languages:
 - Zig ? (TODO: Ask @syrusakbary)
 - AssemblyScript (TODO: Ask @syrusakbary)
 
-## How to run WASIX programs ?
+### How to run WASIX programs ?
 
-WASIX programs can be run on any WASI runtime that supports WASIX. Currently, the only runtime that supports WASIX is Wasmer. However, we expect more runtimes to join soon.
+WASIX programs can be run on any WASI runtime that supports WASIX. Currently, the only runtime that supports WASIX is **Wasmer**. However, we expect more runtimes to join soon.
 
 See the (TODO: link to running programs in wasix with wasmer) for more information on how to run WASIX programs.
+
+### Can I contribute to WASIX ?
+
+WASIX is fully Open Source and adheres to all licenses of the work it derives from and thus is open to contributions from anyone but must follow the key design requirements; especially the goal of long term support and stabilization. The intent is not to fork the WASI standard but to protect the progress already made so that engineers around the world can really get going with building great apps.
+
+For more information on how to contribute to WASIX, see the (TODO: link to contributing to wasix) guide.
