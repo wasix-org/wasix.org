@@ -1,0 +1,47 @@
+## `path_symlink()`
+
+Create a symlink.
+
+### Description
+
+The `path_symlink()` function creates a symbolic link (symlink) with the specified source path pointing to the target path. It requires the `PATH_SYMLINK` right on the base directory.
+
+On POSIX systems, a similar functionality is provided by the `symlink()` function. It creates a symbolic link with the specified source and target paths. The `symlink()` function is part of the POSIX standard and is widely supported across different platforms.
+
+### Syntax
+
+```rust
+pub fn path_symlink<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    old_path: WasmPtr<u8, M>,
+    old_path_len: M::Offset,
+    fd: WasiFd,
+    new_path: WasmPtr<u8, M>,
+    new_path_len: M::Offset,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `old_path`: A wasm pointer to a null-terminated string containing the source path of the symlink.
+- `old_path_len`: The length of the `old_path` string.
+- `fd`: The file descriptor representing the base directory from which the paths are understood.
+- `new_path`: A wasm pointer to a null-terminated string containing the target path where the symlink will be created.
+- `new_path_len`: The length of the `new_path` string.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%fd`: The file descriptor representing the base directory.
+- `old_path`: The source path string.
+- `new_path`: The target path string.
+
+### Note
+
+The `path_symlink()` function creates a symbolic link (symlink) with the specified source path pointing to the target path. It checks the necessary rights on the base directory. On POSIX systems, a similar functionality is provided by the `symlink()` function.

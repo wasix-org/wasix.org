@@ -1,0 +1,51 @@
+## `poll_oneoff()`
+
+Concurrently poll for a set of events.
+
+### Description
+
+The `poll_oneoff()` function allows concurrent polling for a set of events. It takes an array of event subscriptions and returns the events that have occurred since the last poll. It is instrumented with `trace` level logging for debugging purposes.
+
+On POSIX systems, a similar functionality is provided by the `poll()` function. It allows monitoring multiple file descriptors for various types of events, such as read or write readiness, error conditions, or hang-up events. The `poll()` function is part of the POSIX standard and is widely supported across different platforms.
+
+### Syntax
+
+```rust
+pub fn poll_oneoff<M: MemorySize + 'static>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    in_: WasmPtr<Subscription, M>,
+    out_: WasmPtr<Event, M>,
+    nsubscriptions: M::Offset,
+    nevents: WasmPtr<M::Offset, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `in_`: A wasm pointer to an array of `__wasi_subscription_t` structures representing the events to subscribe to.
+- `out_`: A wasm pointer to an array of `__wasi_event_t` structures where the occurred events will be stored.
+- `nsubscriptions`: The number of subscriptions and the number of events.
+- `nevents`: A wasm pointer to a `u32` variable that will store the number of events seen.
+
+### Return Value
+
+The function returns a `Result` indicating the success or failure of the operation. If the operation is successful, it returns `Ok(Errno::Success)`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with `trace` level logging. It includes the following fields for debugging purposes:
+
+- `timeout_ms`: The timeout value in milliseconds.
+- `fd_guards`: The file descriptor guards.
+- `seen`: The number of events seen.
+
+### Note
+
+The `poll_oneoff()` function enables concurrent polling for a set of events. It internally uses the `poll_oneoff_internal()` function to perform the actual polling operation.
+
+The function first processes any pending signals and exits if necessary. It then increments the poll seed to ensure different event ordering in subsequent calls.
+
+Next, it retrieves the event subscriptions from the input array and creates a list of subscription objects. Each subscription object represents an event subscription.
+
+The function clears the number of events to prepare for the upcoming polling.

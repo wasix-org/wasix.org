@@ -1,0 +1,47 @@
+## `fd_readdir()`
+
+Read data from a directory specified by the file descriptor.
+
+### Description
+
+The `fd_readdir()` function reads directory entries from a directory identified by the provided file descriptor (`fd`). It stores the directory entries in the buffer specified by `buf` and returns the number of bytes stored in the buffer via the `bufused` pointer.
+
+### Syntax
+
+```rust
+pub fn fd_readdir<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    buf: WasmPtr<u8, M>,
+    buf_len: M::Offset,
+    cookie: Dircookie,
+    bufused: WasmPtr<M::Offset, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor of the directory to read from.
+- `buf`: A pointer to the buffer where directory entries will be stored.
+- `buf_len`: The length of the buffer in bytes.
+- `cookie`: The directory cookie indicating the position to start reading from.
+- `bufused`: A pointer to store the number of bytes stored in the buffer.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `%fd`: The file descriptor of the directory being read from.
+
+### Note
+
+The `fd_readdir()` function reads directory entries from a directory identified by the file descriptor `fd`. It takes the file descriptor, a buffer where the directory entries will be stored, the length of the buffer in bytes, the directory cookie indicating the position to start reading from, and a pointer to store the number of bytes stored in the buffer.
+
+The function reads the directory entries and stores them in the buffer according to the specified format. The `bufused` pointer will be updated with the number of bytes stored in the buffer. If the entire directory has been read and there is no more data to read, the function will indicate this by storing a value less than `buf_len` in `bufused`.
+
+The function returns an `Errno` value to indicate the success or failure of the operation. If the directory entries are successfully read and stored in the buffer, it returns `Errno::Success`. Otherwise, it returns an appropriate error code.

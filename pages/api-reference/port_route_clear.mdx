@@ -1,0 +1,26 @@
+## `port_route_clear()`
+
+Clears all the routes in the local port.
+
+### Description
+
+The `port_route_clear()` function clears all the routes in the routing table of the local port. This allows you to remove all existing routes at once.
+
+### Syntax
+
+```rust
+pub fn port_route_clear(mut ctx: FunctionEnvMut<'_, WasiEnv>) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+
+### Return Value
+
+The function returns a `Result` indicating the outcome of the operation. If the operation is successful, `Ok(Errno::Success)` is returned. If an error occurs, an appropriate `WasiError` is returned.
+
+### Notes
+
+- The `port_route_clear()` function clears all the routes in the routing table of the local port, effectively removing all existing routes.
+- The behavior and limitations of the `port_route_clear()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

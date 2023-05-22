@@ -1,0 +1,44 @@
+## `proc_parent()`
+
+Returns the parent handle of the supplied process.
+
+### Description
+
+The `proc_parent()` function is used to retrieve the parent handle of a given process. It takes a process identifier (PID) as input and returns the PID of the parent process.
+
+In POSIX systems, each process has a parent process except for the initial process, which is typically assigned a parent of PID 1 (init process). The parent process is responsible for creating and managing its child processes.
+
+### Syntax
+
+```rust
+pub fn proc_parent<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    pid: Pid,
+    ret_parent: WasmPtr<Pid, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: The function environment.
+- `pid`: The process identifier (PID) of the process whose parent is to be retrieved.
+- `ret_parent`: Pointer to store the returned parent process ID.
+
+### Return Value
+
+The function returns an `Errno` value indicating the result of the operation. If the operation is successful, it returns `Errno::Success`. If the supplied process does not exist or the current process is not the parent, it returns `Errno::Badf`.
+
+### Logging
+
+This function is instrumented with `debug` level logging. It includes the following field for debugging purposes:
+
+- `pid`: The process identifier (PID) of the supplied process.
+- `parent`: The parent process ID.
+
+### Note
+
+- The `proc_parent()` function is used to retrieve the parent handle of a given process.
+- It checks if the supplied `pid` matches the current process's PID. If they match, it retrieves the parent PID using the `ppid()` method of the current process.
+- If the supplied `pid` does not match the current process's PID, it attempts to retrieve the process from the control plane using the `get_process()` method.
+- The function stores the parent PID in the specified `ret_parent` pointer.
+- The function returns `Errno::Badf` if the supplied process does not exist or the current process is not the parent.

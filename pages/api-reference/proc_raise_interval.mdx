@@ -1,0 +1,41 @@
+## `proc_raise_interval()`
+
+Send a signal to the process of the calling thread with an optional interval for repeated signaling.
+
+### Description
+
+The `proc_raise_interval()` function sends a signal to the process of the calling thread. It allows specifying an interval for repeated signaling, where the signal will be sent at the specified interval repeatedly. This function is similar to the `raise` function in POSIX, which sends a signal to the current process or a specific process.
+
+### Syntax
+
+```rust
+pub fn proc_raise_interval(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sig: Signal,
+    interval: Timestamp,
+    repeat: Bool,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sig`: The signal to be raised for the process.
+- `interval`: The interval (in milliseconds) between repeated signals. A value of `0` indicates a single signal without repetition.
+- `repeat`: A boolean value indicating whether the signal should be repeated (`true`) or not (`false`).
+
+### Return Value
+
+The function returns `Ok(Errno::Success)` if the operation is successful. Otherwise, it returns an appropriate `WasiError` value.
+
+### Logging
+
+This function is instrumented with `debug` level logging. It includes the following fields for debugging purposes:
+
+- `sig`: The signal to be raised.
+
+Notes
+The proc_raise_interval() function sends a signal to the process of the calling thread.
+It uses the signal_interval() method of the current process to send the signal with the specified interval and repetition settings.
+This function is similar to the raise function in POSIX, which sends a signal to the current process or a specific process.
+After sending the signal, the function calls WasiEnv::process_signals_and_exit() to process any pending signals and handle process termination if necessary.

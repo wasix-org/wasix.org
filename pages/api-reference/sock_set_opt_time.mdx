@@ -1,0 +1,37 @@
+## `sock_set_opt_time()`
+
+Sets one of the times associated with a socket.
+
+### Description
+
+The `sock_set_opt_time()` function sets the value of a specific socket option that represents a time-related setting for the given socket descriptor.
+
+### Syntax
+
+```rust
+pub fn sock_set_opt_time<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    opt: Sockoption,
+    time: WasmPtr<OptionTimestamp, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The socket descriptor.
+- `opt`: The socket option to be set.
+- `time`: A WebAssembly pointer to the value representing the time to set.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `sock_set_opt_time()` function sets the value of a specific socket option that represents a time-related setting for the specified socket descriptor.
+- The specific socket option to set is determined by the `opt` parameter.
+- The value to set is read from the memory location pointed to by the `time` parameter, which should be a valid WebAssembly pointer to an `OptionTimestamp` value.
+- The `OptionTimestamp` value represents a time duration. It has a `tag` field that specifies whether the time is present (`OptionTag::Some`) or not (`OptionTag::None`), and a `u` field that holds the duration value in nanoseconds.
+- The behavior and limitations of the `sock_set_opt_time()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

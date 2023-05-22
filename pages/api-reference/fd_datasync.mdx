@@ -1,0 +1,38 @@
+## `fd_datasync()`
+
+Synchronize the file data to disk.
+
+### Description
+
+The `fd_datasync()` function is used to synchronize the file data associated with a file descriptor to disk. It ensures that any modified data for the file is written to the underlying storage device.
+
+### Syntax
+
+```rust
+pub fn fd_datasync(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor to synchronize.
+
+### Return Value
+
+The function returns a `Result` containing an `Errno` value indicating the success or failure of the operation. An `Errno::Success` value indicates successful synchronization.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%fd`: The file descriptor being synchronized.
+- `err`: Any encountered error during the synchronization process.
+
+### Note
+
+The `fd_datasync()` function is used to synchronize the file data associated with a file descriptor to disk. It ensures that any modified data for the file is written to the underlying storage device. Only file descriptors with the appropriate `Rights::FD_DATASYNC` permission can be synchronized.
+
+Please let me know if there's anything else I can assist you with.

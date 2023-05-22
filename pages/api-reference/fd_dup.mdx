@@ -1,0 +1,44 @@
+## `fd_dup()`
+
+Duplicates a file handle.
+
+### Description
+
+The `fd_dup()` function duplicates a file handle, creating a new file handle that is a duplicate of the original. The duplicated file handle refers to the same underlying file or resource as the original file handle.
+
+### Syntax
+
+```rust
+pub fn fd_dup<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    ret_fd: WasmPtr<WasiFd, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file handle to be cloned.
+- `ret_fd`: A WebAssembly memory pointer where the new file handle will be stored.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%fd`: The file handle being duplicated.
+- `ret_fd`: The new file handle that is a duplicate of the original.
+
+### Note
+
+The `fd_dup()` function duplicates a file handle. It takes the file handle `fd` to be cloned and a WebAssembly memory pointer `ret_fd` where the new file handle will be stored.
+
+The function retrieves the memory view and the file system state from the WASI environment using the function context. It then calls the `clone_fd()` method on the file system state to duplicate the file handle. The `clone_fd()` method creates a new file handle that is a duplicate of the original file handle.
+
+The duplicated file handle is stored in the WebAssembly memory using the provided memory pointer `ret_fd`.
+
+The function returns an `Errno` value to indicate the success or failure of the operation. If the file handle is successfully duplicated, it returns `Errno::Success`. Otherwise, it returns an appropriate error code.

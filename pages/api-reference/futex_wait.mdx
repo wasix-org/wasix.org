@@ -1,0 +1,42 @@
+## `futex_wait()`
+
+Waits for a `futex_wake` operation to wake the current thread. Returns `false` on timeout, and `true` in all other cases.
+
+### Description
+
+The `futex_wait()` function waits for a specific memory location, referred to as a "futex," to be woken up by a `futex_wake` operation. It checks the value held by the futex against an expected value and waits until the value changes or a timeout occurs. This function is typically used for synchronization purposes, allowing threads to wait until a certain condition is met before continuing their execution.
+
+If the value held by the futex does not match the expected value, the function returns `EINVAL`. If a timeout is specified and the futex is not triggered within the allocated time, the function returns `false`. In all other cases, the function returns `true`.
+
+### Syntax
+
+```rust
+pub fn futex_wait<M: MemorySize + 'static>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    futex_ptr: WasmPtr<u32, M>,
+    expected: u32,
+    timeout: WasmPtr<OptionTimestamp, M>,
+    ret_woken: WasmPtr<Bool, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `futex_ptr`: A pointer to the memory location holding the value to be checked.
+- `expected`: The expected value that should currently be held at the memory location.
+- `timeout`: A pointer to an optional timeout duration. If `None`, the function will wait indefinitely.
+- `ret_woken`: A pointer to a Boolean value that will be set to `true` if the futex is woken up, or `false` otherwise.
+
+### Return Value
+
+The function returns a `Result` containing an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `futex_wait()` function is used to wait for a futex to be woken up by a `futex_wake` operation. It allows threads to synchronize their execution based on the state of the futex.
+- The function checks the value held by the futex against the expected value. If the values match, the function waits until the value changes or a timeout occurs.
+- If the value held by the futex does not match the expected value, the function returns `EINVAL`, indicating an invalid argument.
+- The timeout parameter allows you to specify a maximum duration to wait for the futex to be triggered. If the futex is not triggered within the allocated time, the function returns `false`.
+- The `ret_woken` parameter is a Boolean value that is set to `true` if the futex is woken up, indicating that the wait operation was successful. If the function returns `false` or encounters an error, the `ret_woken` value will be set to `false`.
+- The behavior and limitations of the `futex_wait()` function may vary depending on the specific runtime environment and underlying operating system. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

@@ -1,0 +1,45 @@
+## `thread_spawn()`
+
+Creates a new thread by spawning that shares the same memory address space, file handles, and main event loops.
+
+### Description
+
+The `thread_spawn()` function creates a new thread within the WASI environment. Threads allow concurrent execution of multiple tasks within a program. The created thread shares the same memory address space, file handles, and main event loops as the calling thread.
+
+This function is similar to the POSIX `pthread_create()` function, which creates a new thread within a process.
+
+### Syntax
+
+```rust
+pub fn thread_spawn<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    start_ptr: WasmPtr<ThreadStart<M>, M>,
+    ret_tid: WasmPtr<Tid, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `start_ptr`: A pointer to the structure that describes the thread to be launched.
+- `ret_tid`: A pointer to the location where the ID of the newly created thread will be stored.
+
+### Return Value
+
+The function returns `Errno`. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value indicating the reason for the failure.
+
+### Logging
+
+This function is instrumented with `debug` level logging.
+
+### Note
+
+- The `thread_spawn()` function creates a new thread within the WASI environment.
+- The created thread shares the same memory address space, file handles, and main event loops as the calling thread.
+- It takes a pointer to a structure that describes the thread to be launched as input. The structure provides the necessary information to initialize and start the new thread.
+- After the thread is created, its ID is returned and stored in the location pointed to by `ret_tid`.
+- The `thread_spawn()` function is similar to the POSIX `pthread_create()` function, which creates a new thread within a process.
+- Utilizing the `thread_spawn()` function allows applications to achieve concurrent execution of multiple tasks within the WASI environment, enabling parallelism and improved performance.
+- The newly created thread is independent and can execute concurrently with other threads within the same WASI environment.
+- The `thread_spawn()` function provides a way to implement multi-threaded applications and leverage the benefits of concurrent execution.
+- Care should be taken to properly synchronize shared resources and manage thread safety when using multiple threads within the same WASI environment.

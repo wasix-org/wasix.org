@@ -1,0 +1,47 @@
+## `chdir()`
+
+Sets the current working directory.
+
+### Description
+
+The `chdir()` function changes the current working directory of the process to the specified directory. It allows processes to have a different working directory from the directory in which they were started.
+
+In POSIX systems, the current working directory represents the directory in the file system from which the process is currently executing. By changing the current working directory, applications can navigate the file system and perform file operations relative to the new directory.
+
+The `chdir()` function takes a path as input and sets it as the new current working directory. If the directory specified by the path does not exist, the function returns `Errno::Noent` to indicate that the directory could not be found.
+
+### Syntax
+
+```rust
+pub fn chdir<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    path: WasmPtr<u8, M>,
+    path_len: M::Offset,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: The function environment.
+- `path`: A pointer to a null-terminated string that represents the path of the new working directory.
+- `path_len`: The length of the path string.
+
+### Return Value
+
+The function returns an `Errno` value indicating the result of the operation. If the operation is successful, it returns `Errno::Success`. If the specified directory does not exist, it returns `Errno::Noent`.
+
+### Logging
+
+This function is instrumented with `debug` level logging. It includes the following field for debugging purposes:
+
+- `path`: The path of the new working directory.
+
+### Note
+
+- The `chdir()` function sets the current working directory of the process to the specified directory.
+- It first retrieves the path string from the memory using the provided `path` pointer and `path_len`.
+- The function then checks if the specified directory exists by attempting to read its contents using the WASI file system APIs. If the read operation fails, it returns `Errno::Noent`.
+- If the directory exists, it updates the current working directory in the WASI state to the specified path.
+- Finally, it returns `Errno::Success` to indicate a successful operation.
+
+In POSIX systems, the current working directory is associated with each process and can be changed using the `chdir()` system call. The `chdir()` function allows applications to switch to a different directory within the file system, which affects all subsequent file operations performed by the process.

@@ -1,0 +1,36 @@
+## `sock_leave_multicast_v6()`
+
+Leaves a particular multicast IPv6 group.
+
+### Description
+
+The `sock_leave_multicast_v6()` function allows a socket to leave a specified multicast IPv6 group on a specific interface.
+
+### Syntax
+
+```rust
+pub fn sock_leave_multicast_v6<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    multiaddr: WasmPtr<__wasi_addr_ip6_t, M>,
+    iface: u32,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The socket descriptor.
+- `multiaddr`: A WebAssembly pointer to the IPv6 multicast group to leave.
+- `iface`: The interface index to leave the multicast group.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `sock_leave_multicast_v6()` function allows a socket to leave a specified multicast IPv6 group on a specific interface.
+- The `multiaddr` parameter specifies the IPv6 multicast group to leave.
+- The `iface` parameter specifies the interface index from which to leave the multicast group.
+- The behavior and limitations of the `sock_leave_multicast_v6()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

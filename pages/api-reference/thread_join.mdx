@@ -1,0 +1,52 @@
+## `thread_join()`
+
+Joins the calling thread with another thread, blocking the calling thread until the other thread finishes.
+
+### Description
+
+The `thread_join()` function allows the calling thread to wait for the completion of another thread. It takes a `Tid` as input, representing the thread handle of the thread to wait on.
+
+This function blocks the calling thread until the specified thread completes its execution. Once the other thread finishes, the calling thread resumes its execution.
+
+### Syntax
+
+```rust
+pub fn thread_join(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    join_tid: Tid,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `join_tid`: The thread handle (Tid) of the thread to wait on.
+
+### Return Value
+
+The function returns `Ok(Errno::Success)` if the operation is successful. Otherwise, it returns an appropriate `WasiError` value.
+
+### Logging
+
+This function is instrumented with `debug` level logging. It includes the following field for debugging purposes:
+
+- `join_tid`: The thread handle (Tid) of the thread being joined.
+
+### Note
+
+- The `thread_join()` function is used to synchronize the execution of multiple threads by allowing one thread to wait for the completion of another thread.
+- It is similar to the `pthread_join()` function in POSIX, which serves the same purpose of joining threads.
+- Joining a thread means that the calling thread suspends its execution until the specified thread completes.
+- By joining a thread, the calling thread can obtain the exit status or return value of the joined thread.
+- This function is typically used when there is a need to coordinate the execution of multiple threads and ensure that certain operations are completed before proceeding.
+- The joined thread must be a valid and joinable thread. If the specified thread has already been joined or is not joinable, the function returns successfully without blocking.
+- The `thread_join()` function can be used to implement thread synchronization, thread coordination, and resource cleanup in multi-threaded applications.
+- It is important to handle thread joining correctly to prevent resource leaks and ensure proper synchronization between threads.
+- Thread joining is a blocking operation, and the calling thread remains in a blocked state until the joined thread completes.
+- Joining a thread allows for clean and controlled termination of threads, as it ensures that all necessary operations in the joined thread have completed before continuing with the execution of the calling thread.
+- Proper usage of thread joining is essential for correct and reliable multi-threaded programming.
+- The `thread_join()` function provides a convenient mechanism for synchronizing and coordinating the execution of threads in the WASI environment.
+- It allows for the orderly completion and termination of threads, enabling effective utilization of multi-threaded resources and synchronization of thread activities.
+- Thread joining can be used in various scenarios, such as waiting for worker threads to finish their work, collecting results from parallel computations, or coordinating the termination of a group of threads.
+- The `thread_join()` function is an important tool for managing and controlling the flow of execution in multi-threaded applications.
+- It provides a way to synchronize threads and enables thread coordination and cooperation in achieving desired program behavior.

@@ -1,0 +1,42 @@
+## `fd_renumber()`
+
+Atomically copy a file descriptor.
+
+### Description
+
+The `fd_renumber()` function atomically copies a file descriptor from one location to another. It ensures that the copying operation is performed atomically and returns an `Errno` value indicating the success or failure of the operation.
+
+### Syntax
+
+```rust
+pub fn fd_renumber(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    from: WasiFd,
+    to: WasiFd,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `from`: The file descriptor to copy.
+- `to`: The location to copy the file descriptor to.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%from`: The file descriptor being copied.
+- `%to`: The location to which the file descriptor is being copied.
+
+### Note
+
+The `fd_renumber()` function atomically copies a file descriptor from one location to another. It takes the source file descriptor `from` and the destination file descriptor `to`. If the `from` and `to` file descriptors are the same, the function returns `Errno::Success` without performing any copying operation.
+
+The function retrieves the file descriptor map from the WASI environment and attempts to find the file descriptor entry corresponding to `from`. If the entry is found, a new file descriptor entry is created with the same properties as the original entry, except for the file descriptor number, which is set to `to`. The new entry is then inserted into the file descriptor map with the `to` file descriptor number.
+
+The function returns an `Errno` value to indicate the success or failure of the operation. If the file descriptor is successfully copied, it returns `Errno::Success`. Otherwise, it returns an appropriate error code.

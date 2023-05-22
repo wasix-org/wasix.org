@@ -1,0 +1,34 @@
+## `port_route_list()`
+
+Returns a list of all the routes owned by the local port.
+
+### Description
+
+The `port_route_list()` function retrieves a list of all the routes in the routing table of the local port. The function fills the output buffer with route information as much as possible. If the buffer is too small to accommodate all the routes, the function returns `EOVERFLOW` and fills `nroutes` with the size of the buffer needed.
+
+### Syntax
+
+```rust
+pub fn port_route_list<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    routes_ptr: WasmPtr<Route, M>,
+    nroutes_ptr: WasmPtr<M::Offset, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `routes_ptr`: A WebAssembly pointer to the buffer where route information will be stored. The buffer should be large enough to accommodate the routes.
+- `nroutes_ptr`: A WebAssembly pointer to a location where the number of routes will be stored. If the buffer is too small, this value will be updated with the size of the buffer needed.
+
+### Return Value
+
+The function returns a `Result` indicating the outcome of the operation. If the operation is successful, `Ok(Errno::Success)` is returned. If the buffer is too small to accommodate all the routes, `Ok(Errno::Overflow)` is returned, and the `nroutes` value is updated with the size of the buffer needed. If an error occurs, an appropriate `WasiError` is returned.
+
+### Notes
+
+- The `port_route_list()` function retrieves a list of all the routes in the routing table of the local port. The routes are stored in the `routes_ptr` buffer.
+- The function fills the `routes_ptr` buffer with route information as much as possible. If the buffer is too small to accommodate all the routes, the function returns `EOVERFLOW` and updates the `nroutes_ptr` value with the size of the buffer needed to store all the routes.
+- The `routes_ptr` buffer should have enough capacity to hold `max_routes` routes, where `max_routes` is the size of the buffer in terms of the `Route` structure.
+- The behavior and limitations of the `port_route_list()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

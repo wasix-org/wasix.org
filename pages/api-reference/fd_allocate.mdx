@@ -1,0 +1,41 @@
+## `fd_allocate`
+
+Allocate extra space for a file descriptor.
+
+### Description
+
+The `fd_allocate` function is used to allocate additional space for a file descriptor. It allows extending the size of a file or buffer associated with the file descriptor.
+
+### Syntax
+
+```rust
+pub fn fd_allocate(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    offset: Filesize,
+    len: Filesize,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor to allocate space for.
+- `offset`: The offset from the start marking the beginning of the allocation.
+- `len`: The length from the offset marking the end of the allocation.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%fd`: The file descriptor being used.
+- `%offset`: The offset from the start of the allocation.
+- `%len`: The length of the allocation.
+
+### Note
+
+The `fd_allocate` function allows for allocating additional space for a file descriptor. It extends the size of the file or buffer associated with the file descriptor based on the specified offset and length.

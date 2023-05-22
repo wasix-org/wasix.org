@@ -1,0 +1,33 @@
+## `sock_shutdown()`
+
+Shut down socket send and receive channels.
+
+### Description
+
+The `sock_shutdown()` function is used to shut down the send and receive channels of a socket. It is similar to the `shutdown` function in POSIX. The function allows you to selectively shut down either the send channel, the receive channel, or both channels of the socket.
+
+### Syntax
+
+```rust
+pub fn sock_shutdown(mut ctx: FunctionEnvMut<'_, WasiEnv>, sock: WasiFd, how: SdFlags) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The file descriptor of the socket to shut down.
+- `how`: Specifies which channels on the socket to shut down.
+
+### Return Value
+
+The function returns an `Errno` value. If the operation is successful, `Errno::Success` is returned. Otherwise, an appropriate `Errno` value indicating the error is returned.
+
+### Notes
+
+- The `sock_shutdown()` function allows you to shut down the send and/or receive channels of a socket.
+- The `how` parameter specifies which channels to shut down. It can take one of the following values:
+  - `__WASI_SHUT_RD`: Shut down the receive channel.
+  - `__WASI_SHUT_WR`: Shut down the send channel.
+  - `__WASI_SHUT_RD | __WASI_SHUT_WR`: Shut down both the send and receive channels.
+- The function maps the `how` value to the corresponding `std::net::Shutdown` enum variant and passes it to the underlying socket's `shutdown()` method.
+- The specific behavior of the `sock_shutdown()` function may vary depending on the runtime environment and underlying networking implementation.

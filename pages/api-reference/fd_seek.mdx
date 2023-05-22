@@ -1,0 +1,63 @@
+## `fd_seek()`
+
+Update file descriptor offset.
+
+### Description
+
+The `fd_seek()` function updates the offset of a file descriptor. It allows you to adjust the offset by a specified number of bytes relative to a given position.
+
+### Syntax
+
+```rust
+pub fn fd_seek<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    offset: FileDelta,
+    whence: Whence,
+    newoffset: WasmPtr<Filesize, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor to update.
+- `offset`: The number of bytes to adjust the offset by.
+- `whence`: The position that the offset is relative to.
+- `newoffset`: A WebAssembly memory pointer where the new offset will be stored.
+
+### Return Value
+
+The function returns a `Result` indicating the success or failure of the operation. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `%fd`: The file descriptor being mutated.
+- `%offset`: The number of bytes to adjust the offset by.
+- `?whence`: The position that the offset is relative to.
+
+### Note
+
+The `fd_seek()` function updates the offset of the specified file descriptor (`fd`) based on the given `offset` and `whence` parameters.
+
+The function first processes any pending signals and checks for an exit request using the `process_signals_and_exit()` function.
+
+Next, it retrieves the memory view, file system state, and inodes from the WASI environment using the function context.
+
+The function retrieves the file descriptor entry for the specified file descriptor (`fd`) from the file system state using the `get_fd()` method.
+
+If the file descriptor does not have the `FD_SEEK` right, the function returns `Errno::Access` to indicate an access error.
+
+The function then handles the different `whence` cases:
+
+- `Whence::Cur`: Adjusts the offset relative to the current position. The function retrieves the file descriptor entry, and depending on whether the offset is positive or negative, it adds or subtracts the offset from the current offset value using atomic operations. The new offset is then stored in the file descriptor entry.
+
+- `Whence::End`: Adjusts the offset relative to the end of the file. The function checks the file descriptor entry's kind to ensure it represents a file. It creates an async closure that seeks to the end of the file with the specified offset. It updates the file descriptor's offset value and stores the new offset in the file descriptor entry.
+
+- `Whence::Set`: Sets the offset to an absolute value. The function retrieves the file descriptor entry and updates its offset value with the specified offset.
+
+For all cases, the function writes the new offset value to the provided memory location (`newoffset`) using the WebAssembly memory view.
+
+Finally, the function returns `Errno::Success` to indicate a successful operation.

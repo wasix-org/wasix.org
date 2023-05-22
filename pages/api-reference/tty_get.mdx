@@ -1,0 +1,36 @@
+## `tty_get()`
+
+Retrieves the current state of the TTY.
+
+### Description
+
+The `tty_get()` function is used to retrieve the current state of the terminal (TTY). It provides information such as the number of columns, number of rows, width, height, and TTY configuration.
+
+This function is typically used in interactive applications that need to obtain information about the terminal to perform certain operations or adjust their behavior based on the terminal settings.
+
+### Syntax
+
+```rust
+pub fn tty_get<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    tty_state: WasmPtr<Tty, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: The function environment.
+- `tty_state`: A pointer to a `Tty` structure where the TTY state will be stored.
+
+### Return Value
+
+The function returns an `Errno` value indicating the result of the operation. If the operation is successful and the TTY state is retrieved, it returns `Errno::Success`. If the TTY is not supported, it returns `Errno::Notsup`.
+
+### Note
+
+- The `tty_get()` function retrieves the current state of the TTY.
+- It checks if the TTY is available in the runtime. If it is not available, indicating that the program is not running in an interactive terminal, it returns `Errno::Notsup`.
+- If the TTY is available, it calls the `tty_get()` method on the TTY bridge to obtain the current TTY state.
+- The TTY state is then stored in a `Tty` structure with fields such as `cols`, `rows`, `width`, `height`, `stdin_tty`, `stdout_tty`, `stderr_tty`, `echo`, and `line_buffered`.
+- The function writes the `Tty` structure to the memory specified by the `tty_state` pointer.
+- If the operation is successful, it returns `Errno::Success`.

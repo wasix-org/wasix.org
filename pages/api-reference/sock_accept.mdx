@@ -1,0 +1,42 @@
+## `sock_accept()`
+
+Accept a new incoming connection.
+
+### Description
+
+The `sock_accept()` function is used to accept a new incoming connection on a listening socket. It is similar to the `accept` function in POSIX.
+
+When a connection is accepted, a new socket is created and returned. This new socket represents the communication channel with the client.
+
+### Syntax
+
+```rust
+pub fn sock_accept<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    mut fd_flags: Fdflags,
+    ro_fd: WasmPtr<WasiFd, M>,
+    ro_addr: WasmPtr<__wasi_addr_port_t, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The file descriptor of the listening socket on which to accept a connection.
+- `fd_flags`: The desired values of the file descriptor flags for the new socket.
+- `ro_fd`: A WebAssembly pointer where the file descriptor of the new socket will be written.
+- `ro_addr`: A WebAssembly pointer where the address of the remote client will be written.
+
+### Return Value
+
+The function returns a `Result` containing the outcome of the operation. If the operation is successful, `Ok(Errno::Success)` is returned, and the file descriptor of the new socket is written to the memory location pointed to by `ro_fd`. The address of the remote client is written to the memory location pointed to by `ro_addr`.
+
+### Notes
+
+- The `sock_accept()` function accepts a new incoming connection on a listening socket.
+- The function blocks until a connection request is received.
+- Upon successful acceptance of a connection, a new socket is created to handle communication with the client.
+- The file descriptor flags specified by `fd_flags` control the behavior of the new socket.
+- The address of the remote client, including the IP address and port number, is written to the memory location pointed to by `ro_addr`.
+- The specific behavior of the `sock_accept()` function may vary depending on the runtime environment and underlying networking implementation.

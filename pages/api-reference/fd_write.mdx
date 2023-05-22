@@ -1,0 +1,60 @@
+## `fd_write()`
+
+Write data to the file descriptor.
+
+### Description
+
+The `fd_write()` function writes data from one or more buffers to the specified file descriptor. It is similar to the POSIX `write()` function, but with additional support for writing multiple non-contiguous buffers in a single function call using the `iovs` parameter.
+
+### Syntax
+
+```rust
+pub fn fd_write<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    iovs: WasmPtr<__wasi_ciovec_t<M>, M>,
+    iovs_len: M::Offset,
+    nwritten: WasmPtr<M::Offset, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor (opened with writing permission) to write to.
+- `iovs`: A wasm pointer to an array of `__wasi_ciovec_t` structures, each describing a buffer to write data from.
+- `iovs_len`: The length of the `iovs` array.
+- `nwritten`: A wasm pointer to an `M::Offset` value where the number of bytes written will be written.
+
+### Return Value
+
+The function returns a `Result` indicating the success or failure of the operation. If the operation is successful, it returns `Ok(Errno::Success)` along with the number of bytes written. If an error occurs, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `%fd`: The file descriptor being written to.
+- `nwritten`: The number of bytes written.
+
+### POSIX Context
+
+The `fd_write()` function is inspired by the POSIX `write()` function, which writes data to a file descriptor. However, the `fd_write()` function in the WASI environment provides additional support for writing multiple non-contiguous buffers in a single function call.
+
+In the POSIX context, the `write()` function has the following signature:
+
+```c
+#include <unistd.h>
+
+ssize_t write(int fd, const void *buf, size_t count);
+```
+
+- `fd`: The file descriptor to write to.
+- `buf`: A pointer to the buffer containing the data to be written.
+- `count`: The number of bytes to write from the buffer.
+
+The `write()` function writes up to `count` bytes from the buffer pointed to by `buf` to the file referred to by the file descriptor `fd`. It returns the number of bytes actually written or -1 if an error occurs.
+
+The `write()` function operates with raw bytes and doesn't support the concept of vectors (`iovs`) like the `fd_write()` function in the WASI environment does.
+
+It's important to note that the `fd_write()` function in the WASI environment maps to the `write()` function in the POSIX context, but with additional support for vectors using the `iovs` parameter. The behavior of the `fd_write()` function follows the POSIX specification while accommodating the requirements of the WASI environment.

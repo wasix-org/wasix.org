@@ -1,0 +1,51 @@
+## `callback_signal()`
+
+Sets the callback to invoke signals.
+
+### Description
+
+The `callback_signal()` function sets the callback function that will be invoked when signals are received. It allows applications to define a custom function to handle signals and perform specific actions in response to signal events.
+
+This function takes the name of the callback function as input and sets it as the signal callback. The callback function will be invoked whenever signals are received by the process.
+
+### Syntax
+
+```rust
+pub fn callback_signal<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    name: WasmPtr<u8, M>,
+    name_len: M::Offset,
+) -> Result<(), WasiError>
+```
+
+### Parameters
+
+- `ctx`: The function environment.
+- `name`: A pointer to a null-terminated string that represents the name of the callback function.
+- `name_len`: The length of the name string.
+
+### Return Value
+
+The function returns `Result<(), WasiError>`. If the operation is successful, it returns `Ok(())`. Otherwise, it returns an appropriate `WasiError` value.
+
+### Logging
+
+This function is instrumented with `trace` level logging. It includes the following fields for debugging purposes:
+
+- `name`: The name of the signal callback function.
+- `funct_is_some`: Indicates whether the callback function is available (`Some`) or not (`None`).
+
+### Note
+
+- The `callback_signal()` function sets the callback function that will be invoked when signals are received.
+- It retrieves the name string from the memory using the provided `name` pointer and `name_len`.
+- The function then attempts to find the typed function with the specified name in the exports of the WebAssembly instance associated with the WASI environment. If the function is found, it sets it as the signal callback.
+- After setting the callback function, it signals that the callback has been set by updating the `signal` and `signal_set` fields in the inner data of the WASI environment.
+- Finally, it calls `WasiEnv::process_signals_and_exit()` to process any pending signals and handle process termination if necessary.
+
+Special Cases:
+
+- If the name of the callback function cannot be retrieved from memory or an error occurs during the retrieval process, the function logs a warning message and returns early without setting the callback.
+- If the typed function with the specified name is not found in the exports of the WebAssembly instance, the callback is not set, and subsequent signal events will not trigger the custom callback function.
+
+By setting a custom signal callback, applications can define their own signal handling logic and perform specific actions when signals are received. This allows for more fine-grained control over signal handling in the WASI environment.

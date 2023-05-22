@@ -1,0 +1,35 @@
+## `thread_parallelism()`
+
+Returns the available parallelism, which represents the number of available cores that can run concurrently.
+
+### Description
+
+The `thread_parallelism()` function retrieves the available parallelism, which represents the number of cores or threads that can run concurrently. It provides information about the degree of parallelism supported by the underlying hardware.
+
+This function is analogous to the POSIX `sysconf(_SC_NPROCESSORS_ONLN)` function, which retrieves the number of processors online.
+
+### Syntax
+
+```rust
+pub fn thread_parallelism<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    ret_parallelism: WasmPtr<M::Offset, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `ret_parallelism`: A pointer to the memory where the parallelism value will be written.
+
+### Return Value
+
+The function returns `Errno::Success` if the operation is successful. Otherwise, it returns an appropriate `Errno` value.
+
+### Notes
+
+- The available parallelism value indicates the potential for concurrent execution of multiple threads or tasks.
+- By understanding the available parallelism, the application can optimize its thread management strategies, such as thread pool sizing, task scheduling, and load balancing, to achieve efficient utilization of system resources and maximize performance.
+- The available parallelism value can vary depending on the system architecture, hardware configuration, and runtime environment.
+- Applications can use the available parallelism information to dynamically adjust their threading strategies and adapt to different execution environments, optimizing performance across a range of systems.
+- Thread parallelism is a key consideration in designing and optimizing multi-threaded applications, and the `thread_parallelism()` function provides a means to retrieve this information in the WASI environment.

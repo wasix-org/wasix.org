@@ -1,0 +1,36 @@
+## `sock_get_opt_size()`
+
+Retrieves the size of a particular option for the socket.
+
+### Description
+
+The `sock_get_opt_size()` function retrieves the size of a specific socket option for the given socket descriptor.
+
+### Syntax
+
+```rust
+pub fn sock_get_opt_size<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    opt: Sockoption,
+    ret_size: WasmPtr<Filesize, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The socket descriptor.
+- `opt`: The socket option to be retrieved.
+- `ret_size`: A WebAssembly pointer to store the retrieved size value.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `sock_get_opt_size()` function retrieves the size of a specific socket option for the specified socket descriptor.
+- The specific socket option to retrieve is determined by the `opt` parameter.
+- The retrieved size value is stored at the memory location pointed to by the `ret_size` parameter.
+- The behavior and limitations of the `sock_get_opt_size()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

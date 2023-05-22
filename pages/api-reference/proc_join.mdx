@@ -1,0 +1,46 @@
+## `proc_join()`
+
+Joins the child process, blocking the current process until the child process finishes.
+
+### Description
+
+The `proc_join()` function is used to wait for a specific child process to finish execution before continuing with the parent process. It blocks the execution of the current process until the child process exits. The function retrieves the PID of the child process from the `pid_ptr` parameter. If the `pid` value is `None`, the function waits for any child process to exit. After the child process finishes, the function retrieves the exit status and writes it to the `status_ptr` parameter.
+
+On POSIX systems, a similar functionality is provided by the `waitpid()` function. It allows a parent process to wait for a specific child process or any child process to exit. The `waitpid()` function is part of the POSIX standard and is widely supported across different platforms.
+
+### Syntax
+
+```rust
+pub fn proc_join<M: MemorySize + 'static>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    pid_ptr: WasmPtr<OptionPid, M>,
+    _flags: JoinFlags,
+    status_ptr: WasmPtr<JoinStatus, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `pid_ptr`: A wasm pointer to an `OptionPid` structure representing the PID of the child process to wait on.
+- `_flags`: Unused parameter.
+- `status_ptr`: A wasm pointer to a `JoinStatus` structure where the exit status of the child process will be stored.
+
+### Return Value
+
+The function returns a `Result` indicating the success or failure of the operation. If the operation is successful, it returns `Ok(Errno::Success)`. Otherwise, it returns an appropriate `WasiError` value.
+
+### Logging
+
+This function is instrumented with `trace` level logging. It includes the following fields for debugging purposes:
+
+- `pid`: The raw PID of the process.
+
+### Notes
+
+- The `proc_join()` function waits for the child process specified by the PID to finish execution.
+- If the `pid` value is `None`, the function waits for any child process to exit.
+- The function clears the existing values in the `pid_ptr` and `status_ptr` parameters.
+- After the child process finishes, the function retrieves the exit status and writes it to the `status_ptr` parameter.
+- The function uses an asynchronous approach with a deep sleep mechanism to avoid blocking for too long when waiting for the child process.
+- On POSIX systems, a similar functionality is provided by the `waitpid()` function, which allows a parent process to wait for a specific child process or any child process to exit.

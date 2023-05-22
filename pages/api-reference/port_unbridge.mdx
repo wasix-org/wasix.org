@@ -1,0 +1,27 @@
+## `port_unbridge()`
+
+Disconnects from a remote network.
+
+### Description
+
+The `port_unbridge()` function terminates the connection to a remote network, effectively disconnecting from it.
+
+### Syntax
+
+```rust
+pub fn port_unbridge(mut ctx: FunctionEnvMut<'_, WasiEnv>) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+
+### Return Value
+
+The function returns a `Result` indicating the outcome of the operation. If the operation is successful, `Ok(Errno::Success)` is returned. If an error occurs, an appropriate `WasiError` is returned.
+
+### Notes
+
+- The `port_unbridge()` function terminates the connection to a remote network, effectively disconnecting from it.
+- After calling this function, further communication with the remote network will not be possible unless a new connection is established.
+- The behavior and limitations of the `port_unbridge()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

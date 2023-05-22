@@ -1,0 +1,38 @@
+## `sock_get_opt_time()`
+
+Retrieves one of the times associated with a socket.
+
+### Description
+
+The `sock_get_opt_time()` function retrieves the value of a specific socket option that represents a time-related setting for the given socket descriptor.
+
+### Syntax
+
+```rust
+pub fn sock_get_opt_time<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    opt: Sockoption,
+    ret_time: WasmPtr<OptionTimestamp, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The socket descriptor.
+- `opt`: The socket option to be retrieved.
+- `ret_time`: A WebAssembly pointer to the location where the retrieved time value should be stored.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `sock_get_opt_time()` function retrieves the value of a specific socket option that represents a time-related setting for the specified socket descriptor.
+- The specific socket option to retrieve is determined by the `opt` parameter.
+- The retrieved value is stored in the memory location pointed to by the `ret_time` parameter, which should be a valid WebAssembly pointer to an `OptionTimestamp` value.
+- The `OptionTimestamp` value represents a time duration. It has a `tag` field that specifies whether the time is present (`OptionTag::Some`) or not (`OptionTag::None`), and a `u` field that holds the duration value in nanoseconds.
+- If the socket option is not set or the requested time value is not applicable, the `tag` field of the returned `OptionTimestamp` will be `OptionTag::None` and the `u` field will be zero.
+- The behavior and limitations of the `sock_get_opt_time()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

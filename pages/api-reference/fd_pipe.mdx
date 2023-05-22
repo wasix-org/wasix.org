@@ -1,0 +1,46 @@
+## `fd_pipe()`
+
+Creates a pipe that feeds data between two file handles.
+
+### Description
+
+The `fd_pipe()` function is used to create a pipe, which is a unidirectional communication channel that allows data to be transferred between two file handles. It creates a pair of file descriptors representing the read and write ends of the pipe.
+
+### Syntax
+
+```rust
+pub fn fd_pipe<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    ro_fd1: WasmPtr<WasiFd, M>,
+    ro_fd2: WasmPtr<WasiFd, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `ro_fd1`: A wasm pointer to a `WasiFd` where the first file descriptor representing one end of the pipe will be written.
+- `ro_fd2`: A wasm pointer to a `WasiFd` where the second file descriptor representing the other end of the pipe will be written.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `fd1`: The first file descriptor representing one end of the pipe.
+- `fd2`: The second file descriptor representing the other end of the pipe.
+
+### Description
+
+The `fd_pipe()` function creates a pipe by performing the following steps:
+
+1. It retrieves the memory view, file system state, and inodes from the WASI environment using the function context.
+2. It creates a new `Pipe` using the `Pipe::channel()` function, which returns two objects representing the read and write ends of the pipe.
+3. It creates two inodes for the pipe using the `create_inode_with_default_stat()` method of the file system state. Each inode is associated with one end of the pipe and has the type `Kind::Pipe`.
+4. It creates two file descriptors for the pipe using the `create_fd()` method of the file system state. The file descriptors have the necessary rights and flags for reading and writing to the pipe.
+5. It records the created file descriptors in the current span for logging purposes.
+6. It writes the file descriptors to the memory locations specified by the `ro_fd1` and `ro_fd2` wasm pointers using the `write()` method.
+7. It returns `Errno::Success` to indicate the successful creation of the pipe.

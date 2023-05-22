@@ -1,0 +1,37 @@
+## `sock_listen()`
+
+Listen for connections on a socket.
+
+### Description
+
+The `sock_listen()` function is used to put a socket into a listening state, allowing it to accept incoming connections. This function is similar to the `listen` function in POSIX, which is used to mark a socket as a passive socket that can accept connections.
+
+When a socket is in the listening state, it can receive connection attempts from remote clients. The socket remains in the listening state until it is closed or the application explicitly stops listening.
+
+### Syntax
+
+```rust
+pub fn sock_listen<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    backlog: M::Offset,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The file descriptor of the socket to listen on.
+- `backlog`: The maximum size of the queue for pending connections. This parameter specifies the maximum number of connections that can be queued while the socket is waiting for acceptance.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `sock_listen()` function puts a socket into a listening state, allowing it to accept incoming connections.
+- The behavior and limitations of the `sock_listen()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.
+- The `backlog` parameter determines the maximum number of connections that can be queued while the socket is waiting for acceptance. If the number of pending connections exceeds the backlog value, additional connection attempts may be refused or dropped.
+- After calling `sock_listen()`, the application can use the `sock_accept()` function to accept incoming connections and establish new sockets for communication with the clients.
+- The specific runtime environment may impose additional restrictions on the `sock_listen()` function, such as limits on the backlog size or other system-specific considerations.

@@ -1,0 +1,31 @@
+## `port_addr_remove()`
+
+Removes an address from the local port.
+
+### Description
+
+The `port_addr_remove()` function is used to remove an address from the local port. This removes the specified IP address from the list of addresses that the port is bound to.
+
+### Syntax
+
+```rust
+pub fn port_addr_remove<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    ip: WasmPtr<__wasi_addr_t, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `ip`: A WebAssembly pointer to a `__wasi_addr_t` structure that represents the IP address to be removed.
+
+### Return Value
+
+The function returns a `Result` indicating the outcome of the operation. If the operation is successful, `Ok(Errno::Success)` is returned. If an error occurs, an appropriate `WasiError` is returned.
+
+### Notes
+
+- The `port_addr_remove()` function removes the specified IP address from the list of addresses that the local port is bound to.
+- The `__wasi_addr_t` structure represents an IP address. It contains a single field `ip` for the IP address.
+- The behavior and limitations of the `port_addr_remove()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

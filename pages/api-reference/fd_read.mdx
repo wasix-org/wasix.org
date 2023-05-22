@@ -1,0 +1,44 @@
+## `fd_read()`
+
+Read data from a file descriptor.
+
+### Description
+
+The `fd_read()` function is used to read data from a file identified by the provided file descriptor (`fd`). It takes an array of `__wasi_iovec_t` structures (`iovs`) describing the buffers where the data will be stored, the number of vectors (`iovs_len`) in the `iovs` array, and a pointer to store the number of bytes read. The function reads data from the file into the specified buffers and returns the number of bytes read.
+
+In POSIX systems, reading data from a file typically involves updating the file cursor, which determines the next position from which data will be read. The `fd_read()` function allows reading data from a file without modifying the file cursor's position. This can be useful in scenarios where applications need to read data from a specific location in a file without altering the cursor's state.
+
+### Syntax
+
+```rust
+pub fn fd_read<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    iovs: WasmPtr<__wasi_iovec_t<M>, M>,
+    iovs_len: M::Offset,
+    nread: WasmPtr<M::Offset, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor of the file to read from.
+- `iovs`: A pointer to an array of `__wasi_iovec_t` structures describing the buffers where the data will be stored.
+- `iovs_len`: The number of vectors (`__wasi_iovec_t`) in the `iovs` array.
+- `nread`: A pointer to store the number of bytes read.
+
+### Return Value
+
+The function returns a `Result` indicating the success or failure of the operation. If successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `%fd`: The file descriptor being read from.
+- `?nread`: The number of bytes read.
+
+### Note
+
+The `fd_read()` function allows reading data from a file identified by the file descriptor `fd`. It takes the file descriptor, an array of buffers where the data will be stored, the number of vectors in the `iovs` array, and a pointer to store the number of bytes read. The function reads data from the file into the specified buffers without modifying the file cursor's position. It returns an error code to indicate the success or failure of the operation. If the data is successfully read from the file, it returns `Errno::Success`. Otherwise, it returns an appropriate error code.

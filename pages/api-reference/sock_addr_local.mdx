@@ -1,0 +1,35 @@
+## `sock_addr_local()`
+
+Returns the local address to which the socket is bound.
+
+### Description
+
+The `sock_addr_local()` function retrieves the local address to which the socket identified by the file descriptor `sock` is bound and stores the address in the `ret_addr` memory location.
+
+### Syntax
+
+```rust
+pub fn sock_addr_local<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    ret_addr: WasmPtr<__wasi_addr_port_t, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The file descriptor of the socket.
+- `ret_addr`: A WebAssembly pointer to a memory location where the local address will be stored.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `sock_addr_local()` function retrieves the local address to which the socket identified by the file descriptor `sock` is bound.
+- The local address consists of an IP address (either IPv4 or IPv6) and a port number.
+- The local address is stored in the `ret_addr` memory location, which should be a `WasmPtr<__wasi_addr_port_t>` pointing to a writable memory region.
+- The function `sock_addr_local()` is similar to the `getsockname` function in POSIX.
+- The behavior and limitations of the `sock_addr_local()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

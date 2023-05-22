@@ -1,0 +1,42 @@
+## `path_create_directory()`
+
+Create a directory at a path.
+
+### Description
+
+The `path_create_directory()` function creates a new directory at the specified path relative to the given directory. It requires the `PATH_CREATE_DIRECTORY` right to be set on the directory where the new directory will be created.
+
+On POSIX systems, a similar functionality is provided by the `mkdir()` function. It creates a new directory with the given name and the specified permission mode. The `mkdir()` function is part of the POSIX standard and is widely supported across different platforms.
+
+### Syntax
+
+```rust
+pub fn path_create_directory<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    path: WasmPtr<u8, M>,
+    path_len: M::Offset,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor representing the directory that the path is relative to.
+- `path`: A wasm pointer to a null-terminated string containing the path data.
+- `path_len`: The length of the `path` string.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with trace-level logging. It will log the following information:
+
+- `%fd`: The file descriptor representing the directory.
+- `path`: The path string.
+
+### Note
+
+The `path_create_directory()` function creates a new directory at the specified path relative to the given directory. It checks if the specified directory has the necessary rights and creates the directory accordingly. On POSIX systems, a similar functionality is provided by the `mkdir()` function.

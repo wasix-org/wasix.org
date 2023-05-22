@@ -1,0 +1,36 @@
+## `sock_join_multicast_v4()`
+
+Joins a particular multicast IPv4 group.
+
+### Description
+
+The `sock_join_multicast_v4()` function allows a socket to join a specified multicast IPv4 group on a specific interface.
+
+### Syntax
+
+```rust
+pub fn sock_join_multicast_v4<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    sock: WasiFd,
+    multiaddr: WasmPtr<__wasi_addr_ip4_t, M>,
+    iface: WasmPtr<__wasi_addr_ip4_t, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `sock`: The socket descriptor.
+- `multiaddr`: A WebAssembly pointer to the IPv4 multicast group to be joined.
+- `iface`: A WebAssembly pointer to the IPv4 interface to join the multicast group.
+
+### Return Value
+
+The function returns an `Errno` value indicating the outcome of the operation. If the operation is successful, `Errno::Success` is returned. If an error occurs, an appropriate `Errno` value is returned.
+
+### Notes
+
+- The `sock_join_multicast_v4()` function allows a socket to join a specified multicast IPv4 group on a specific interface.
+- The `multiaddr` parameter specifies the IPv4 multicast group to join.
+- The `iface` parameter specifies the IPv4 interface on which to join the multicast group.
+- The behavior and limitations of the `sock_join_multicast_v4()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

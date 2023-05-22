@@ -1,0 +1,35 @@
+## `port_addr_list()`
+
+Returns a list of all the addresses owned by the local port. This function fills the output buffer as much as possible. If the buffer is not big enough, the `naddrs` address will be filled with the buffer size needed, and `EOVERFLOW` will be returned.
+
+### Description
+
+The `port_addr_list()` function retrieves a list of all the IP addresses owned by the local port. It stores the addresses in the provided output buffer `addrs_ptr`. The number of addresses returned is stored in the memory location pointed to by `naddrs_ptr`.
+
+### Syntax
+
+```rust
+pub fn port_addr_list<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    addrs_ptr: WasmPtr<__wasi_cidr_t, M>,
+    naddrs_ptr: WasmPtr<M::Offset, M>,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `addrs_ptr`: A `WasmPtr` pointing to the buffer where the addresses will be stored.
+- `naddrs_ptr`: A `WasmPtr` pointing to the memory location where the number of addresses will be stored.
+
+### Return Value
+
+The function returns a `Result` indicating the outcome of the operation. If the operation is successful, `Ok(Errno::Success)` is returned. If the buffer is not big enough to hold all the addresses, `Errno::Overflow` is returned, and the `naddrs` value is filled with the required buffer size. If an error occurs, an appropriate `WasiError` is returned.
+
+### Notes
+
+- The `port_addr_list()` function retrieves a list of all the IP addresses owned by the local port and stores them in the provided buffer.
+- The maximum number of addresses that can be stored in the buffer is determined by the buffer size and the size of the `__wasi_cidr_t` structure.
+- If the buffer size is not large enough to hold all the addresses, the function will fill the `naddrs` value with the required buffer size and return `Errno::Overflow`.
+- It is important to ensure that the output buffer is large enough to accommodate the maximum number of addresses expected.
+- The behavior and limitations of the `port_addr_list()` function may vary depending on the specific runtime environment and underlying networking implementation. It is important to consult the documentation or specifications of the specific environment to understand its behavior in that context.

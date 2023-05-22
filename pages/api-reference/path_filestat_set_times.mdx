@@ -1,0 +1,52 @@
+## `path_filestat_set_times()`
+
+Update time metadata on a file or directory.
+
+### Description
+
+The `path_filestat_set_times()` function allows updating the time metadata (last accessed time and last modified time) for a file or directory specified by a path relative to the given directory.
+
+On POSIX systems, a similar functionality is provided by the `utimensat()` function. It updates the timestamps (access time and modification time) of a file or directory with nanosecond precision.
+
+### Syntax
+
+```rust
+pub fn path_filestat_set_times<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    flags: LookupFlags,
+    path: WasmPtr<u8, M>,
+    path_len: M::Offset,
+    st_atim: Timestamp,
+    st_mtim: Timestamp,
+    fst_flags: Fstflags,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor representing the directory that the `path` is relative to.
+- `flags`: Flags to control how the `path` is understood.
+- `path`: A wasm pointer to a null-terminated string containing the file path.
+- `path_len`: The length of the `path` string.
+- `st_atim`: The timestamp that the last accessed time attribute is set to.
+- `st_mtim`: The timestamp that the last modified time attribute is set to.
+- `fst_flags`: A bitmask controlling which attributes are set.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%fd`: The file descriptor representing the directory.
+- `path`: The path string.
+- `%st_atim`: The last accessed time attribute value.
+- `%st_mtim`: The last modified time attribute value.
+
+### Note
+
+The `path_filestat_set_times()` function allows updating the time metadata (last accessed time and last modified time) for a file or directory specified by a path relative to the given directory. It checks if the specified directory has the necessary rights and updates the timestamps accordingly. On POSIX systems, a similar functionality is provided by the `utimensat()` function.

@@ -1,0 +1,42 @@
+## `path_unlink_file()`
+
+Unlink a file, deleting it if the number of hardlinks is 1.
+
+### Description
+
+The `path_unlink_file()` function unlinks a file at the specified path. If the file has only one hardlink (i.e., its link count is 1), it will be deleted from the file system. It requires the `PATH_UNLINK_FILE` right on the base file descriptor.
+
+On POSIX systems, a similar functionality is provided by the `unlink()` function. It removes the specified file from the file system. If the file has no other hardlinks, it is completely deleted. The `unlink()` function is part of the POSIX standard and is widely supported across different platforms.
+
+### Syntax
+
+```rust
+pub fn path_unlink_file<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    fd: WasiFd,
+    path: WasmPtr<u8, M>,
+    path_len: M::Offset,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `fd`: The file descriptor representing the base directory from which the path is understood.
+- `path`: A wasm pointer to a null-terminated string containing the path of the file to be unlinked.
+- `path_len`: The length of the `path` string.
+
+### Return Value
+
+The function returns an `Errno` value indicating the success or failure of the operation. If the operation is successful, it returns `Errno::Success`. Otherwise, it returns an appropriate `Errno` value.
+
+### Logging
+
+This function has been instrumented with debug-level logging. It will log the following information:
+
+- `%fd`: The file descriptor representing the base directory.
+- `path`: The path string.
+
+### Note
+
+The `path_unlink_file()` function unlinks a file at the specified path, deleting it if the number of hardlinks is 1. It checks the necessary rights on the base file descriptor. On POSIX systems, a similar functionality is provided by the `unlink()` function.

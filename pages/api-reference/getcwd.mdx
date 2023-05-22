@@ -1,0 +1,48 @@
+## `getcwd()`
+
+Returns the current working directory.
+
+### Description
+
+The `getcwd()` function retrieves the current working directory of the process. It returns the absolute path of the current working directory.
+
+In POSIX systems, the current working directory represents the directory in the file system from which the process is currently executing. It is important for applications to know their current working directory to locate files and navigate the file system.
+
+If the size of the buffer provided for the path is insufficient to hold the entire path, the function returns `ERANGE` to indicate that the path has been truncated. This allows the caller to allocate a larger buffer and call the function again to retrieve the full path.
+
+### Syntax
+
+```rust
+pub fn getcwd<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    path: WasmPtr<u8, M>,
+    path_len: WasmPtr<M::Offset, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: The function environment.
+- `path`: A pointer to a buffer where the current working directory path will be written.
+- `path_len`: A pointer to a variable that holds the size of the buffer in bytes.
+
+### Return Value
+
+The function returns an `Errno` value indicating the result of the operation. If the operation is successful, it returns `Errno::Success`. If the provided buffer is too small to hold the entire path, it returns `Errno::Range`.
+
+### Logging
+
+This function is instrumented with `debug` level logging. It includes the following fields for debugging purposes:
+
+- `path`: The current working directory path.
+- `max_path_len`: The maximum length of the path buffer.
+
+### Note
+
+- The `getcwd()` function retrieves the current working directory of the process.
+- It first gets the current directory path from the WASI state.
+- The function then checks if the provided path buffer has enough space to hold the entire path. If not, it returns `Errno::Range`.
+- If the buffer size is sufficient, it writes the current directory path to the buffer and returns `Errno::Success`.
+- If the provided `path` pointer is null or the `path_len` is zero, the function returns `Errno::Inval`.
+
+In POSIX systems, the current working directory is associated with each process and can be changed using the `chdir()` system call. It allows processes to have a different working directory from the directory in which they were started. The `getcwd()` function is part of the POSIX standard and provides a way to retrieve the current working directory of a process. It helps applications to determine their current location in the file system hierarchy and perform file operations relative to that directory.

@@ -1,0 +1,43 @@
+## `proc_signal()`
+
+Sends a signal to a child process.
+
+### Description
+
+The `proc_signal()` function is used to send a signal to a specific child process identified by its PID. The signal specified by the `sig` parameter is sent to the child process, which allows for various forms of inter-process communication and process control.
+
+On POSIX systems, a similar functionality is provided by the `kill()` function. It allows sending a signal to a process or a group of processes identified by their process ID. The `kill()` function is part of the POSIX standard and is widely supported across different platforms.
+
+### Syntax
+
+```rust
+pub fn proc_signal<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    pid: Pid,
+    sig: Signal,
+) -> Result<Errno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `pid`: The PID of the child process to which the signal will be sent.
+- `sig`: The signal to send to the child process.
+
+### Return Value
+
+The function returns a `Result` indicating the success or failure of the operation. If the operation is successful, it returns `Ok(Errno::Success)`. Otherwise, it returns an appropriate `WasiError` value.
+
+### Logging
+
+This function is instrumented with `trace` level logging. It includes the following fields for debugging purposes:
+
+- `pid`: The PID of the child process.
+- `sig`: The signal being sent.
+
+### Notes
+
+- The `proc_signal()` function sends a signal to the child process identified by its PID.
+- If a process with the specified PID is found, the signal specified by the `sig` parameter is sent to that process.
+- On POSIX systems, a similar functionality is provided by the `kill()` function, which allows sending signals to processes identified by their process ID.
+- Sending signals to processes enables inter-process communication and process control. Signals can be used for various purposes, such as terminating a process, handling specific events, or requesting actions from the receiving process.

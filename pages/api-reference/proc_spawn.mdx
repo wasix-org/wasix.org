@@ -1,0 +1,60 @@
+## `proc_spawn()`
+
+Spawns a new process within the context of this machine.
+
+### Description
+
+The `proc_spawn()` function is used to spawn a new process within the context of the current machine. It creates a new process with the specified parameters, such as the process name, arguments, preopens, working directory, and I/O handling. The function returns the bus handles associated with the spawned process.
+
+In POSIX systems, `spawn()` is a common function used to create new processes. It allows specifying various attributes for the new process, such as the program to execute, command-line arguments, environment variables, working directory, file descriptors, and more.
+
+### Syntax
+
+```rust
+pub fn proc_spawn<M: MemorySize>(
+    mut ctx: FunctionEnvMut<'_, WasiEnv>,
+    name: WasmPtr<u8, M>,
+    name_len: M::Offset,
+    chroot: Bool,
+    args: WasmPtr<u8, M>,
+    args_len: M::Offset,
+    preopen: WasmPtr<u8, M>,
+    preopen_len: M::Offset,
+    stdin: WasiStdioMode,
+    stdout: WasiStdioMode,
+    stderr: WasiStdioMode,
+    working_dir: WasmPtr<u8, M>,
+    working_dir_len: M::Offset,
+    ret_handles: WasmPtr<BusHandles, M>,
+) -> Result<BusErrno, WasiError>
+```
+
+### Parameters
+
+- `ctx`: A mutable reference to the function environment.
+- `name`: Name of the process to be spawned.
+- `name_len`: Length of the name parameter.
+- `chroot`: Indicates if the process will chroot or not.
+- `args`: List of the arguments to pass the process (entries are separated by line feeds).
+- `args_len`: Length of the args parameter.
+- `preopen`: List of the preopens for this process (entries are separated by line feeds).
+- `preopen_len`: Length of the preopen parameter.
+- `stdin`: How stdin will be handled.
+- `stdout`: How stdout will be handled.
+- `stderr`: How stderr will be handled.
+- `working_dir`: Working directory where this process should run (passing '.' will use the current directory).
+- `working_dir_len`: Length of the working_dir parameter.
+- `ret_handles`: Pointer to store the returned bus handles.
+
+### Return Value
+
+The function returns `Result<BusErrno, WasiError>`. If the operation is successful, it returns `Ok(BusErrno::Success)`. Otherwise, it returns an appropriate `BusErrno` or `WasiError` value.
+
+### Note
+
+- The `proc_spawn()` function is used to create a new process within the context of the current machine.
+- It supports various attributes for the new process, such as the process name, arguments, preopens, working directory, and I/O handling.
+- The function returns the bus handles associated with the spawned process, which can be used to invoke further calls on the process.
+- If `chroot` is set to `Bool::True`, indicating a chroot operation, a warning message will be logged as chroot is not currently supported.
+- After spawning the process, the function stores the bus handles in the specified `ret_handles` pointer.
+- The function calls `WasiEnv::process_signals_and_exit()` to process any pending signals and handle process termination if necessary.

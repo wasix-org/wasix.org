@@ -1,0 +1,37 @@
+## `tty_set()`
+
+Updates the properties of the TTY.
+
+### Description
+
+The `tty_set()` function is used to update the properties of the terminal (TTY). It allows modifying TTY settings such as echo, line buffering, and line feed behavior.
+
+This function is typically used in interactive applications that need to change the behavior of the terminal, such as enabling or disabling echo, enabling or disabling line buffering, or modifying line feed behavior.
+
+### Syntax
+
+```rust
+pub fn tty_set<M: MemorySize>(
+    ctx: FunctionEnvMut<'_, WasiEnv>,
+    tty_state: WasmPtr<Tty, M>,
+) -> Errno
+```
+
+### Parameters
+
+- `ctx`: The function environment.
+- `tty_state`: A pointer to a `Tty` structure containing the new TTY state.
+
+### Return Value
+
+The function returns an `Errno` value indicating the result of the operation. If the operation is successful, it returns `Errno::Success`. If the TTY is not supported, it returns `Errno::Notsup`.
+
+### Note
+
+- The `tty_set()` function updates the properties of the TTY.
+- It checks if the TTY is available in the runtime. If it is not available, indicating that the program is not running in an interactive terminal, it returns `Errno::Notsup`.
+- If the TTY is available, it reads the `Tty` structure from the memory specified by the `tty_state` pointer.
+- It extracts the relevant TTY properties such as `echo`, `line_buffered`, and `line_feeds`.
+- The function then constructs a `WasiTtyState` structure with the updated TTY properties.
+- Finally, it calls the `tty_set()` method on the TTY bridge with the new TTY state to update the terminal properties.
+- If the operation is successful, it returns `Errno::Success`.
