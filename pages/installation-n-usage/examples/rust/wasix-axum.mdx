@@ -1,7 +1,249 @@
-# Wasix with Axum
+## WASIX with Axum
 
-import { Callout } from "nextra-theme-docs";
+This is a sample project that shows how to use Axum with the WASIX toolchain.
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this example
+### Prerequisites
+
+The project requires the following tools to be installed on your system:
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [WASIX](TODO: link to WASIX Installation with RUST)
+
+import { Steps } from "nextra-theme-docs";
+import { Callout, FileTree } from "nextra-theme-docs";
+
+<Steps>
+
+### Start a new project
+
+```shell
+$ cargo new --bin wasix-axum
+     Created binary (application) `wasix-axum` package
+```
+
+Your `wasix-axum` directory structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="wasix-axum" defaultOpen>
+    <FileTree.Folder name="src" defaultOpen>
+      <FileTree.File name="main.rs" />
+    </FileTree.Folder>
+    <FileTree.File name=".gitignore" />
+    <FileTree.File name="Cargo.toml" />
+  </FileTree.Folder>
+</FileTree>
+
+### Add dependencies
+
+```shell
+$ cd wasix-axum
+$ cargo add axum --features tokio
+$ cargo add tokio --features full
+```
+
+Now your `Cargo.toml` should look like this:
+
+```toml filename="Cargo.toml"
+[package]
+name = "wasix-axum"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "0.6.18", features = ["tokio"] }
+tokio = { version = "1.28.1", features = ["full"] }
+```
+
+### Writing the Application
+
+#### Basic Application Setup
+
+Now, let's stub out a basic `get` route that returns a string using a `handler` function.
+
+```rust copy filename="src/main.rs"
+use axum::{routing::get, Router};
+use std::net::SocketAddr;
+
+#[tokio::main]
+async fn main() {
+    // Building our application with a single Route
+    let app = Router::new().route("/", get(handler));
+
+    // Run the server with hyper on http://127.0.0.1:3000
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+    axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .await
+        .unwrap();
+}
+
+async fn handler() -> &'static str {
+    "Hello, Axum ❤️ WASIX!"
+}
+
+```
+
+#### Running the Application
+
+Run the application with the `cargo`:
+
+```shell
+$ cargo run
+   Compiling wasix-axum v0.1.0 (/wasix-axum)
+    Finished dev [unoptimized + debuginfo] target(s) in 1.41s
+     Running `target/debug/wasix-axum`
+```
+
+Now in a separate terminal, you can use `curl` to make a request to the server:
+
+```shell
+$ curl http://127.0.0.1:3000
+Hello, Axum ❤️ WASIX!%
+```
+
+Hmm, but let's see does it work with wasix ? Let's try to build it with wasix:
+
+```shell
+$ cargo wasix build
+...
+    ::: .cargo/registry/src/index.crates.io/socket2-0.4.9/src/lib.rs:104:16
+     |
+104  |             fn from(socket: $from) -> $for {
+     |                ---- implicitly returns `()` as its body has no tail or `return` expression
+
+Some errors have detailed explanations: E0061, E0308, E0412, E0422, E0425, E0432, E0433, E0583, E0618.
+For more information about an error, try `rustc --explain E0061`.
+error: could not compile `socket2` (lib) due to 202 previous errors
+warning: build failed, waiting for other jobs to finish..
+...
+```
+
+Oh no, it doesn't work. But why ?
+TODO: Write here an explaination about why it doesn't work. @dynamite-bud
+
+#### Compiling with WASIX
+
+<Callout type="info" emoji="ℹ️">
+  For making certain features such as networking, sockets, threading, etc. work
+  with wasix we need patch dependencies for some crates that use those features.
 </Callout>
+
+Let's add the following patch to our `Cargo.toml`:
+
+```toml copy filename="Cargo.toml"
+[package]
+name = "wasix-axum"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "=0.6.9", features = ["tokio"] } # ← Updated Line
+tokio = { version = "=1.24.2", default-features = false, features = ["full"] } # ← Updated Line
+parking_lot = { version = "=0.12.1", features = ["nightly"] } # ← Added Line
+
+[patch.crates-io]
+socket2 = { git = "https://github.com/john-sharratt/socket2.git", branch = "v0.4.7" } # ← Added Line
+libc = { git = "https://github.com/john-sharratt/libc.git" } # ← Added Line
+tokio = { git = "https://github.com/john-sharratt/tokio.git", branch = "wasix-1.24.2" } # ← Added Line
+```
+
+<Callout type="info" emoji="ℹ️">
+  As you can see above the `parking_lot` crate works out of the box 🚀 with
+  wasix. It just needs the `nightly` feature to be enabled.
+</Callout>
+
+<Callout type="warning" emoji="🚧">
+  We need to pin and replace some dependencies to achieve wasix compatibility.
+  So, currently supported axum version is `0.6.9` and tokio version is `1.24.2`.
+</Callout>
+
+Now, let's try to build it with wasix again:
+
+```shell
+$ cargo wasix build
+    Blocking waiting for file lock on package cache
+    Updating crates.io index
+    Blocking waiting for file lock on package cache
+    Blocking waiting for file lock on package cache
+   Compiling tokio v1.24.2 (https://github.com/john-sharratt/tokio.git?branch=wasix-1.24.2#8ba16a72)
+   Compiling tower v0.4.13
+   Compiling hyper v0.14.26
+   Compiling tower-http v0.4.0
+   Compiling axum v0.6.9
+   Compiling wasix-axum v0.1.0 (/wasix-axum)
+    Finished dev [unoptimized + debuginfo] target(s) in 14.63s
+info: Post-processing WebAssembly files
+```
+
+Yay, it builds! Now, let's try to run it:
+
+<Callout type="error" emoji="🚨">
+  It could happen that the above command might fail for you, this is because of
+  dependencies not resolving correctly. You can easily fix this by running
+  `cargo update` and then running `cargo wasix build` again.
+</Callout>
+
+```shell
+$ cargo wasix run
+    Finished dev [unoptimized + debuginfo] target(s) in 0.23s
+     Running `/Users/xorcist/.cargo/bin/cargo-wasix target/wasm32-wasmer-wasi/debug/wasix-axum.wasm`
+info: Post-processing WebAssembly files
+     Running `target/wasm32-wasmer-wasi/debug/wasix-axum.wasm`
+thread 'main' panicked at 'error binding to 127.0.0.1:3000: error creating server listener: Not supported (os error 58)', .cargo/registry/src/index.crates.io-/hyper-0.14.26/src/server/server.rs:79:13
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: failed to run `target/wasm32-wasmer-wasi/debug/wasix-axum.wasm`
+╰─▶ 1: RuntimeError: unreachable
+error: failed to execute "wasmer" "--enable-threads" "--" "target/wasm32-wasmer-wasi/debug/wasix-axum.wasm"
+    status: exit status: 134
+```
+
+<Callout type="warning" emoji="🚧">
+  TODO: Currently, we need to run it using `wasmer run`. See the
+  [issue](https://github.com/wasmerio/cargo-wasix/issues/13)
+</Callout>
+
+Let's try to run it with wasmer:
+
+```shell copy
+$ wasmer run target/wasm32-wasmer-wasi/debug/wasix-axum.wasm --net --enable-threads
+```
+
+Let's go through the flags we used above:
+
+1. `--net` - This flag enables networking support for wasm files.
+2. `--enable-threads` - This flag enables threading support for wasm files.
+
+Now in a separate terminal, you can use `curl` to make a request to the server:
+
+```shell
+$ curl http://localhost:3000
+Hello, Axum ❤️ WASIX!%
+```
+
+Yay, it works! 🎉
+
+</Steps>
+
+## Conclusion
+
+In this tutorial, we learned:
+
+- How to build a simple web server using axum and **compile it with wasix**.
+- How to **patch** dependencies add WASIX support until changes are adopted upstream.
+- How to run wasix based `.wasm` files with **Wasmer**.
+- How to enable **networking** and **threading** support for wasm files.
+
+import { Card, Cards } from "nextra-theme-docs";
+
+<Card
+  icon={
+    <svg viewBox="0 0 24 24" className=" transform scale-[120%] mr-2">
+      <path
+        fill="currentColor"
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
+    </svg>
+  }
+  title="Check the example code"
+  href="https://www.github.com/"
+/>

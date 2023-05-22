@@ -1,0 +1,162 @@
+## Threading with WASIX
+
+This is a sample project that shows how to use features such as threading and sleep in WASIX.
+
+### Prerequisites
+
+The project requires the following tools to be installed on your system:
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [WASIX](TODO: link to WASIX Installation with RUST)
+
+import { Steps } from "nextra-theme-docs";
+import { Callout, FileTree } from "nextra-theme-docs";
+
+<Steps>
+
+### Start a new project
+
+```shell
+$ cargo new --bin wasix-threading
+     Created binary (application) `wasix-threading` package
+```
+
+Your `wasix-threading` directory structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="wasix-threading" defaultOpen>
+    <FileTree.Folder name="src" defaultOpen>
+      <FileTree.File name="main.rs" />
+    </FileTree.Folder>
+    <FileTree.File name=".gitignore" />
+    <FileTree.File name="Cargo.toml" />
+  </FileTree.Folder>
+</FileTree>
+
+Your `Cargo.toml` should look like this:
+
+```toml copy filename="Cargo.toml"
+[package]
+name = "wasix-threading"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+```
+
+### Writing the Application
+
+#### Basic Application Setup
+
+We will write a basic threading example from the [Rust Book](https://doc.rust-lang.org/book/ch16-01-threads.html).
+
+Let's write code for the above:
+
+```rust copy filename="src/main.rs"
+use std::thread;
+use std::time::Duration;
+
+fn main() {
+    let handle = thread::spawn(|| {
+        for i in 1..10 {
+            println!("hi number {} from the spawned thread!", i);
+            thread::sleep(Duration::from_millis(1));
+        }
+    });
+
+    for i in 1..5 {
+        println!("hi number {} from the main thread!", i);
+        thread::sleep(Duration::from_millis(1));
+    }
+
+    handle.join().unwrap();
+}
+```
+
+Breakdown of main function:
+
+- `thread::spawn` creates a new thread and returns a `JoinHandle` for it.
+- `thread::sleep` is used to sleep the thread for a given duration.
+- `handle.join()` waits for the thread to finish.
+
+#### Running the Application
+
+Run the application with the `cargo`:
+
+```shell
+$ cargo run
+   Compiling wasix-threading v0.1.0 (/wasix-threading)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.04s
+     Running `target/debug/wasix-threading`
+hi number 1 from the main thread!
+hi number 1 from the spawned thread!
+hi number 2 from the spawned thread!
+hi number 2 from the main thread!
+hi number 3 from the main thread!
+hi number 3 from the spawned thread!
+hi number 4 from the main thread!
+hi number 4 from the spawned thread!
+hi number 5 from the spawned thread!
+hi number 6 from the spawned thread!
+hi number 7 from the spawned thread!
+hi number 8 from the spawned thread!
+hi number 9 from the spawned thread!
+all done
+```
+
+#### Compiling with WASIX
+
+Let's compile it with `wasix` now.
+
+```shell
+$ cargo wasix build
+   Compiling wasix-threading v0.1.0 (/wasix-threading)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.73s
+info: Post-processing WebAssembly files
+```
+
+It builds! Now, let's try to run it:
+
+```shell
+$ cargo wasix run
+    Finished dev [unoptimized + debuginfo] target(s) in 0.09s
+     Running `cargo-wasix target/wasm32-wasmer-wasi/debug/wasix-threading.wasm`
+info: Post-processing WebAssembly files
+     Running `target/wasm32-wasmer-wasi/debug/wasix-threading.wasm`
+hi number 1 from the main thread!
+hi number 1 from the spawned thread!
+hi number 2 from the main thread!
+hi number 2 from the spawned thread!
+hi number 3 from the main thread!
+hi number 3 from the spawned thread!
+hi number 4 from the main thread!
+hi number 4 from the spawned thread!
+hi number 5 from the spawned thread!
+hi number 6 from the spawned thread!
+hi number 7 from the spawned thread!
+hi number 8 from the spawned thread!
+hi number 9 from the spawned thread!
+```
+
+Yay, it works! 🎉
+
+</Steps>
+
+## Conclusion
+
+In this tutorial, we saw that thread `spawn` and `sleep` work flawlessly in `wasix`.
+
+import { Card, Cards } from "nextra-theme-docs";
+
+<Card
+  icon={
+    <svg viewBox="0 0 24 24" className=" transform scale-[120%] mr-2">
+      <path
+        fill="currentColor"
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
+    </svg>
+  }
+  title="Check the example code"
+  href="https://www.github.com/"
+/>

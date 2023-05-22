@@ -1,7 +1,266 @@
-# Using Conditional Variable Example
+## Condvar with WASIX
 
-import { Callout } from "nextra-theme-docs";
+This sample project demonstrates condvar to synchronize threads.
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this example
+**Condvar** stands for "condition variable," which is a synchronization primitive in many threading systems, including Rust. It's part of Rust's standard library in the `std::sync` module. In this tutorial, we'll learn how condvar can be used to synchronize threads, and then build the same program with WASIX.
+
+### Prerequisites
+
+The project requires the following tools to be installed on your system:
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [WASIX](TODO: link to WASIX Installation with RUST)
+
+import { Steps } from "nextra-theme-docs";
+import { Callout, FileTree } from "nextra-theme-docs";
+
+<Steps>
+
+### Start a new project
+
+```shell
+$ cargo new --bin wasix-condvar
+     Created binary (application) `wasix-condvar` package
+```
+
+Your `wasix-condvar` directory structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="wasix-condvar" defaultOpen>
+    <FileTree.Folder name="src" defaultOpen>
+      <FileTree.File name="main.rs" />
+    </FileTree.Folder>
+    <FileTree.File name=".gitignore" />
+    <FileTree.File name="Cargo.toml" />
+  </FileTree.Folder>
+</FileTree>
+
+Your `Cargo.toml` should look like this:
+
+```toml filename="Cargo.toml"
+[package]
+name = "wasix-condvar"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+```
+
+### Writing the Application
+
+#### Basic Application Setup
+
+We will create a condvar and a mutex to synchronize threads. We will spawn a thread that will sleep for 1 second and then notify the condvar. The main thread instantiates a loop which will wait for the condvar to be notified.
+
+Let's write code for the above:
+
+```rust copy filename="src/main.rs"
+use std::{
+    sync::{Arc, Condvar, Mutex},
+    thread,
+    time::Duration,
+};
+
+/// Inside of our lock, spawn a new thread, and then wait for it to start.
+fn main() {
+    // create a condvar, which is a shared object that threads can use to wait for another thread to wake them up.
+    let pair = Arc::new((Mutex::new(false), Condvar::new()));
+
+    // We enter a lock
+    let (lock, cvar) = &*pair;
+
+    // acquire the lock on the boolean
+    let mut started = lock.lock().unwrap();
+
+    println!("condvar-secondary thread spawn");
+    {
+        let pair = Arc::clone(&pair);
+        thread::spawn(move || {
+            {
+                println!("condvar-secondary thread started");
+                let (lock, cvar) = &*pair;
+
+                //sleep the secondary thread for 1 second so that the main thread can wait for it
+                println!("condvar-secondary thread sleep(1sec) start");
+                thread::sleep(Duration::from_secs(1));
+                println!("condvar-secondary thread sleep(1sec) end");
+
+                // acquire the lock on the boolean and
+                let mut started = lock.lock().unwrap();
+                *started = true;
+                println!("condvar-secondary thread set condition");
+                // We notify the condvar that the value has changed.
+                cvar.notify_one();
+                println!("condvar-secondary thread notify");
+            }
+            thread::sleep(Duration::from_millis(50));
+            println!("condvar-secondary thread exit");
+        });
+    }
+    thread::sleep(Duration::from_millis(100));
+
+    // Wait for the thread to start up.
+    println!("condvar-main loop");
+
+    // check the boolean value and if it is false, wait for the condvar to be notified
+    while !*started {
+        println!("condvar-main wait");
+        // We wait for the condvar to be notified.
+        started = cvar.wait(started).unwrap();
+        println!("condvar-main woken");
+    }
+    println!("condvar-main parent done");
+
+    // sleep for 1 second so that the secondary thread can exit
+    thread::sleep(Duration::from_millis(100));
+
+    println!("all done");
+}
+
+
+```
+
+#### Running the Application
+
+Run the application with the `cargo`:
+
+```shell
+$ cargo run
+   Compiling wasix-condvar v0.1.0 (/wasix-condvar)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.48s
+     Running `target/debug/wasix-condvar`
+condvar-secondary thread spawn
+condvar-secondary thread started
+condvar-secondary thread sleep(1sec) start
+condvar-main loop
+condvar-main wait
+condvar-secondary thread sleep(1sec) end
+condvar-secondary thread set condition
+condvar-secondary thread notify
+condvar-main woken
+condvar-main parent done
+condvar-secondary thread exit
+all done
+```
+
+Let's try to build this example with WASIX.
+
+#### Compiling with WASIX
+
+```shell
+$ cargo wasix build
+   Compiling wasix-condvar v0.1.0 (/wasix-condvar)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.29s
+info: Post-processing WebAssembly files
+```
+
+It builds! Now, let's try to run it:
+
+```shell
+$ cargo wasix run
+    Finished dev [unoptimized + debuginfo] target(s) in 0.00s
+     Running `cargo-wasix target/wasm32-wasmer-wasi/debug/wasix-condvar.wasm`
+info: Post-processing WebAssembly files
+     Running `target/wasm32-wasmer-wasi/debug/wasix-condvar.wasm`
+condvar-secondary thread spawn
+condvar-secondary thread started
+condvar-secondary thread sleep(1sec) start
+condvar-main loop
+condvar-main wait
+condvar-secondary thread sleep(1sec) end
+condvar-secondary thread set condition
+condvar-secondary thread notify
+condvar-main woken
+condvar-main parent done
+condvar-secondary thread exit
+all done
+```
+
+Yay, it works! 🎉
+
+#### Does it works with WASI?
+
+Let's try to build the same application with WASI:
+
+<Callout type="info" emoji="ℹ️">
+  You might need to install wasi as a target for your system using `rustup
+  target add wasm32-wasi`.
 </Callout>
+
+```shell
+$ cargo build --target wasm32-wasi
+   Compiling wasix-condvar v0.1.0 (/wasix-condvar)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.67s
+```
+
+It builds! Now, let's try to run it:
+
+1. Using `wasmer`:
+
+```shell
+$wasmer target/wasm32-wasi/debug/wasix-condvar.wasm --enable-all
+condvar-secondary thread spawn
+thread 'main' panicked at 'failed to spawn thread: Error { kind: Unsupported, message: "operation not supported on this platform" }', /rustc/7908a1d65496b88626e4b7c193c81d777005d6f3/library/std/src/thread/mod.rs:683:29
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+error: failed to run `target/wasm32-wasi/debug/wasix-condvar.wasm`
+╰─▶ 1: RuntimeError: unreachable
+```
+
+2. Using `wasmtime`:
+
+```shell
+$ wasmtime target/wasm32-wasi/debug/wasix-condvar.wasm --wasm-features all
+condvar-secondary thread spawn
+thread 'main' panicked at 'failed to spawn thread: Error { kind: Unsupported, message: "operation not supported on this platform" }', /rustc/7908a1d65496b88626e4b7c193c81d777005d6f3/library/std/src/thread/mod.rs:683:29
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+Error: failed to run main module `target/wasm32-wasi/debug/wasix-condvar.wasm`
+
+Caused by:
+    0: failed to invoke command default
+    1: error while executing at wasm backtrace:
+           0: 0xf51b - <unknown>!__rust_start_panic
+           1: 0xf23b - <unknown>!rust_panic
+           2: 0xf20e - <unknown>!std::panicking::rust_panic_with_hook::hb6c4238e5a98e6ff
+           3: 0xe1d6 - <unknown>!std::panicking::begin_panic_handler::{{closure}}::h86b4a68243584c88
+           4: 0xe100 - <unknown>!std::sys_common::backtrace::__rust_end_short_backtrace::hae24bf3ad5d55f98
+           5: 0xe8eb - <unknown>!rust_begin_unwind
+           6: 0x13f6f - <unknown>!core::panicking::panic_fmt::haad5666f18c11649
+           7: 0x15501 - <unknown>!core::result::unwrap_failed::hc92bb94ce7f212ab
+           8: 0x1b5f - <unknown>!std::thread::spawn::h7f61a4092607114f
+           9: 0x692a - <unknown>!wasix_condvar::main::h0f9742bbd1eccea0
+          10: 0x2b26 - <unknown>!core::ops::function::FnOnce::call_once::h2eacb91305e287b4
+          11:  0xc3b - <unknown>!std::sys_common::backtrace::__rust_begin_short_backtrace::h7a4e994fb8688e77
+          12: 0x6713 - <unknown>!std::rt::lang_start::{{closure}}::h8fd988fc0a170a71
+          13: 0xb1e6 - <unknown>!std::rt::lang_start_internal::h56b23c8d718bfa7e
+          14: 0x66b0 - <unknown>!std::rt::lang_start::h92986fb925c8daf9
+          15: 0x6bf7 - <unknown>!__main_void
+          16:  0x465 - <unknown>!_start
+       note: using the `WASMTIME_BACKTRACE_DETAILS=1` environment variable may show more debugging information
+    2: wasm trap: wasm `unreachable` instruction executed
+```
+
+It doesn't work! 😢. Currently, with wasm32-wasi - TODO: write something about why it doesn't work @theduke.
+
+</Steps>
+
+## Conclusion
+
+In this tutorial we learned:
+
+- How to use condvar to synchronize threads.
+- TODO - write more points
+
+import { Card, Cards } from "nextra-theme-docs";
+
+<Card
+  icon={
+    <svg viewBox="0 0 24 24" className=" transform scale-[120%] mr-2">
+      <path
+        fill="currentColor"
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
+    </svg>
+  }
+  title="Check the example code"
+  href="https://www.github.com/"
+/>
