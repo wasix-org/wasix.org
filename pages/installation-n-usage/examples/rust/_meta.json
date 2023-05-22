@@ -4,6 +4,6 @@
   "condvar": "Condition variables",
   "multi-threading": "Multi-threading",
   "http-ok": "TCP HTTP server",
-  "tokio": "Tokio with Wasix",
+  "threading": "Threading with Wasix",
   "unix-pipe": "Unix pipe"
 }
