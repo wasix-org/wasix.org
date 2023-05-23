@@ -25,13 +25,13 @@ const actions = [
     iconBackground: " bg-violet-100 dark:bg-violet-900 dark:bg-opacity-30",
   },
   {
-    title: "Asynchronous",
+    title: "Asynchronous Runtimes Support",
     icon: FaSyncAlt,
     iconForeground: "text-red-500",
     iconBackground: " bg-red-100 dark:bg-red-600 dark:bg-opacity-20",
   },
   {
-    title: "Directory Support",
+    title: "Filesystem Support",
     icon: VscFileSymlinkDirectory,
     iconForeground: "text-yellow-500",
     iconBackground: " bg-yellow-100 dark:bg-yellow-800 dark:bg-opacity-30",
@@ -69,8 +69,8 @@ const actions = [
   {
     title: "Runtime Support",
     icon: BsGearFill,
-    iconForeground: "text-amber-500",
-    iconBackground: " bg-amber-100 dark:bg-amber-800 dark:bg-opacity-40",
+    iconForeground: "text-violet-500",
+    iconBackground: " bg-violet-100 dark:bg-violet-800 dark:bg-opacity-40",
   },
 ];
 
@@ -80,7 +80,7 @@ interface FeatureProps {
 
 export default function Features({ id }: FeatureProps) {
   return (
-    <div id={id} className="h-[100lvh]">
+    <div id={id} className="h-[100slvh]">
       <h2 className="text-7xl font-bold font-sans my-12 ml-4 sm:ml-0 text-black dark:text-white">
         Features
       </h2>
