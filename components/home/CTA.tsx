@@ -2,7 +2,7 @@ import React from "react";
 export default function CTA() {
   return (
     <div className="mb-28">
-      <div className="relative isolate overflow-hidden bg-opacity-90 bg-black dark:bg-white px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
+      <div className="relative isolate overflow-hidden  bg-opacity-100 bg-black dark:bg-opacity-90 dark:bg-white px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
         <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl dark:text-black">
           Get started with Wasix
         </h2>
