@@ -15,6 +15,7 @@ import TantivyLego from "./apps/TantivyLogo";
 import TokioLogo from "./apps/TokioLogo";
 import TowerLogo from "./apps/TowerLogo";
 import TracingLogo from "./apps/TracingLogo";
+import { BsFillHeartFill } from "react-icons/bs";
 import { shuffleArray } from "../utils";
 
 const availableApps = [
@@ -75,16 +76,19 @@ export default function Apps() {
     );
   }, [resolvedTheme]);
   return (
-    <div className="h-[100svh] mt-28">
-      <h2 className="text-7xl font-bold font-sans ml-4 mb-12 sm:ml-0 text-black dark:text-white">
+    <div className="my-28">
+      <h2 className="text-5xl md:text-7xl font-bold font-sans ml-4 mb-12 sm:ml-0 text-black dark:text-white">
         Just works in WASIX
       </h2>
       <div className="flex flex-col mx-4 rounded-md relative">
         {randomMarquees()}
         <div className="absolute w-full md:w-auto left-[50%] top-[50%] -translate-x-[50%] -translate-y-[50%] rounded-2xl backdrop-filter backdrop-blur-xl bg-white bg-opacity-30 dark:bg-black dark:bg-opacity-30 z-10 px-16 py-28">
-          <span className="text-black dark:text-white text-5xl md:whitespace-nowrap">
-            All the apps you love ♥️
-          </span>
+          <p className="text-black dark:text-white text-4xl md:text-5xl md:whitespace-nowrap">
+            All the apps you love{" "}
+            <span className="inline-flex text-black dark:text-white">
+              <BsFillHeartFill className="h-7 w-7" />
+            </span>
+          </p>
         </div>
       </div>
     </div>

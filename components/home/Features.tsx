@@ -81,7 +81,7 @@ interface FeatureProps {
 export default function Features({ id }: FeatureProps) {
   return (
     <div id={id} className="h-[100slvh]">
-      <h2 className="text-7xl font-bold font-sans my-12 ml-4 sm:ml-0 text-black dark:text-white">
+      <h2 className="text-5xl md:text-7xl font-bold font-sans ml-4 mb-12 sm:ml-0 text-black dark:text-white">
         Features
       </h2>
       <div className="flex flex-col space-y-4 mx-4 sm:ml-0 sm:space-y-0 sm:grid sm:grid-cols-4 sm:gap-4 sm:divide-y-0">
