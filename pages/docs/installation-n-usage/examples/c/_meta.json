@@ -1,12 +1,7 @@
 {
-  "epoll": "Epoll",
-  "execve": "Execve",
   "file-copy": "File Copy",
-  "fork-longjmp": "Fork Longjmp",
-  "fork": "Fork",
   "longjmp": "Longjmp",
-  "pipe": "Pipe",
+  "readdir": "Readdir",
   "signal": "Signal",
-  "spawn": "Spawn",
-  "vfork": "Vfork"
+  "spawn": "Spawn"
 }
