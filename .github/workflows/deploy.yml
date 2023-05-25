@@ -54,4 +54,4 @@ jobs:
 
       # Specified the command to run in wasix-docs directory because public dir in top level creates conficts with the next.js
       - name: Publish
-        run: cd wasix-docs && wasmer-deploy publish --publish-package --registry https://registry.wapm.io/graphql --token=${{ secrets.WAPM_IO_TOKEN }} --non-interactive
+        run: cd wasix-docs && wasmer-deploy publish --publish-package --registry https://registry.wapm.io/graphql --token=${{ secrets.WAPM_PROD_TOKEN }} --non-interactive
