@@ -1,7 +1,154 @@
-# Using Signal Example
+## Signals with WASIX
 
-import { Callout } from "nextra-theme-docs";
+This sample project demonstrates how signals work with WASIX.
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this example
+### Prerequisites
+
+The project requires the following tools to be installed on your system:
+
+- [WASIX](TODO: link to WASIX Installation with C)
+- [WASIX SDK](TODO: link to WASIX SDK Installation)
+
+import { Steps } from "nextra-theme-docs";
+import { Callout, FileTree } from "nextra-theme-docs";
+
+<Steps>
+
+### Start a new project
+
+#### Create a new directory for your project:
+
+```shell copy
+$ mkdir wasix-signal
+$ cd wasix-signal
+```
+
+#### Make a new file called signal.c:
+
+```shell copy
+$ touch signal.c
+```
+
+#### Link the SysRoot
+
+<Callout type="error" emoji="🔴">
+  TODO: Write about linking the SysRoot
 </Callout>
+
+### Writing the Application
+
+#### Basic Application Setup
+
+We want to a simple C program that demonstrates how to handle signals in a process. It should set up signal handlers for two signals: `SIGHUP` and `SIGINT`.
+
+Let's write code for the above:
+
+```c copy filename="signal.c"
+#include <stdio.h>
+#include <signal.h>
+#include <unistd.h>
+
+volatile int run = 1; // set to 0 when SIGINT is caught
+
+/*
+ * Signal handler function.
+ * It is called when a signal is delivered to the process.
+ */
+void sig_handler(int signo)
+{
+    // SIGHUP is sent when user closes the terminal
+    if (signo == SIGHUP)
+    {
+        run = 0; // set to 0 to terminate the program
+        printf("received SIGHUP\n");
+    }
+    // SIGINT is sent when user presses Ctrl+C
+    if (signo == SIGINT)
+    {
+        run = 0; // set to 0 to terminate the program
+        printf("received SIGINT\n");
+    }
+}
+
+int main(void)
+{
+    if (signal(SIGINT, sig_handler) == SIG_ERR)
+        printf("\ncan't catch SIGINT\n");
+    if (signal(SIGHUP, sig_handler) == SIG_ERR)
+        printf("\ncan't catch SIGHUP\n");
+
+    /*
+     * Raise a SIGHUP signal.
+     */
+    raise(SIGHUP);
+
+    // A long long wait so that we can easily issue a signal to this process
+    while (run)
+    {
+        printf("running...\n");
+        sleep(1); // sleep for 1 second
+    }
+
+    return 0;
+}
+```
+
+The `main` function sets up the signal handlers using the `signal` function. It then raises a `SIGHUP` signal using the `raise` function. Finally, it enters a loop that prints "running..." every second until the `run` variable is set to 0 by one of the signal handlers.
+
+#### Compiling the Application
+
+Let's compile the application with `clang`:
+
+```shell
+$ clang -o signal signal.c
+```
+
+#### Running the Application
+
+We can run the application with the following command:
+
+```shell
+$ ./signal
+received SIGHUP
+```
+
+As we see the signal is received and the program terminates. But the signal is recieved so fast that we don't see the "running..." message.
+
+#### Let's try to build this example with WASIX.
+
+```shell
+$ (TODO)/path/to/wasix-sdk/clang signal.c --target="wasm32-wasi" -o signal.wasm
+```
+
+It's compiling! Now, let's try to run it:
+
+```shell
+$ wasmer run signal.wasm
+received SIGHUP
+```
+
+It works!
+
+</Steps>
+
+## Conclusion
+
+In this tutorial we learned:
+
+- How to write a simple C program that handles signals
+- Compiling a C program with WASIX
+
+import { Card, Cards } from "nextra-theme-docs";
+
+<Card
+  icon={
+    <svg viewBox="0 0 24 24" className=" transform scale-[120%] mr-2">
+      <path
+        fill="currentColor"
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
+    </svg>
+  }
+  title="Check the example code"
+  href="https://www.github.com/"
+/>

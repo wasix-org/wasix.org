@@ -1,7 +1,210 @@
-# Using File Copy Example
+## File Copying with WASIX
 
-import { Callout } from "nextra-theme-docs";
+This sample project demonstrates how file-copying works using a C program compiled with WASIX.
 
-<Callout type="warning" emoji="🚨">
-  Todo: Write this example
+### Prerequisites
+
+The project requires the following tools to be installed on your system:
+
+- [WASIX](TODO: link to WASIX Installation with C)
+- [WASIX SDK](TODO: link to WASIX SDK Installation)
+
+import { Steps } from "nextra-theme-docs";
+import { Callout, FileTree } from "nextra-theme-docs";
+
+<Steps>
+
+### Start a new project
+
+#### Create a new directory for your project:
+
+```shell copy
+$ mkdir wasix-file-copy
+$ cd wasix-file-copy
+```
+
+#### Make a new file called file-copy.c:
+
+```shell copy
+$ touch file-copy.c
+```
+
+#### Link the SysRoot
+
+<Callout type="error" emoji="🔴">
+  TODO: Write about linking the SysRoot
 </Callout>
+
+### Writing the Application
+
+#### Basic Application Setup
+
+We want to write a program that takes in two arguments from the command line, the source file and the destination file, and copies the contents of the source file to the destination file.
+
+Let's write code for the above:
+
+```c copy filename="file-copy.c"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <errno.h>
+
+int main(int argc, char **argv)
+{
+    /*
+     * Declare variables n and m to be of type ssize_t.
+     */
+    // ssize_t is a signed version of size_t
+    ssize_t n, m;
+    char buf[BUFSIZ];
+
+    /*
+     * If the number of arguments is not 3, print an error message and exit.
+     */
+    if (argc != 3)
+    {
+        fprintf(stderr, "usage: %s <from> <to>\n", argv[0]);
+        exit(1);
+    }
+
+    /*
+     * Open the input file for reading.
+     * If the open fails, print an error message and exit.
+     */
+    int in = open(argv[1], O_RDONLY);
+    if (in < 0)
+    {
+        fprintf(stderr, "error opening input %s: %s\n", argv[1], strerror(errno));
+        exit(1);
+    }
+
+    /*
+     * Open the output file for writing.
+     * If the open fails, print an error message and exit.
+     */
+    int out = open(argv[2], O_WRONLY | O_CREAT, 0660);
+    if (out < 0)
+    {
+        fprintf(stderr, "error opening output %s: %s\n", argv[2], strerror(errno));
+        exit(1);
+    }
+
+    /*
+     * Read from the input file and write to the output file until the read fails.
+     * If the read fails, print an error message and exit.
+     */
+    while ((n = read(in, buf, BUFSIZ)) > 0) // read the input file into the buffer
+    {
+        char *ptr = buf; // create a ptr that points to the buffer
+        while (n > 0)    // while there is still data to be read
+        {
+            m = write(out, ptr, (size_t)n); // write the data from the buffer to the output file
+
+            /*
+             * If the write fails, print an error message and exit.
+             */
+            if (m < 0)
+            {
+                fprintf(stderr, "write error: %s\n", strerror(errno));
+                exit(1);
+            }
+            n -= m;   // decrement the number of bytes left to read
+            ptr += m; // increment the pointer to the buffer
+        }
+    }
+
+    /*
+     * n should be equal to 0 if the read was successful.
+     * so if n is less than 0, print an error message and exit.
+     */
+    if (n < 0)
+    {
+        fprintf(stderr, "read error: %s\n", strerror(errno));
+        exit(1);
+    }
+
+    return EXIT_SUCCESS;
+}
+```
+
+#### Compiling the Application
+
+Let's compile the application with `clang`:
+
+```shell
+$ clang -o file-copy file-copy.c
+```
+
+#### Running the Application
+
+We can run the application with the following command:
+
+```shell
+$ ./file-copy
+usage: ./file-copy <from> <to>
+```
+
+Let's make two files, `input.txt` and `output.txt`:
+
+```shell
+$ touch input.txt
+$ echo "Hello, World!" > input.txt
+$ touch output.txt
+```
+
+Now, let's run the application:
+
+```shell
+$ ./file-copy input.txt output.txt
+```
+
+Let's check the contents of `output.txt`:
+
+```shell
+$ cat output.txt
+Hello, World!
+```
+
+#### Let's try to build this example with WASIX.
+
+```shell
+$ (TODO)/path/to/wasix-sdk/clang file-copy.c --target="wasm32-wasi" -o file-copy.wasm
+```
+
+It's compiling! Now, let's try to run it:
+
+> Don't forget to clean the output file before running the application.
+
+```shell
+$ wasmer run file-copy.wasm input.txt output.txt
+$ cat output.txt
+Hello, World!
+```
+
+It works!
+
+</Steps>
+
+## Conclusion
+
+In this tutorial we learned:
+
+- How to copy a file using C
+- Compiling a C program with WASIX
+
+import { Card, Cards } from "nextra-theme-docs";
+
+<Card
+  icon={
+    <svg viewBox="0 0 24 24" className=" transform scale-[120%] mr-2">
+      <path
+        fill="currentColor"
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
+    </svg>
+  }
+  title="Check the example code"
+  href="https://www.github.com/"
+/>
