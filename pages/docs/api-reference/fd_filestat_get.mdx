@@ -10,14 +10,14 @@ In POSIX systems, file descriptors are used to perform I/O operations on files. 
 
 ### Syntax
 
-```rust
-pub fn fd_filestat_get<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    buf: WasmPtr<Filestat, M>,
-) -> Errno
+```ebnf
+  ;;; Return the attributes of an open file.
+  (@interface func (export "fd_filestat_get")
+    (param $fd $fd)
+    ;;; The buffer where the file's attributes are stored.
+    (result $error (expected $filestat (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

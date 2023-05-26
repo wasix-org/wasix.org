@@ -8,13 +8,16 @@ The `proc_exit()` function is similar to the `exit()` function in POSIX systems.
 
 ### Syntax
 
-```rust
-pub fn proc_exit<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    code: ExitCode,
-) -> Result<(), WasiError>
+```ebnf
+  ;;; the environment.
+  ;;; termination of the program. The meanings of other values is dependent on
+  ;;; Terminate the process normally. An exit code of 0 indicates successful
+  (@interface func (export "proc_exit")
+    ;;; The exit code returned by the process.
+    (param $rval $exitcode)
+    (@witx noreturn)
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -8,14 +8,18 @@ The `clock_res_get()` function is used to retrieve the resolution of the specifi
 
 ### Syntax
 
-```rust
-pub fn clock_res_get<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    clock_id: Snapshot0Clockid,
-    resolution: WasmPtr<Timestamp, M>,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `clock_getres` in POSIX.
+  ;;; return `errno::inval`.
+  ;;; Implementations are required to provide a non-zero value for supported clocks. For unsupported clocks,
+  ;;; Return the resolution of a clock.
+  (@interface func (export "clock_res_get")
+    ;;; The clock for which to return the resolution.
+    (param $id $clockid)
+    ;;; The resolution of the clock, or an error if one happened.
+    (result $error (expected $timestamp (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

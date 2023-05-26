@@ -8,14 +8,18 @@ The `clock_time_set()` function is used to set the time of the specified clock.
 
 ### Syntax
 
-```rust
-pub fn clock_time_set<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    clock_id: Snapshot0Clockid,
-    time: Timestamp,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `clock_settime` in POSIX.
+  ;;; Sets the time value of a clock.
+  (@interface func (export "clock_time_set")
+    ;;; The clock for which to set the time.
+    (param $id $clockid)
+    ;;; The value of the time to be set.
+    (param $timestamp $timestamp)
+    ;;; The time value of the clock.
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.
@@ -36,5 +40,3 @@ This function has been instrumented with trace-level logging. It will log the fo
 ### Note
 
 The `clock_time_set()` function sets the time of the specified clock. The provided time value is in nanoseconds.
-
-Please let me know if there's anything else I can assist you with.

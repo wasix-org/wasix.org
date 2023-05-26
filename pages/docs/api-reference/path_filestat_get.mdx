@@ -10,17 +10,19 @@ On POSIX systems, a similar functionality is provided by the `stat()` or `lstat(
 
 ### Syntax
 
-```rust
-pub fn path_filestat_get<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    flags: LookupFlags,
-    path: WasmPtr<u8, M>,
-    path_len: M::Offset,
-    buf: WasmPtr<Filestat, M>,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `stat` in POSIX.
+  ;;; Return the attributes of a file or directory.
+  (@interface func (export "path_filestat_get")
+    (param $fd $fd)
+    ;;; Flags determining the method of how the path is resolved.
+    (param $flags $lookupflags)
+    ;;; The path of the file or directory to inspect.
+    (param $path string)
+    ;;; The buffer where the file's attributes are stored.
+    (result $error (expected $filestat (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

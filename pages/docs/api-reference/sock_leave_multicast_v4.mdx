@@ -8,15 +8,18 @@ The `sock_leave_multicast_v4()` function allows a socket to leave a specified mu
 
 ### Syntax
 
-```rust
-pub fn sock_leave_multicast_v4<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    multiaddr: WasmPtr<__wasi_addr_ip4_t, M>,
-    iface: WasmPtr<__wasi_addr_ip4_t, M>,
-) -> Errno
+```ebnf
+  ;;; Leaves a particular multicast IPv4 group
+  (@interface func (export "sock_leave_multicast_v4")
+    ;;; Socket descriptor
+    (param $fd $fd)
+    ;;; Multicast group to leave
+    (param $multiaddr (@witx const_pointer $addr_ip4))
+    ;;; Interface that will left
+    (param $interface (@witx const_pointer $addr_ip4))
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

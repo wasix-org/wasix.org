@@ -8,14 +8,20 @@ The `port_addr_list()` function retrieves a list of all the IP addresses owned b
 
 ### Syntax
 
-```rust
-pub fn port_addr_list<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    addrs_ptr: WasmPtr<__wasi_cidr_t, M>,
-    naddrs_ptr: WasmPtr<M::Offset, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; filled with the buffer size needed and the EOVERFLOW will be returned
+  ;;; If the buffer is not big enough then the naddrs address will be
+  ;;; This function fills the output buffer as much as possible.
+  ;;;
+  ;;; Returns a list of all the addresses owned by the local port
+  (@interface func (export "port_addr_list")
+    ;;; The buffer where addresses will be stored
+    (param $addrs (@witx pointer $addr_cidr))
+    (param $naddrs (@witx pointer $size))
+    ;;; The number of addresses returned.
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -10,14 +10,15 @@ This function takes the name of the callback function as input and sets it as th
 
 ### Syntax
 
-```rust
-pub fn callback_signal<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    name: WasmPtr<u8, M>,
-    name_len: M::Offset,
-) -> Result<(), WasiError>
+```ebnf
+  ;;; Registers a callback function for signals
+  (@interface func (export "callback_signal")
+    ;;; Exported function that will be called back when the signal triggers
+    ;;; (must match the callback signature that takes the signal value)
+    ;;; (if this is not specified the default will be "_signal")
+    (param $callback string)
+  )
 ```
-
 ### Parameters
 
 - `ctx`: The function environment.

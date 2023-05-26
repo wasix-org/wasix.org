@@ -10,18 +10,22 @@ The function sends a message using the provided scatter/gather vectors to the sp
 
 ### Syntax
 
-```rust
-pub fn sock_send_to<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    si_data: WasmPtr<__wasi_ciovec_t<M>, M>,
-    si_data_len: M::Offset,
-    _si_flags: SiFlags,
-    addr: WasmPtr<__wasi_addr_port_t, M>,
-    ret_data_len: WasmPtr<M::Offset, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; the data from multiple buffers in the manner of `writev`.
+  ;;; Note: This is similar to `sendto` in POSIX, though it also supports writing
+  ;;; Send a message on a socket to a specific address.
+  (@interface func (export "sock_send_to")
+    (param $fd $fd)
+    ;;; List of scatter/gather vectors to which to retrieve data
+    (param $si_data $ciovec_array)
+    ;;; Message flags.
+    (param $si_flags $siflags)
+    ;;; Address of the socket to send message to
+    (param $addr (@witx const_pointer $addr_port))
+    ;;; Number of bytes transmitted.
+    (result $error (expected $size (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

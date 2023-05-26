@@ -10,14 +10,21 @@ Once the connection is initiated, the socket handle can be polled to wait for da
 
 ### Syntax
 
-```rust
-pub fn sock_connect<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    addr: WasmPtr<__wasi_addr_port_t, M>,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `connect` in POSIX
+  ;;;
+  ;;; the socket status to change which can be queried via 'sock_status'
+  ;;; Polling the socket handle will wait for data to arrive or for
+  ;;; 
+  ;;; Initiate a connection on a socket to the specified address
+  (@interface func (export "sock_connect")
+    ;;; Socket descriptor
+    (param $fd $fd)
+    ;;; Address of the socket to connect to
+    (param $addr (@witx const_pointer $addr_port))
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

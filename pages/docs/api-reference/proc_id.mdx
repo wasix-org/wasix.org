@@ -10,10 +10,12 @@ In POSIX systems, a process ID is a unique identifier assigned to each running p
 
 ### Syntax
 
-```rust
-pub fn proc_id<M: MemorySize>(ctx: FunctionEnvMut<'_, WasiEnv>, ret_pid: WasmPtr<Pid, M>) -> Errno
+```ebnf
+  ;;; Returns the handle of the current process
+  (@interface func (export "proc_id")
+    (result $error (expected $pid (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: The function environment.

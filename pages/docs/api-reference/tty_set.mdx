@@ -10,13 +10,13 @@ This function is typically used in interactive applications that need to change 
 
 ### Syntax
 
-```rust
-pub fn tty_set<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    tty_state: WasmPtr<Tty, M>,
-) -> Errno
+```ebnf
+  ;;; Updates the properties of the the TTY
+  (@interface func (export "tty_set")
+    (param $state (@witx pointer $tty))
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: The function environment.

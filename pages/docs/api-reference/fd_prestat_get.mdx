@@ -10,14 +10,14 @@ The function takes the file descriptor as input and writes the corresponding met
 
 ### Syntax
 
-```rust
-pub fn fd_prestat_get<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    buf: WasmPtr<Prestat, M>,
-) -> Errno
+```ebnf
+  ;;; Return a description of the given preopened file descriptor.
+  (@interface func (export "fd_prestat_get")
+    (param $fd $fd)
+    ;;; The buffer where the description is stored.
+    (result $error (expected $prestat (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

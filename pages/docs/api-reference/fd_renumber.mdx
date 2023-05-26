@@ -8,14 +8,16 @@ The `fd_renumber()` function atomically copies a file descriptor from one locati
 
 ### Syntax
 
-```rust
-pub fn fd_renumber(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    from: WasiFd,
-    to: WasiFd,
-) -> Errno
+```ebnf
+  ;;; would disappear if `dup2()` were to be removed entirely.
+  ;;; This function provides a way to atomically renumber file descriptors, which
+  (@interface func (export "fd_renumber")
+    (param $fd $fd)
+    ;;; The file descriptor to overwrite.
+    (param $to $fd)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

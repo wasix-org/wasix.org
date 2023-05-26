@@ -10,19 +10,22 @@ On POSIX systems, a similar functionality is provided by the `link()` function. 
 
 ### Syntax
 
-```rust
-pub fn path_link<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    old_fd: WasiFd,
-    old_flags: LookupFlags,
-    old_path: WasmPtr<u8, M>,
-    old_path_len: M::Offset,
-    new_fd: WasiFd,
-    new_path: WasmPtr<u8, M>,
-    new_path_len: M::Offset,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `linkat` in POSIX.
+  ;;; Create a hard link.
+  (@interface func (export "path_link")
+    (param $old_fd $fd)
+    ;;; Flags determining the method of how the path is resolved.
+    (param $old_flags $lookupflags)
+    ;;; The source path from which to link.
+    (param $old_path string)
+    ;;; The working directory at which the resolution of the new path starts.
+    (param $new_fd $fd)
+    ;;; The destination path at which to create the hard link.
+    (param $new_path string)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

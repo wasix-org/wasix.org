@@ -10,18 +10,20 @@ On POSIX systems, a similar functionality is provided by the `rename()` function
 
 ### Syntax
 
-```rust
-pub fn path_rename<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    old_fd: WasiFd,
-    old_path: WasmPtr<u8, M>,
-    old_path_len: M::Offset,
-    new_fd: WasiFd,
-    new_path: WasmPtr<u8, M>,
-    new_path_len: M::Offset,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `renameat` in POSIX.
+  ;;; Rename a file or directory.
+  (@interface func (export "path_rename")
+    (param $fd $fd)
+    ;;; The source path of the file or directory to rename.
+    (param $old_path string)
+    ;;; The working directory at which the resolution of the new path starts.
+    (param $new_fd $fd)
+    ;;; The destination path to which to rename the file or directory.
+    (param $new_path string)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

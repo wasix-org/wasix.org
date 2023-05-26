@@ -10,16 +10,21 @@ If the value held by the futex does not match the expected value, the function r
 
 ### Syntax
 
-```rust
-pub fn futex_wait<M: MemorySize + 'static>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    futex_ptr: WasmPtr<u32, M>,
-    expected: u32,
-    timeout: WasmPtr<OptionTimestamp, M>,
-    ret_woken: WasmPtr<Bool, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Returns false on timeout, and true in all other cases.
+  ;;; Returns with EINVAL if the futex doesn't hold the expected value.
+  ;;;
+  ;;; Wait for a futex_wake operation to wake us.
+  (@interface func (export "futex_wait")
+    ;;; Memory location that holds the value that will be checked
+    (param $futex (@witx pointer u32))
+    ;;; Expected value that should be currently held at the memory location
+    (param $expected u32)
+    ;;; Timeout should the futex not be triggered in the allocated time
+    (param $timeout (@witx const_pointer $option_timestamp))
+    (result $error (expected $bool (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -8,13 +8,14 @@ The `fd_close()` function is used to close an open file descriptor. For sockets,
 
 ### Syntax
 
-```rust
-pub fn fd_close(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Note: This is similar to `close` in POSIX.
+  ;;; Close a file descriptor.
+  (@interface func (export "fd_close")
+    (param $fd $fd)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -10,17 +10,19 @@ In POSIX systems, file reading operations typically involve updating the file cu
 
 ### Syntax
 
-```rust
-pub fn fd_pread<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    iovs: WasmPtr<__wasi_iovec_t<M>, M>,
-    iovs_len: M::Offset,
-    offset: Filesize,
-    nread: WasmPtr<M::Offset, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Note: This is similar to `preadv` in Linux (and other Unix-es).
+  ;;; Read from a file descriptor, without using and updating the file descriptor's offset.
+  (@interface func (export "fd_pread")
+    (param $fd $fd)
+    ;;; List of scatter/gather vectors in which to store data.
+    (param $iovs $iovec_array)
+    ;;; The offset within the file at which to read.
+    (param $offset $filesize)
+    ;;; The number of bytes read.
+    (result $error (expected $size (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

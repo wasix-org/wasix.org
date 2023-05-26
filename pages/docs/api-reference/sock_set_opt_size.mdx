@@ -8,15 +8,19 @@ The `sock_set_opt_size()` function sets the size of a specific socket option for
 
 ### Syntax
 
-```rust
-pub fn sock_set_opt_size(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    opt: Sockoption,
-    size: Filesize,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `setsockopt` in POSIX for SO_RCVBUF
+  ;;; Set size of particular option for this socket
+  (@interface func (export "sock_set_opt_size")
+    ;;; Socket descriptor
+    (param $fd $fd)
+    ;;; Socket option to be set
+    (param $sockopt $sock_option)
+    ;;; Buffer size
+    (param $size $filesize)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

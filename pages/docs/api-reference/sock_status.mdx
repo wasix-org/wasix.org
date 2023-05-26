@@ -8,14 +8,13 @@ The `sock_status()` function retrieves the current status of a socket identified
 
 ### Syntax
 
-```rust
-pub fn sock_status<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    ret_status: WasmPtr<Sockstatus, M>,
-) -> Errno
+```ebnf
+  ;;; Returns the current status of a socket
+  (@interface func (export "sock_status")
+    (param $fd $fd)
+    (result $error (expected $sock_status (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

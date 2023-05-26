@@ -10,13 +10,13 @@ This function is analogous to the POSIX `sysconf(_SC_NPROCESSORS_ONLN)` function
 
 ### Syntax
 
-```rust
-pub fn thread_parallelism<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    ret_parallelism: WasmPtr<M::Offset, M>,
-) -> Errno
+```ebnf
+  ;;; number of available cores that can run concurrently
+  ;;; Returns the available parallelism which is normally the
+  (@interface func (export "thread_parallelism")
+    (result $error (expected $size (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -8,10 +8,12 @@ The `port_route_clear()` function clears all the routes in the routing table of 
 
 ### Syntax
 
-```rust
-pub fn port_route_clear(mut ctx: FunctionEnvMut<'_, WasiEnv>) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Clears all the routes in the local port
+  (@interface func (export "port_route_clear")
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

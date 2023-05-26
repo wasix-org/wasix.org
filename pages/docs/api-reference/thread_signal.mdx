@@ -10,14 +10,16 @@ This function is similar to the `signal` function in POSIX, which allows sending
 
 ### Syntax
 
-```rust
-pub fn thread_signal(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    tid: Tid,
-    sig: Signal,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Sends a signal to a specific thread
+  (@interface func (export "thread_signal")
+    ;;; Handle of the thread to send a signal
+    (param $tid $tid)
+    ;;; Signal to send to the thread
+    (param $signal $signal)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -10,18 +10,20 @@ The resolved IP addresses are stored in the output buffer provided by the `addrs
 
 ### Syntax
 
-```rust
-pub fn resolve<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    host: WasmPtr<u8, M>,
-    host_len: M::Offset,
-    port: u16,
-    addrs: WasmPtr<__wasi_addr_t, M>,
-    naddrs: M::Offset,
-    ret_naddrs: WasmPtr<M::Offset, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; This function fills the output buffer as much as possible.
+  (@interface func (export "resolve")
+    ;;; Host to resolve
+    (param $host string)
+    ;;; Port hint (zero if no hint is supplied)
+    (param $port u16)
+    ;;; The buffer where addresses will be stored
+    (param $addrs (@witx pointer $addr))
+    (param $naddrs $size)
+    ;;; The number of IP addresses returned during the DNS resolution.
+    (result $error (expected $size (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

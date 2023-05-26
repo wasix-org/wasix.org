@@ -8,14 +8,14 @@ The `args_sizes_get()` function is used to retrieve the sizes of the command-lin
 
 ### Syntax
 
-```rust
-pub fn args_sizes_get<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    argc: WasmPtr<M::Offset, M>,
-    argv_buf_size: WasmPtr<M::Offset, M>,
-) -> Errno
+```ebnf
+  ;;; Return command-line argument data sizes.
+  (@interface func (export "args_sizes_get")
+    ;;; Returns the number of arguments and the size of the argument string
+    ;;; data, or an error.
+    (result $error (expected (tuple $size $size) (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

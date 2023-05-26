@@ -12,14 +12,14 @@ The `chdir()` function takes a path as input and sets it as the new current work
 
 ### Syntax
 
-```rust
-pub fn chdir<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    path: WasmPtr<u8, M>,
-    path_len: M::Offset,
-) -> Errno
+```ebnf
+  ;;; Sets the current working directory
+  (@interface func (export "chdir")
+    ;;; Path to change the current working directory to
+    (param $path string)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: The function environment.

@@ -11,11 +11,17 @@ This function is similar to the POSIX `pthread_create()` function, which creates
 ### Syntax
 
 ```rust
-pub fn thread_spawn<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    start_ptr: WasmPtr<ThreadStart<M>, M>,
-    ret_tid: WasmPtr<Tid, M>,
-) -> Errno
+  ;;; Creates a new thread by spawning that shares the same
+  ;;; memory address space, file handles and main event loops.
+  ;;; The web assembly process must export function named 'wasi_thread_start'
+  (@interface func (export "thread_spawn_v2")
+    ;;; Pointer to the structure the describes the thread
+    ;;; that is being spawened
+    (param $args (@witx pointer $thread_start))
+    ;;; Returns the thread index of the newly created thread
+    ;;; (indices always start from zero)
+    (result $error (expected $tid (error $errno)))
+  )
 ```
 
 ### Parameters

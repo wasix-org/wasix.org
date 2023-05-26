@@ -10,14 +10,15 @@ This function blocks the calling thread until the specified thread completes its
 
 ### Syntax
 
-```rust
-pub fn thread_join(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    join_tid: Tid,
-) -> Result<Errno, WasiError>
-```
-
-### Parameters
+```ebnf
+  ;;; one until the other finishes
+  ;;; Joins this thread with another thread, blocking this
+  (@interface func (export "thread_join")
+    ;;; Handle of the thread to wait on
+    (param $tid $tid)
+    (result $error (expected (error $errno)))
+  )
+```### Parameters
 
 - `ctx`: A mutable reference to the function environment.
 - `join_tid`: The thread handle (Tid) of the thread to wait on.

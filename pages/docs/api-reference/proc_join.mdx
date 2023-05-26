@@ -10,15 +10,21 @@ On POSIX systems, a similar functionality is provided by the `waitpid()` functio
 
 ### Syntax
 
-```rust
-pub fn proc_join<M: MemorySize + 'static>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    pid_ptr: WasmPtr<OptionPid, M>,
-    _flags: JoinFlags,
-    status_ptr: WasmPtr<JoinStatus, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; the process that exited.
+  ;;; for any subprocess to exit. PID will be populated with
+  ;;; Passing none to PID will mean that the call will wait
+  ;;;
+  ;;; Wait for process to exit
+  (@interface func (export "proc_join")
+    ;;; ID of the process to wait on
+    (param $pid (@witx pointer $option_pid))
+    ;;; Flags that determine how the join behaves
+    (param $flags $join_flags)
+    ;;; Returns the status of the process
+    (result $error (expected $join_status (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

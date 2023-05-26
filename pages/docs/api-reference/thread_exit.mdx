@@ -10,13 +10,17 @@ This function is similar to the POSIX `pthread_exit()` function, which terminate
 
 ### Syntax
 
-```rust
-pub fn thread_exit(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    exitcode: ExitCode,
-) -> Result<(), WasiError>
+```ebnf
+  ;;; other values is dependent on the environment.
+  ;;; of 0 indicates successful termination of the thread. The meanings of
+  ;;; the process will also exit with the specified exit code. An exit code
+  ;;; Terminates the current running thread, if this is the last thread then
+  (@interface func (export "thread_exit")
+    ;;; The exit code returned by the process.
+    (param $rval $exitcode)
+    (@witx noreturn)
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

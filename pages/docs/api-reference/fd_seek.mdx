@@ -8,16 +8,19 @@ The `fd_seek()` function updates the offset of a file descriptor. It allows you 
 
 ### Syntax
 
-```rust
-pub fn fd_seek<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    offset: FileDelta,
-    whence: Whence,
-    newoffset: WasmPtr<Filesize, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Note: This is similar to `lseek` in POSIX.
+  ;;; Move the offset of a file descriptor.
+  (@interface func (export "fd_seek")
+    (param $fd $fd)
+    ;;; The number of bytes to move.
+    (param $offset $filedelta)
+    ;;; The base from which the offset is relative.
+    (param $whence $whence)
+    ;;; The new offset of the file descriptor, relative to the start of the file.
+    (result $error (expected $filesize (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -10,14 +10,15 @@ In POSIX systems, file descriptors are small, non-negative integers used to repr
 
 ### Syntax
 
-```rust
-pub fn fd_fdstat_get<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    buf_ptr: WasmPtr<Fdstat, M>,
-) -> Errno
+```ebnf
+  ;;; Note: This returns similar flags to `fcntl(fd, F_GETFL)` in POSIX, as well as additional fields.
+  ;;; Get the attributes of a file descriptor.
+  (@interface func (export "fd_fdstat_get")
+    (param $fd $fd)
+    ;;; The buffer where the file descriptor's attributes are stored.
+    (result $error (expected $fdstat (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

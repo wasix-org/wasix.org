@@ -10,16 +10,21 @@ On POSIX systems, a similar functionality is provided by the `poll()` function. 
 
 ### Syntax
 
-```rust
-pub fn poll_oneoff<M: MemorySize + 'static>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    in_: WasmPtr<Subscription, M>,
-    out_: WasmPtr<Event, M>,
-    nsubscriptions: M::Offset,
-    nevents: WasmPtr<M::Offset, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; If `nsubscriptions` is 0, returns `errno::inval`.
+  ;;;
+  ;;; Concurrently poll for the occurrence of a set of events.
+  (@interface func (export "poll_oneoff")
+    ;;; The events to which to subscribe.
+    (param $in (@witx const_pointer $subscription))
+    ;;; The events that have occurred.
+    (param $out (@witx pointer $event))
+    ;;; Both the number of subscriptions and events.
+    (param $nsubscriptions $size)
+    ;;; The number of events stored.
+    (result $error (expected $size (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

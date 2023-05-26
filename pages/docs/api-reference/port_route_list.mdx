@@ -8,14 +8,18 @@ The `port_route_list()` function retrieves a list of all the routes in the routi
 
 ### Syntax
 
-```rust
-pub fn port_route_list<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    routes_ptr: WasmPtr<Route, M>,
-    nroutes_ptr: WasmPtr<M::Offset, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; fill nroutes with the size of the buffer needed.
+  ;;; If the buffer is too small this will return EOVERFLOW and
+  ;;; This function fills the output buffer as much as possible.
+  ;;; Returns a list of all the routes owned by the local port
+  (@interface func (export "port_route_list")
+    ;;; The buffer where routes will be stored
+    (param $routes (@witx pointer $route))
+    (param $nroutes (@witx pointer $size))
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

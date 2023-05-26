@@ -8,15 +8,17 @@ The `sock_get_opt_size()` function retrieves the size of a specific socket optio
 
 ### Syntax
 
-```rust
-pub fn sock_get_opt_size<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    opt: Sockoption,
-    ret_size: WasmPtr<Filesize, M>,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `getsockopt` in POSIX for SO_RCVBUF
+  ;;; Retrieve the size of particular option for this socket
+  (@interface func (export "sock_get_opt_size")
+    ;;; Socket descriptor
+    (param $fd $fd)
+    ;;; Socket option to be retrieved
+    (param $sockopt $sock_option)
+    (result $error (expected $filesize (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

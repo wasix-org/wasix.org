@@ -10,13 +10,15 @@ This function is similar to the `raise` function in POSIX, which sends a signal 
 
 ### Syntax
 
-```rust
-pub fn proc_raise(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sig: Signal,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Note: This is similar to `raise` in POSIX.
+  ;;; Send a signal to the process of the calling thread.
+  (@interface func (export "proc_raise")
+    ;;; The signal condition to trigger.
+    (param $sig $signal)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

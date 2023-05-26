@@ -8,15 +8,15 @@ The `fd_event()` function creates a file handle that can be used for event notif
 
 ### Syntax
 
-```rust
-pub fn fd_event<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    initial_val: u64,
-    flags: EventFdFlags,
-    ret_fd: WasmPtr<WasiFd, M>,
-) -> Errno
+```ebnf
+  ;;;
+  ;;; Creates a file handle for event notifications
+  (@interface func (export "fd_event")
+    (param $initial_val u64)
+    (param $flags $eventfdflags)
+    (result $error (expected $fd (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

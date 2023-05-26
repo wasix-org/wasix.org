@@ -8,15 +8,18 @@ The `sock_join_multicast_v6()` function allows a socket to join a specified mult
 
 ### Syntax
 
-```rust
-pub fn sock_join_multicast_v6<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    multiaddr: WasmPtr<__wasi_addr_ip6_t, M>,
-    iface: u32,
-) -> Errno
+```ebnf
+  ;;; Joins a particular multicast IPv6 group
+  (@interface func (export "sock_join_multicast_v6")
+    ;;; Socket descriptor
+    (param $fd $fd)
+    ;;; Multicast group to joined
+    (param $multiaddr (@witx const_pointer $addr_ip6))
+    ;;; Interface that will join
+    (param $interface u32)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

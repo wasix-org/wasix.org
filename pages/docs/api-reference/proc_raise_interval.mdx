@@ -8,15 +8,20 @@ The `proc_raise_interval()` function sends a signal to the process of the callin
 
 ### Syntax
 
-```rust
-pub fn proc_raise_interval(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sig: Signal,
-    interval: Timestamp,
-    repeat: Bool,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Note: This is similar to `setitimer` in POSIX.
+  ;;; Send a signal to the process of the calling thread on a regular basis
+  (@interface func (export "proc_raise_interval")
+    ;;; The signal condition to trigger.
+    (param $sig $signal)
+    ;;; Time to wait before raising the signal
+    ;;; (zero here indicates the signal interval is cancelled)
+    (param $interval $timestamp)
+    ;;; Flag that indicates if the signal will trigger indefinately
+    (param $repeat $bool)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

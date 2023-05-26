@@ -8,14 +8,19 @@ The `sock_addr_peer()` function retrieves the remote address to which the socket
 
 ### Syntax
 
-```rust
-pub fn sock_addr_peer<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    ro_addr: WasmPtr<__wasi_addr_port_t, M>,
-) -> Errno
+```ebnf
+  ;;; either IP4 or IP6.
+  ;;; When successful, the contents of the output buffer consist of an IP address,
+  ;;;
+  ;;; Note: This is similar to `getpeername` in POSIX
+  ;;;
+  ;;; Returns the remote address to which the socket is connected to.
+  (@interface func (export "sock_addr_peer")
+    ;;; Socket that the address is bound to
+    (param $fd $fd)
+    (result $error (expected $addr_port (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

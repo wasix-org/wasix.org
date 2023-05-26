@@ -8,16 +8,20 @@ The `fd_write()` function writes data from one or more buffers to the specified 
 
 ### Syntax
 
-```rust
-pub fn fd_write<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    iovs: WasmPtr<__wasi_ciovec_t<M>, M>,
-    iovs_len: M::Offset,
-    nwritten: WasmPtr<M::Offset, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; interleaved while `write` is executed.
+  ;;; for a regular file by other threads in the WASI process should not be
+  ;;; Like POSIX, any calls of `write` (and other functions to read or write)
+  ;;;
+  ;;; Note: This is similar to `writev` in POSIX.
+  ;;; Write to a file descriptor.
+  (@interface func (export "fd_write")
+    (param $fd $fd)
+    ;;; List of scatter/gather vectors from which to retrieve data.
+    (param $iovs $ciovec_array)
+    (result $error (expected $size (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -8,14 +8,14 @@ The `environ_sizes_get()` function is used to retrieve the sizes of the environm
 
 ### Syntax
 
-```rust
-pub fn environ_sizes_get<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    environ_count: WasmPtr<M::Offset, M>,
-    environ_buf_size: WasmPtr<M::Offset, M>,
-) -> Errno
+```ebnf
+  ;;; Return environment variable data sizes.
+  (@interface func (export "environ_sizes_get")
+    ;;; Returns the number of environment variable arguments and the size of the
+    ;;; environment variable data.
+    (result $error (expected (tuple $size $size) (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -12,13 +12,14 @@ This function is similar to the POSIX `pthread_sleep()` function, which suspends
 
 ### Syntax
 
-```rust
-pub fn thread_sleep<M: MemorySize + 'static>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    duration: Timestamp,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Sends the current thread to sleep for a period of time
+  (@interface func (export "thread_sleep")
+    ;;; Amount of time that the thread should sleep
+    (param $duration $timestamp)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

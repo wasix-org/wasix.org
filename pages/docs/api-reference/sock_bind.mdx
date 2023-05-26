@@ -12,14 +12,17 @@ Binding a socket to a specific address allows the socket to receive incoming con
 
 ### Syntax
 
-```rust
-pub fn sock_bind<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    addr: WasmPtr<__wasi_addr_port_t, M>,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `bind` in POSIX using PF_INET
+  ;;; Bind a socket
+  (@interface func (export "sock_bind")
+    ;;; File descriptor of the socket to be bind
+    (param $fd $fd)
+    ;;; Address to bind the socket to
+    (param $addr (@witx const_pointer $addr_port))
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

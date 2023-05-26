@@ -10,12 +10,13 @@ This function is similar to the POSIX `sched_yield()` function, which allows a t
 
 ### Syntax
 
-```rust
-pub fn sched_yield<M: MemorySize + 'static>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Note: This is similar to `sched_yield` in POSIX.
+  ;;; Temporarily yield execution of the calling thread.
+  (@interface func (export "sched_yield")
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

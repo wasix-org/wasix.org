@@ -10,14 +10,22 @@ The function creates a snapshot by capturing the stack memory, global variables,
 
 ### Syntax
 
-```rust
-pub fn stack_checkpoint<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    snapshot_ptr: WasmPtr<StackSnapshot, M>,
-    ret_val: WasmPtr<Longsize, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; This function will read the __stack_pointer global
+  ;;;
+  ;;; This is used by `longjmp` and `setjmp`
+  ;;;
+  ;;; the stack is first recorded.
+  ;;; restoration (and hence must be none zero) - zero will be returned when
+  ;;; later using its stack hash. The value supplied will be returned upon
+  ;;; Creates a checkpoint of the current stack which allows it to be restored
+  (@interface func (export "stack_checkpoint")
+    ;;; Reference to the stack snapshot that will be filled
+    (param $snapshot (@witx pointer $stack_snapshot))
+    ;;; Returns zero upon registration and the value when restored
+    (result $error (expected $longsize (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

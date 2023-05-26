@@ -10,14 +10,14 @@ In POSIX systems, each process has a parent process except for the initial proce
 
 ### Syntax
 
-```rust
-pub fn proc_parent<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    pid: Pid,
-    ret_parent: WasmPtr<Pid, M>,
-) -> Errno
+```ebnf
+  ;;; Returns the parent handle of a particular process
+  (@interface func (export "proc_parent")
+    ;;; Handle of the process to get the parent handle for
+    (param $pid $pid)
+    (result $error (expected $pid (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: The function environment.

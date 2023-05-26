@@ -8,14 +8,16 @@ The `environ_get()` function is used to read the environment variable data. It w
 
 ### Syntax
 
-```rust
-pub fn environ_get<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    environ: WasmPtr<WasmPtr<u8, M>, M>,
-    environ_buf: WasmPtr<u8, M>,
-) -> Errno
+```ebnf
+  ;;; Key/value pairs are expected to be joined with `=`s, and terminated with `\0`s.
+  ;;; The sizes of the buffers should match that returned by `environ_sizes_get`.
+  ;;; Read environment variable data.
+  (@interface func (export "environ_get")
+    (param $environ (@witx pointer (@witx pointer u8)))
+    (param $environ_buf (@witx pointer u8))
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

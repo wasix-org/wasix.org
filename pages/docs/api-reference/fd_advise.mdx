@@ -8,16 +8,20 @@ The `fd_advise()` function is used to provide advice to the operating system abo
 
 ### Syntax
 
-```rust
-pub fn fd_advise(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    offset: Filesize,
-    len: Filesize,
-    advice: Advice,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `posix_fadvise` in POSIX.
+  ;;; Provide file advisory information on a file descriptor.
+  (@interface func (export "fd_advise")
+    (param $fd $fd)
+    ;;; The offset within the file to which the advisory applies.
+    (param $offset $filesize)
+    ;;; The length of the region to which the advisory applies.
+    (param $len $filesize)
+    ;;; The advice.
+    (param $advice $advice)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -10,13 +10,13 @@ This function is typically used in interactive applications that need to obtain 
 
 ### Syntax
 
-```rust
-pub fn tty_get<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    tty_state: WasmPtr<Tty, M>,
-) -> Errno
+```ebnf
+  ;;; Retrieves the current state of the TTY
+  (@interface func (export "tty_get")
+    (param $state (@witx pointer $tty))
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: The function environment.
