@@ -1,5 +1,49 @@
-# Usage for wasix in Rust
+# Rust Wasix Usage
 
----
+import { Callout } from "nextra-theme-docs";
 
-## 1. Introduction
+<Callout type="default" emoji="📦">
+  Currenly, Wasix is only supported by the Wasmer runtime. So, you need to
+  install the [Wasmer](https://wasmer.io/) runtime.
+</Callout>
+
+## `cargo wasix`
+
+`cargo wasix` can be used to run, test, and build Rust programs for the Wasix
+
+### Running a binary
+
+```shell copy
+$ cargo wasix run <path-to-wasm-file>
+```
+
+### Testing a binary
+
+```shell copy
+$ cargo wasix test <path-to-wasm-file>
+```
+
+### Building a binary
+
+```shell copy
+$ cargo wasix build <path-to-wasm-file>
+```
+
+### Benchmarking a binary
+
+```shell copy
+$ cargo wasix bench <path-to-wasm-file>
+```
+
+## `wasmer`
+
+`wasmer-cli` can also be used to run `wasix` binaries. As well as provide additional flags such as `--enable-bulk-memory`, `--enable-threads` and `--net`.
+
+### Additional flags
+
+<Callout type="info" emoji="ℹ️">
+  Some wasm files need extra flags that can be provided while running the file
+  with the runtime. For example, `wasmer run --enable-threads --net
+  ./target/wasix/debug/hello.wasm`. Learn more about Wasmer's [runtime
+  flags](https://docs.wasmer.io/ecosystem/wasmer/usage)
+</Callout>
