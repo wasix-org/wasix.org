@@ -8,7 +8,7 @@ function WasixExplained() {
   return (
     <div className="p-2 my-4 flex justify-center w-full">
       <Image
-        className=" max-w-md"
+        className="w-full md:max-w-md"
         alt={"WASIX Explained"}
         src={wasixExplained}
       />
