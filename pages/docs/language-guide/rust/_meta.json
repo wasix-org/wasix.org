@@ -1,5 +1,7 @@
 {
   "installation": "Installation",
   "usage": "Usage",
-  "tutorials": "Tutorials"
+  "tutorials": "Tutorials",
+  "examples": "Examples",
+  "patched-repos": "Patched Repositories"
 }
