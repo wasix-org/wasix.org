@@ -12,7 +12,6 @@ function WasixLogo({ className }: Props = {}) {
       viewBox="0 0 324 128"
       className={className}
     >
-      <path fill="#fff" d="m79.87 67.39-3.11 13.99h9.68l-3.57-13.99h-3Z" />
       <path
         className="text-black dark:text-white"
         d="M66.13 0c.01.193.01.387 0 .58a12.34 12.34 0 0 1-12.34 12.34A12.329 12.329 0 0 1 41.47.58a5.61 5.61 0 0 1 0-.58H0v107.62h107.62V0H66.13Zm69.62 60.23 3.11-13.99h-9.68l3.57 13.99h3Z"
