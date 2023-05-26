@@ -60,7 +60,7 @@
   "sock_leave_multicast_v6": "sock_leave_multicast_v6",
   "sock_bind": "sock_bind",
   "sock_listen": "sock_listen",
-  "sock_accept_v2": "sock_accept_v2",
+  "sock_accept": "sock_accept",
   "sock_connect": "sock_connect",
   "sock_recv_from": "sock_recv_from",
   "sock_send_to": "sock_send_to",

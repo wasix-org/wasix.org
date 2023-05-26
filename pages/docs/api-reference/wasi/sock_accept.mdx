@@ -11,17 +11,18 @@ When a connection is accepted, a new socket is created and returned. This new so
 ### Syntax
 
 ```ebnf
-  ;;; Note: This is similar to `accept` in POSIX.
   ;;; Accept a new incoming connection.
-  (@interface func (export "sock_accept")
+  ;;; Note: This is similar to `accept` in POSIX.
+  (@interface func (export "sock_accept_v2")
     ;;; The listening socket.
     (param $fd $fd)
     ;;; The desired values of the file descriptor flags.
     (param $flags $fdflags)
     ;;; New socket connection
-    (result $error (expected $fd (error $errno)))
+    (result $error (expected (tuple $fd $addr_port) (error $errno)))
   )
 ```
+
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.
