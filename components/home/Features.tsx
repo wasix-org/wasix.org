@@ -118,9 +118,13 @@ const actions = [
     Description: () => (
       <p>
         WASIX compiled programs can directly run in the browser using
-        <span className="bg-rose-100 dark:bg-rose-800 dark:bg-opacity-30 text-rose-600 px-1 py-[2px] rounded-md font-bold text-xs">
-          WASM
-        </span>
+        <a
+          href="https://www.npmjs.com/package/@wasmer/wasi"
+          className="bg-rose-100 dark:bg-rose-800 dark:bg-opacity-30 text-rose-600 px-1 py-[2px] rounded-md font-bold text-xs underline"
+        >
+          @wasmer/wasi
+        </a>{" "}
+        package
       </p>
     ),
     icon: BsGlobe2,
