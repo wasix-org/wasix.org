@@ -1,96 +1,90 @@
 ## Non-Invasive extensions added to WASI
 
-```rust
-// Its now possible to duplicate file handles
-pub use x::fd_dup;
+### WASIX extended Functions
 
-// Events are used by polling functions that can be interrupted such
-// as `tokio` and `mio`
-pub use x::fd_event;
+- The ability to duplicate file handles
+  - [`fd_dup`](/docs/api-reference/fd_dup)
+- polling functions that can be interrupted by libraries such as `tokio` and `mio`
+  - [`fd_event`](/docs/api-reference/fd_event)
+- Pipes to stream data to and from subprocesses
+  - [`fd_pipe`](/docs/api-reference/fd_pipe)
+- Ability to yield CPU time without the bloat of `poll_oneoff`
+  - `sched_yield`
+- Getting and setting the TTY properties
+  - [`tty_get`](/docs/api-reference/tty_get)
+  - [`tty_set`](/docs/api-reference/tty_set)
+- Changing the current directory is now natively supported
+  - [`getcwd`](/docs/api-reference/getcwd)
+  - [`chdir`](/docs/api-reference/chdir)
+- Signals can be blocked (needed by `libc`)
+  - [`callback_signal`](/docs/api-reference/callback_signal)
+- Spawning threads as per the experimental threads spec
+  - [`thread_spawn`](/docs/api-reference/thread_spawn)
+- Extra thread functions
+  - [`thread_sleep`](/docs/api-reference/thread_sleep)
+  - [`thread_id`](/docs/api-reference/thread_id)
+  - [`thread_join`](/docs/api-reference/thread_join)
+  - [`thread_parallelism`](/docs/api-reference/thread_parallelism)
+  - [`thread_signal`](/docs/api-reference/thread_signal)
+  - [`thread_exit`](/docs/api-reference/thread_exit)
+- Operating system futex support used for multithread constructs
+  - [`futex_wait`](/docs/api-reference/futex_wait)
+  - [`futex_wake`](/docs/api-reference/futex_wake)
+  - [`futex_wake_all`](/docs/api-reference/futex_wake_all)
+- Longjmp and setjmp used by `libc`
+  - [`stack_checkpoint`](/docs/api-reference/stack_checkpoint)
+  - [`stack_restore`](/docs/api-reference/stack_restore)
+- Subprocess support
+  - [`proc_raise_interval`](/docs/api-reference/proc_raise_interval)
+  - [`proc_fork`](/docs/api-reference/proc_fork)
+  - [`proc_exec`](/docs/api-reference/proc_exec)
+  - [`proc_spawn`](/docs/api-reference/proc_spawn)
+  - [`proc_id`](/docs/api-reference/proc_id)
+  - [`proc_parent`](/docs/api-reference/proc_parent)
+  - [`proc_join`](/docs/api-reference/proc_join)
+  - [`proc_signal`](/docs/api-reference/proc_signal)
+- Interface support
+  - [`port_bridge`](/docs/api-reference/port_bridge)
+  - [`port_unbridge`](/docs/api-reference/port_unbridge)
+  - [`port_dhcp_acquire`](/docs/api-reference/port_dhcp_acquire)
+  - [`port_addr_add`](/docs/api-reference/port_addr_add)
+  - [`port_addr_remove`](/docs/api-reference/port_addr_remove)
+  - [`port_addr_clear`](/docs/api-reference/port_addr_clear)
+  - [`port_mac`](/docs/api-reference/port_mac)
+  - [`port_addr_list`](/docs/api-reference/port_addr_list)
+  - [`port_gateway_set`](/docs/api-reference/port_gateway_set)
+  - [`port_route_add`](/docs/api-reference/port_route_add)
+  - [`port_route_remove`](/docs/api-reference/port_route_remove)
+  - [`port_route_clear`](/docs/api-reference/port_route_clear)
+  - [`port_route_list`](/docs/api-reference/port_route_list)
+- All the missing socket functionality
+  - [`sock_status`](/docs/api-reference/sock_status)
+  - [`sock_addr_local`](/docs/api-reference/sock_addr_local)
+  - [`sock_addr_peer`](/docs/api-reference/sock_addr_peer)
+  - [`sock_open`](/docs/api-reference/sock_open)
+  - [`sock_set_opt_flag`](/docs/api-reference/sock_set_opt_flag)
+  - [`sock_get_opt_flag`](/docs/api-reference/sock_get_opt_flag)
+  - [`sock_set_opt_time`](/docs/api-reference/sock_set_opt_time)
+  - [`sock_get_opt_time`](/docs/api-reference/sock_get_opt_time)
+  - [`sock_set_opt_size`](/docs/api-reference/sock_set_opt_size)
+  - [`sock_get_opt_size`](/docs/api-reference/sock_get_opt_size)
+  - [`sock_join_multicast_v4`](/docs/api-reference/sock_join_multicast_v4)
+  - [`sock_leave_multicast_v4`](/docs/api-reference/sock_leave_multicast_v4)
+  - [`sock_join_multicast_v6`](/docs/api-reference/sock_join_multicast_v6)
+  - [`sock_leave_multicast_v6`](/docs/api-reference/sock_leave_multicast_v6)
+  - [`sock_bind`](/docs/api-reference/sock_bind)
+  - [`sock_listen`](/docs/api-reference/sock_listen)
+  - [`sock_accept_v2`](/docs/api-reference/sock_accept_v2)
+  - [`sock_connect`](/docs/api-reference/sock_connect)
+  - [`sock_recv_from`](/docs/api-reference/sock_recv_from)
+  - [`sock_send_to`](/docs/api-reference/sock_send_to)
+  - [`sock_send_file`](/docs/api-reference/sock_send_file)
+- Ability to perform DNS queries
+  - [`resolve`](/docs/api-reference/resolve)
 
-// Pipes are required to stream data to and from subprocesses
-pub use x::fd_pipe;
+### WASIX extended extra Functions
 
-// Yields CPU time without the bloat of `poll_oneoff`
-pub use x::sched_yield;
-
-// Getting and setting the TTY properties
-pub use x::tty_get;
-pub use x::tty_set;
-
-// Changing the current directory is now natively supported
-pub use x::getcwd;
-pub use x::chdir;
-
-// Signals can be blocked (needed by `libc`)
-pub use x::callback_signal;
-
-// Spawning threads as per the experimental threads spec
-pub use x::thread_spawn;
-
-// Extra thread related functions
-pub use x::thread_sleep;
-pub use x::thread_id;
-pub use x::thread_join;
-pub use x::thread_parallelism;
-pub use x::thread_signal;
-pub use x::thread_exit;
-
-// Operating system futex support used for multithread constructs
-pub use x::futex_wait;
-pub use x::futex_wake;
-pub use x::futex_wake_all;
-
-// Longjmp and setjmp used by `libc`
-pub use x::stack_checkpoint;
-pub use x::stack_restore;
-
-// Subprocess support
-pub use x::proc_raise_interval;
-pub use x::proc_fork;
-pub use x::proc_exec;
-pub use x::proc_spawn;
-pub use x::proc_id;
-pub use x::proc_parent;
-pub use x::proc_join;
-pub use x::proc_signal;
-
-// Interface support
-pub use x::port_bridge;
-pub use x::port_unbridge;
-pub use x::port_dhcp_acquire;
-pub use x::port_addr_add;
-pub use x::port_addr_remove;
-pub use x::port_addr_clear;
-pub use x::port_mac;
-pub use x::port_addr_list;
-pub use x::port_gateway_set;
-pub use x::port_route_add;
-pub use x::port_route_remove;
-pub use x::port_route_clear;
-pub use x::port_route_list;
-
-// All the missing socket functionality
-pub use x::sock_status;
-pub use x::sock_addr_local;
-pub use x::sock_addr_peer;
-pub use x::sock_set_opt_flag;
-pub use x::sock_get_opt_flag;
-pub use x::sock_set_opt_time;
-pub use x::sock_get_opt_time;
-pub use x::sock_set_opt_size;
-pub use x::sock_get_opt_size;
-pub use x::sock_join_multicast_v4;
-pub use x::sock_leave_multicast_v4;
-pub use x::sock_join_multicast_v6;
-pub use x::sock_leave_multicast_v6;
-pub use x::sock_bind;
-pub use x::sock_listen;
-pub use x::sock_connect;
-pub use x::sock_recv_from;
-pub use x::sock_send_to;
-pub use x::sock_send_file;
-
-// Ability to perform DNS queries
-pub use x::resolve;
-```
+- [`clock_time_set`](/docs/api-reference/clock_time_set)
+- [`ws_connect`](/docs/api-reference/ws_connect)
+- [`http_request`](/docs/api-reference/http_request)
+- [`http_status`](/docs/api-reference/http_status)
