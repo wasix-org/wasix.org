@@ -8,5 +8,5 @@ workload:
           repository: "https://wapm.io/"
           namespace: wasmer
           name: wasix-docs
-          tag: 0.32.0
+          tag: 0.34.0
   capabilities: {}
