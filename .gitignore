@@ -1,5 +1,5 @@
 .next
 node_modules
-public/
-
 .DS_Store
+
+/wasix-docs/public/**

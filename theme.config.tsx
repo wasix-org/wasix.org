@@ -72,11 +72,7 @@ const config: DocsThemeConfig = {
   },
   head: function useHead() {
     const { title } = useConfig();
-    const { route } = useRouter();
-    const socialCard =
-      route === "/" || !title
-        ? "https://nextra.site/og.jpeg"
-        : `https://nextra.site/api/og?title=${title}`;
+    const socialCard = "https://wasix.org/og.png";
 
     return (
       <>
@@ -84,24 +80,15 @@ const config: DocsThemeConfig = {
         <meta name="theme-color" content="#fff" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta httpEquiv="Content-Language" content="en" />
-        <meta
-          name="description"
-          content="Make beautiful websites with Next.js & MDX."
-        />
-        <meta
-          name="og:description"
-          content="Make beautiful websites with Next.js & MDX."
-        />
+        <meta name="WASIX" content="The superset of WASI" />
+        <meta name="og:WASIX" content="The superset of WASI" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content={socialCard} />
-        <meta name="twitter:site:domain" content="nextra.site" />
-        <meta name="twitter:url" content="https://nextra.site" />
-        <meta
-          name="og:title"
-          content={title ? title + " – Nextra" : "Nextra"}
-        />
+        <meta name="twitter:site:domain" content="wasix.org" />
+        <meta name="twitter:url" content="https://wasix.org" />
+        <meta name="og:title" content={title ? title + " – WASIX" : "WASIX"} />
         <meta name="og:image" content={socialCard} />
-        <meta name="apple-mobile-web-app-title" content="Nextra" />
+        <meta name="apple-mobile-web-app-title" content="WASIX" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link
@@ -119,14 +106,7 @@ const config: DocsThemeConfig = {
       </>
     );
   },
-  // banner: {
-  //   key: '2.0-release',
-  //   text: (
-  //     <a href="https://nextra.site" target="_blank" rel="noreferrer">
-  //       🎉 Nextra 2.0 is released. Read more →
-  //     </a>
-  //   )
-  // },
+
   editLink: {
     text: "Edit this page on GitHub →",
   },
