@@ -8,10 +8,16 @@ The `sock_shutdown()` function is used to shut down the send and receive channel
 
 ### Syntax
 
-```rust
-pub fn sock_shutdown(mut ctx: FunctionEnvMut<'_, WasiEnv>, sock: WasiFd, how: SdFlags) -> Errno
+```ebnf
+  ;;; Note: This is similar to `shutdown` in POSIX.
+  ;;; Shut down socket send and receive channels.
+  (@interface func (export "sock_shutdown")
+    (param $fd $fd)
+    ;;; Which channels on the socket to shut down.
+    (param $how $sdflags)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

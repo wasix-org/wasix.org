@@ -8,15 +8,19 @@ The `sock_set_opt_flag()` function sets a specific socket option for the given s
 
 ### Syntax
 
-```rust
-pub fn sock_set_opt_flag(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    opt: Sockoption,
-    flag: Bool,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `setsockopt` in POSIX for SO_REUSEADDR
+  ;;; Sets a particular socket setting
+  (@interface func (export "sock_set_opt_flag")
+    ;;; Socket descriptor
+    (param $fd $fd)
+    ;;; Socket option to be set
+    (param $sockopt $sock_option)
+    ;;; Value to set the option to
+    (param $flag $bool)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

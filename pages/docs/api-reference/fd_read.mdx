@@ -10,16 +10,17 @@ In POSIX systems, reading data from a file typically involves updating the file 
 
 ### Syntax
 
-```rust
-pub fn fd_read<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    iovs: WasmPtr<__wasi_iovec_t<M>, M>,
-    iovs_len: M::Offset,
-    nread: WasmPtr<M::Offset, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Note: This is similar to `readv` in POSIX.
+  ;;; Read from a file descriptor.
+  (@interface func (export "fd_read")
+    (param $fd $fd)
+    ;;; List of scatter/gather vectors to which to store data.
+    (param $iovs $iovec_array)
+    ;;; The number of bytes read.
+    (result $error (expected $size (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

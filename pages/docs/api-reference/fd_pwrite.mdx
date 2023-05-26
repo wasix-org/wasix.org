@@ -10,17 +10,23 @@ In POSIX systems, writing data to a file typically involves updating the file cu
 
 ### Syntax
 
-```rust
-pub fn fd_pwrite<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    iovs: WasmPtr<__wasi_ciovec_t<M>, M>,
-    iovs_len: M::Offset,
-    offset: Filesize,
-    nwritten: WasmPtr<M::Offset, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; WASI process should not be interleaved while `pwrite` is executed.
+  ;;; functions to read or write) for a regular file by other threads in the
+  ;;; Like Linux (and other Unix-es), any calls of `pwrite` (and other
+  ;;;
+  ;;; Note: This is similar to `pwritev` in Linux (and other Unix-es).
+  ;;; Write to a file descriptor, without using and updating the file descriptor's offset.
+  (@interface func (export "fd_pwrite")
+    (param $fd $fd)
+    ;;; List of scatter/gather vectors from which to retrieve data.
+    (param $iovs $ciovec_array)
+    ;;; The offset within the file at which to write.
+    (param $offset $filesize)
+    ;;; The number of bytes written.
+    (result $error (expected $size (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

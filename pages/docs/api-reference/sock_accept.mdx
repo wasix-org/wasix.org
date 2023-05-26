@@ -10,16 +10,18 @@ When a connection is accepted, a new socket is created and returned. This new so
 
 ### Syntax
 
-```rust
-pub fn sock_accept<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    mut fd_flags: Fdflags,
-    ro_fd: WasmPtr<WasiFd, M>,
-    ro_addr: WasmPtr<__wasi_addr_port_t, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Note: This is similar to `accept` in POSIX.
+  ;;; Accept a new incoming connection.
+  (@interface func (export "sock_accept")
+    ;;; The listening socket.
+    (param $fd $fd)
+    ;;; The desired values of the file descriptor flags.
+    (param $flags $fdflags)
+    ;;; New socket connection
+    (result $error (expected $fd (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

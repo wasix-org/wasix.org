@@ -8,15 +8,14 @@ The `fd_pipe()` function is used to create a pipe, which is a unidirectional com
 
 ### Syntax
 
-```rust
-pub fn fd_pipe<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    ro_fd1: WasmPtr<WasiFd, M>,
-    ro_fd2: WasmPtr<WasiFd, M>,
-) -> Errno
-```
-
-### Parameters
+```ebnf
+  ;;; Pipes are bidirectional
+  ;;;
+  ;;; Opens a pipe with two file handles
+  (@interface func (export "fd_pipe")
+    (result $error (expected (tuple $fd $fd) (error $errno)))
+  )
+```### Parameters
 
 - `ctx`: A mutable reference to the function environment.
 - `ro_fd1`: A wasm pointer to a `WasiFd` where the first file descriptor representing one end of the pipe will be written.

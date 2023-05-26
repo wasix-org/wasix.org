@@ -10,17 +10,18 @@ On POSIX systems, a similar functionality is provided by the `symlink()` functio
 
 ### Syntax
 
-```rust
-pub fn path_symlink<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    old_path: WasmPtr<u8, M>,
-    old_path_len: M::Offset,
-    fd: WasiFd,
-    new_path: WasmPtr<u8, M>,
-    new_path_len: M::Offset,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `symlinkat` in POSIX.
+  ;;; Create a symbolic link.
+  (@interface func (export "path_symlink")
+    ;;; The contents of the symbolic link.
+    (param $old_path string)
+    (param $fd $fd)
+    ;;; The destination path at which to create the symbolic link.
+    (param $new_path string)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

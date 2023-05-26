@@ -12,14 +12,16 @@ In POSIX systems, file descriptors are associated with a set of flags that contr
 
 ### Syntax
 
-```rust
-pub fn fd_fdstat_set_flags(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    flags: Fdflags,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Note: This is similar to `fcntl(fd, F_SETFL, flags)` in POSIX.
+  ;;; Adjust the flags associated with a file descriptor.
+  (@interface func (export "fd_fdstat_set_flags")
+    (param $fd $fd)
+    ;;; The desired values of the file descriptor flags.
+    (param $flags $fdflags)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.
@@ -39,5 +41,3 @@ The `fd_fdstat_set_flags()` function corresponds to the POSIX `fcntl()` system c
 ### Note
 
 The `fd_fdstat_set_flags()` function is used to modify the flags associated with a file descriptor. By providing the desired flags, applications can customize the behavior and characteristics of the file descriptor to suit their specific requirements.
-
-Please let me know if there's anything else I can assist you with.

@@ -8,14 +8,15 @@ The `fd_tell()` function retrieves the current offset of the specified file desc
 
 ### Syntax
 
-```rust
-pub fn fd_tell<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    offset: WasmPtr<Filesize, M>,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `lseek(fd, 0, SEEK_CUR)` in POSIX.
+  ;;; Return the current offset of a file descriptor.
+  (@interface func (export "fd_tell")
+    (param $fd $fd)
+    ;;; The current offset of the file descriptor, relative to the start of the file.
+    (result $error (expected $filesize (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

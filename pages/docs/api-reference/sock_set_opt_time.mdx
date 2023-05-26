@@ -8,15 +8,18 @@ The `sock_set_opt_time()` function sets the value of a specific socket option th
 
 ### Syntax
 
-```rust
-pub fn sock_set_opt_time<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    opt: Sockoption,
-    time: WasmPtr<OptionTimestamp, M>,
-) -> Errno
+```ebnf
+  ;;; Sets one of the times the socket
+  (@interface func (export "sock_set_opt_time")
+    ;;; Socket descriptor
+    (param $fd $fd)
+    ;;; Socket option to be set
+    (param $sockopt $sock_option)
+    ;;; Value to set the time to
+    (param $timeout (@witx const_pointer $option_timestamp))
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -12,14 +12,18 @@ If the size of the buffer provided for the path is insufficient to hold the enti
 
 ### Syntax
 
-```rust
-pub fn getcwd<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    path: WasmPtr<u8, M>,
-    path_len: WasmPtr<M::Offset, M>,
-) -> Errno
+```ebnf
+  ;;; will fill the path_len with the needed size and return EOVERFLOW
+  ;;; If the path exceeds the size of the buffer then this function
+  ;;;
+  ;;; Returns the current working directory
+  (@interface func (export "getcwd")
+    ;;; The buffer where current directory is stored
+    (param $path (@witx pointer u8))
+    (param $path_len (@witx pointer $pointersize))
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: The function environment.

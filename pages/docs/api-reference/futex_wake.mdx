@@ -8,14 +8,17 @@ The `futex_wake()` function wakes up one thread that is waiting on the specified
 
 ### Syntax
 
-```rust
-pub fn futex_wake<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    futex_ptr: WasmPtr<u32, M>,
-    ret_woken: WasmPtr<Bool, M>,
-) -> Errno
+```ebnf
+  ;;; or false if no thread was waiting on this futex.
+  ;;; Returns true if this actually woke up such a thread,
+  ;;;
+  ;;; Wake up one thread that's blocked on futex_wait on this futex.
+  (@interface func (export "futex_wake")
+    ;;; Memory location that holds a futex that others may be waiting on
+    (param $futex (@witx pointer u32))
+    (result $error (expected $bool (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

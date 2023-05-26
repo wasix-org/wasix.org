@@ -8,14 +8,18 @@ The `proc_fork()` function is used to create a new process by duplicating the ex
 
 ### Syntax
 
-```rust
-pub fn proc_fork<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    mut copy_memory: Bool,
-    pid_ptr: WasmPtr<Pid, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; number then its the current process and the $pid represents the child.
+  ;;; returns a zero then its the new subprocess. If it returns a positive
+  ;;; Forks the current process into a new subprocess. If the function
+  (@interface func (export "proc_fork")
+    ;;; Indicates if the memory will be copied into the new process
+    ;;; (if it is not copied this then becomes similar to `vfork` in
+    ;;;  that the current process pauses until `proc_exec` is called)
+    (param $copy_memory $bool)
+    (result $error (expected $pid (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

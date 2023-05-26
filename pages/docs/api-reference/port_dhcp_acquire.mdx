@@ -8,10 +8,12 @@ The `port_dhcp_acquire()` function is used to acquire a set of IP addresses usin
 
 ### Syntax
 
-```rust
-pub fn port_dhcp_acquire(mut ctx: FunctionEnvMut<'_, WasiEnv>) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Acquires a set of addresses using DHCP
+  (@interface func (export "port_dhcp_acquire")
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

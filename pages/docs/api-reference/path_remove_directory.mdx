@@ -10,15 +10,17 @@ On POSIX systems, a similar functionality is provided by the `rmdir()` function.
 
 ### Syntax
 
-```rust
-pub fn path_remove_directory<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    path: WasmPtr<u8, M>,
-    path_len: M::Offset,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `unlinkat(fd, path, AT_REMOVEDIR)` in POSIX.
+  ;;; Return `errno::notempty` if the directory is not empty.
+  ;;; Remove a directory.
+  (@interface func (export "path_remove_directory")
+    (param $fd $fd)
+    ;;; The path to a directory to remove.
+    (param $path string)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

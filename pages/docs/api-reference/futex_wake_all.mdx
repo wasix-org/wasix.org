@@ -8,14 +8,14 @@ The `futex_wake_all()` function wakes up all threads that are waiting on the spe
 
 ### Syntax
 
-```rust
-pub fn futex_wake_all<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    futex_ptr: WasmPtr<u32, M>,
-    ret_woken: WasmPtr<Bool, M>,
-) -> Errno
+```ebnf
+  ;;; Wake up all threads that are waiting on futex_wait on this futex.
+  (@interface func (export "futex_wake_all")
+    ;;; Memory location that holds a futex that others may be waiting on
+    (param $futex (@witx pointer u32))
+    (result $error (expected $bool (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

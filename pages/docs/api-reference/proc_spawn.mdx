@@ -10,25 +10,34 @@ In POSIX systems, `spawn()` is a common function used to create new processes. I
 
 ### Syntax
 
-```rust
-pub fn proc_spawn<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    name: WasmPtr<u8, M>,
-    name_len: M::Offset,
-    chroot: Bool,
-    args: WasmPtr<u8, M>,
-    args_len: M::Offset,
-    preopen: WasmPtr<u8, M>,
-    preopen_len: M::Offset,
-    stdin: WasiStdioMode,
-    stdout: WasiStdioMode,
-    stderr: WasiStdioMode,
-    working_dir: WasmPtr<u8, M>,
-    working_dir_len: M::Offset,
-    ret_handles: WasmPtr<BusHandles, M>,
-) -> Result<BusErrno, WasiError>
+```ebnf
+  ;;; permissions but runs standalone.
+  ;;; (i.e. this process). It inherits the filesystem and sandbox
+  ;;; Spawns a new process within the context of the parent process
+  (@interface func (export "proc_spawn")
+    ;;; Name of the process to be spawned
+    (param $name string)
+    ;;; Indicates if the process will chroot or not
+    (param $chroot $bool)
+    ;;; List of the arguments to pass the process
+    ;;; (entries are separated by line feeds)
+    (param $args string)
+    ;;; List of the preopens for this process
+    ;;; (entries are separated by line feeds)
+    (param $preopen string)
+    ;;; How will stdin be handled
+    (param $stdin $stdio_mode)
+    ;;; How will stdout be handled
+    (param $stdout $stdio_mode)
+    ;;; How will stderr be handled
+    (param $stderr $stdio_mode)
+    ;;; Working directory where this process should run
+    ;;; (passing '.' will use the current directory)
+    (param $working_dir string)
+    ;;; Returns a bus process id that can be used to invoke calls
+    (result $error (expected $process_handles (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

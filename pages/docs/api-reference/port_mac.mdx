@@ -8,13 +8,12 @@ The `port_mac()` function retrieves the MAC address of the local port and stores
 
 ### Syntax
 
-```rust
-pub fn port_mac<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    ret_mac: WasmPtr<__wasi_hardwareaddress_t, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Returns the MAC address of the local port
+  (@interface func (export "port_mac")
+    (result $error (expected $hardware_address (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

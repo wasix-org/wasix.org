@@ -8,15 +8,16 @@ The `sock_get_opt_time()` function retrieves the value of a specific socket opti
 
 ### Syntax
 
-```rust
-pub fn sock_get_opt_time<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    opt: Sockoption,
-    ret_time: WasmPtr<OptionTimestamp, M>,
-) -> Errno
+```ebnf
+  ;;; Retrieve one of the times on the socket
+  (@interface func (export "sock_get_opt_time")
+    ;;; Socket descriptor
+    (param $fd $fd)
+    ;;; Socket option to be retrieved
+    (param $sockopt $sock_option)
+    (result $error (expected $option_timestamp (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

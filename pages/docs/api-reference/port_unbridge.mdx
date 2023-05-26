@@ -8,10 +8,12 @@ The `port_unbridge()` function terminates the connection to a remote network, ef
 
 ### Syntax
 
-```rust
-pub fn port_unbridge(mut ctx: FunctionEnvMut<'_, WasiEnv>) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Disconnects from a remote network
+  (@interface func (export "port_unbridge")
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

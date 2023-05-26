@@ -10,18 +10,20 @@ On POSIX systems, a similar functionality is provided by the `readlink()` functi
 
 ### Syntax
 
-```rust
-pub fn path_readlink<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    dir_fd: WasiFd,
-    path: WasmPtr<u8, M>,
-    path_len: M::Offset,
-    buf: WasmPtr<u8, M>,
-    buf_len: M::Offset,
-    buf_used: WasmPtr<M::Offset, M>,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `readlinkat` in POSIX.
+  ;;; Read the contents of a symbolic link.
+  (@interface func (export "path_readlink")
+    (param $fd $fd)
+    ;;; The path of the symbolic link from which to read.
+    (param $path string)
+    ;;; The buffer to which to write the contents of the symbolic link.
+    (param $buf (@witx pointer u8))
+    (param $buf_len $size)
+    ;;; The number of bytes placed in the buffer.
+    (result $error (expected $size (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

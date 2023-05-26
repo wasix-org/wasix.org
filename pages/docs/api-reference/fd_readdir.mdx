@@ -8,17 +8,25 @@ The `fd_readdir()` function reads directory entries from a directory identified 
 
 ### Syntax
 
-```rust
-pub fn fd_readdir<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    buf: WasmPtr<u8, M>,
-    buf_len: M::Offset,
-    cookie: Dircookie,
-    bufused: WasmPtr<M::Offset, M>,
-) -> Errno
+```ebnf
+  ;;; sequence.
+  ;;; Entries for the special `.` and `..` directory entries are included in the
+  ;;;
+  ;;; entry, or skip the oversized directory entry.
+  ;;; read buffer size in case it's too small to fit a single large directory
+  ;;; truncating the last directory entry. This allows the caller to grow its
+  ;;; This function fills the output buffer as much as possible, potentially
+  (@interface func (export "fd_readdir")
+    (param $fd $fd)
+    ;;; The buffer where directory entries are stored
+    (param $buf (@witx pointer u8))
+    (param $buf_len $size)
+    ;;; The location within the directory to start reading
+    (param $cookie $dircookie)
+    ;;; The number of bytes stored in the read buffer. If less than the size of the read buffer, the end of the directory has been reached.
+    (result $error (expected $size (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

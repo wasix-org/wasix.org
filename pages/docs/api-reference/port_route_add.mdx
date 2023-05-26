@@ -8,16 +8,16 @@ The `port_route_add()` function adds a new route to the routing table of the loc
 
 ### Syntax
 
-```rust
-pub fn port_route_add<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    cidr: WasmPtr<__wasi_cidr_t, M>,
-    via_router: WasmPtr<__wasi_addr_t, M>,
-    preferred_until: WasmPtr<OptionTimestamp, M>,
-    expires_at: WasmPtr<OptionTimestamp, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Adds a new route to the local port
+  (@interface func (export "port_route_add")
+    (param $cidr (@witx const_pointer $addr_cidr))
+    (param $via_router (@witx const_pointer $addr))
+    (param $preferred_until (@witx const_pointer $option_timestamp))
+    (param $expires_at (@witx const_pointer $option_timestamp))
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

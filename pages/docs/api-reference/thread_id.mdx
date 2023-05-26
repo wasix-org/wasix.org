@@ -10,13 +10,14 @@ In POSIX systems, thread identification is commonly achieved using thread IDs, w
 
 ### Syntax
 
-```rust
-pub fn thread_id<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    ret_tid: WasmPtr<Tid, M>,
-) -> Errno
+```ebnf
+  ;;;  main thread ID equals the process ID)
+  ;;; (threads indices are sequential from zero while the
+  ;;; Returns the index of the current thread
+  (@interface func (export "thread_id")
+    (result $error (expected $tid (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

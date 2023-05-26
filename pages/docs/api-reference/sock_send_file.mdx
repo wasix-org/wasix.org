@@ -8,17 +8,20 @@ The `sock_send_file()` function is used to send the entire contents of a file do
 
 ### Syntax
 
-```rust
-pub fn sock_send_file<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    in_fd: WasiFd,
-    offset: Filesize,
-    mut count: Filesize,
-    ret_sent: WasmPtr<Filesize, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Sends the entire contents of a file down a socket
+  (@interface func (export "sock_send_file")
+    (param $out_fd $fd)
+    ;;; Open file that has the data to be transmitted
+    (param $in_fd $fd)
+    ;;; Offset into the file to start reading at
+    (param $offset $filesize)
+    ;;; Number of bytes to be sent
+    (param $count $filesize)
+    ;;; Number of bytes transmitted.
+    (result $error (expected $filesize (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

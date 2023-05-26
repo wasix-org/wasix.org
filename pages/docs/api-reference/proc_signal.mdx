@@ -10,14 +10,16 @@ On POSIX systems, a similar functionality is provided by the `kill()` function. 
 
 ### Syntax
 
-```rust
-pub fn proc_signal<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    pid: Pid,
-    sig: Signal,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Sends a signal to another process
+  (@interface func (export "proc_signal")
+    ;;; ID of the process to send a singal
+    (param $pid $pid)
+    ;;; Signal to send to the thread
+    (param $signal $signal)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

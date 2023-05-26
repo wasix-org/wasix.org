@@ -8,14 +8,12 @@ The `fd_dup()` function duplicates a file handle, creating a new file handle tha
 
 ### Syntax
 
-```rust
-pub fn fd_dup<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    ret_fd: WasmPtr<WasiFd, M>,
-) -> Errno
+```ebnf
+  (@interface func (export "fd_dup")
+    (param $fd $fd)
+    (result $error (expected $fd (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -10,15 +10,17 @@ On POSIX systems, a similar functionality is provided by the `unlink()` function
 
 ### Syntax
 
-```rust
-pub fn path_unlink_file<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    path: WasmPtr<u8, M>,
-    path_len: M::Offset,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `unlinkat(fd, path, 0)` in POSIX.
+  ;;; Return `errno::isdir` if the path refers to a directory.
+  ;;; Unlink a file.
+  (@interface func (export "path_unlink_file")
+    (param $fd $fd)
+    ;;; The path to a file to unlink.
+    (param $path string)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

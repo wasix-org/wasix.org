@@ -8,16 +8,26 @@ The `sock_open()` function creates an endpoint for communication and returns a f
 
 ### Syntax
 
-```rust
-pub fn sock_open<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    af: Addressfamily,
-    ty: Socktype,
-    pt: SockProto,
-    ro_sock: WasmPtr<WasiFd, M>,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `socket` in POSIX using PF_INET
+  ;;;
+  ;;; for the process.
+  ;;; call will be the lowest-numbered file descriptor not currently open
+  ;;; tor that refers to that endpoint. The file descriptor returned by a successful
+  ;;; creates an endpoint for communication and returns a file descriptor
+  ;;;
+  ;;; Create an endpoint for communication.
+  (@interface func (export "sock_open")
+    ;;; Address family
+    (param $af $address_family)
+    ;;; Socket type, either datagram or stream
+    (param $socktype $sock_type)
+    ;;; Socket protocol
+    (param $sock_proto $sock_proto)
+    ;;; The file descriptor of the socket that has been opened.
+    (result $error (expected $fd (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

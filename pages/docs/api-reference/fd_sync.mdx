@@ -8,13 +8,14 @@ The `fd_sync()` function synchronizes the file and metadata associated with a fi
 
 ### Syntax
 
-```rust
-pub fn fd_sync(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Note: This is similar to `fsync` in POSIX.
+  ;;; Synchronize the data and metadata of a file to disk.
+  (@interface func (export "fd_sync")
+    (param $fd $fd)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -10,16 +10,20 @@ In POSIX systems, files have associated timestamp metadata that stores informati
 
 ### Syntax
 
-```rust
-pub fn fd_filestat_set_times(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    st_atim: Timestamp,
-    st_mtim: Timestamp,
-    fst_flags: Fstflags,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `futimens` in POSIX.
+  ;;; Adjust the timestamps of an open file or directory.
+  (@interface func (export "fd_filestat_set_times")
+    (param $fd $fd)
+    ;;; The desired values of the data access timestamp.
+    (param $atim $timestamp)
+    ;;; The desired values of the data modification timestamp.
+    (param $mtim $timestamp)
+    ;;; A bitmask indicating which timestamps to adjust.
+    (param $fst_flags $fstflags)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

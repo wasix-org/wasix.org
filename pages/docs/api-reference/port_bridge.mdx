@@ -8,17 +8,18 @@ The `port_bridge()` function establishes a secure connection to a specific remot
 
 ### Syntax
 
-```rust
-pub fn port_bridge<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    network: WasmPtr<u8, M>,
-    network_len: M::Offset,
-    token: WasmPtr<u8, M>,
-    token_len: M::Offset,
-    security: Streamsecurity,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; Securely connects to a particular remote network
+  (@interface func (export "port_bridge")
+    ;;; Fully qualified identifier for the network
+    (param $network string)
+    ;;; Access token used to authenticate with the network
+    (param $token string)
+    ;;; Level of encryption to encapsulate the network connection with
+    (param $security $stream_security)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

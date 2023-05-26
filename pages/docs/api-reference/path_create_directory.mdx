@@ -10,15 +10,16 @@ On POSIX systems, a similar functionality is provided by the `mkdir()` function.
 
 ### Syntax
 
-```rust
-pub fn path_create_directory<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    path: WasmPtr<u8, M>,
-    path_len: M::Offset,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `mkdirat` in POSIX.
+  ;;; Create a directory.
+  (@interface func (export "path_create_directory")
+    (param $fd $fd)
+    ;;; The path at which to create the directory.
+    (param $path string)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

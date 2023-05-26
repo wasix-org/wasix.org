@@ -10,19 +10,20 @@ The function receives data from the socket and stores it in the provided scatter
 
 ### Syntax
 
-```rust
-pub fn sock_recv_from<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    ri_data: WasmPtr<__wasi_iovec_t<M>, M>,
-    ri_data_len: M::Offset,
-    _ri_flags: RiFlags,
-    ro_data_len: WasmPtr<M::Offset, M>,
-    ro_flags: WasmPtr<RoFlags, M>,
-    ro_addr: WasmPtr<__wasi_addr_port_t, M>,
-) -> Result<Errno, WasiError>
+```ebnf
+  ;;; the data into multiple buffers in the manner of `readv`.
+  ;;; Note: This is similar to `recvfrom` in POSIX, though it also supports reading
+  ;;; Receive a message and its peer address from a socket.
+  (@interface func (export "sock_recv_from")
+    (param $fd $fd)
+    ;;; List of scatter/gather vectors to which to store data.
+    (param $ri_data $iovec_array)
+    ;;; Message flags.
+    (param $ri_flags $riflags)
+    ;;; Number of bytes stored in ri_data and message flags.
+    (result $error (expected (tuple $size $roflags $addr_port) (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

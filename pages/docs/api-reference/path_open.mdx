@@ -10,21 +10,32 @@ On POSIX systems, a similar functionality is provided by the `open()` function. 
 
 ### Syntax
 
-```rust
-pub fn path_open<M: MemorySize>(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    dirfd: WasiFd,
-    dirflags: LookupFlags,
-    path: WasmPtr<u8, M>,
-    path_len: M::Offset,
-    o_flags: Oflags,
-    fs_rights_base: Rights,
-    fs_rights_inheriting: Rights,
-    fs_flags: Fdflags,
-    fd: WasmPtr<WasiFd, M>,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `openat` in POSIX.
+  (@interface func (export "path_open")
+    (param $fd $fd)
+    ;;; Flags determining the method of how the path is resolved.
+    (param $dirflags $lookupflags)
+    ;;; The relative path of the file or directory to open, relative to the
+    ;;; `path_open::fd` directory.
+    (param $path string)
+    ;;; The method by which to open the file.
+    (param $oflags $oflags)
+    ;;; The initial rights of the newly created file descriptor. The
+    ;;; implementation is allowed to return a file descriptor with fewer rights
+    ;;; than specified, if and only if those rights do not apply to the type of
+    ;;; file being opened.
+    ;;
+    ;;; The *base* rights are rights that will apply to operations using the file
+    ;;; descriptor itself, while the *inheriting* rights are rights that apply to
+    ;;; file descriptors derived from it.
+    (param $fs_rights_base $rights)
+    (param $fs_rights_inheriting $rights)
+    (param $fdflags $fdflags)
+    ;;; The file descriptor of the file that has been opened.
+    (result $error (expected $fd (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

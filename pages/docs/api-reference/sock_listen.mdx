@@ -10,14 +10,21 @@ When a socket is in the listening state, it can receive connection attempts from
 
 ### Syntax
 
-```rust
-pub fn sock_listen<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    backlog: M::Offset,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `listen`
+  ;;;
+  ;;; attempt is made
+  ;;; Polling the socket handle will wait until a connection
+  ;;;
+  ;;; Listen for connections on a socket
+  (@interface func (export "sock_listen")
+    ;;; File descriptor of the socket to be bind
+    (param $fd $fd)
+    ;;; Maximum size of the queue for pending connections
+    (param $backlog $size)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

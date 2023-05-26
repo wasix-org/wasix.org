@@ -10,16 +10,23 @@ On POSIX systems, a similar functionality is provided by the `execve()` function
 
 ### Syntax
 
-```rust
-pub fn proc_exec<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    name: WasmPtr<u8, M>,
-    name_len: M::Offset,
-    args: WasmPtr<u8, M>,
-    args_len: M::Offset,
-) -> Result<(), WasiError>
+```ebnf
+  ;;; If the named process does not exist then the process will fail and terminate
+  ;;;
+  ;;; and uninitialized) data segments
+  ;;; with  a  new  program, with newly initialized stack, heap, and (initialized
+  ;;; program that is currently being run by the calling process to  be  replaced
+  ;;; execve()  executes  the  program  referred to by pathname.  This causes the
+  (@interface func (export "proc_exec")
+    ;;; Name of the process to be spawned
+    (param $name string)
+    ;;; List of the arguments to pass the process
+    ;;; (entries are separated by line feeds)
+    (param $args string)
+    ;;; This function never returns
+    (@witx noreturn)
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

@@ -8,15 +8,18 @@ The `fd_allocate` function is used to allocate additional space for a file descr
 
 ### Syntax
 
-```rust
-pub fn fd_allocate(
-    ctx: FunctionEnvMut<'_, WasiEnv>,
-    fd: WasiFd,
-    offset: Filesize,
-    len: Filesize,
-) -> Errno
+```ebnf
+  ;;; Note: This is similar to `posix_fallocate` in POSIX.
+  ;;; Force the allocation of space in a file.
+  (@interface func (export "fd_allocate")
+    (param $fd $fd)
+    ;;; The offset at which to start the allocation.
+    (param $offset $filesize)
+    ;;; The length of the area that is allocated.
+    (param $len $filesize)
+    (result $error (expected (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.

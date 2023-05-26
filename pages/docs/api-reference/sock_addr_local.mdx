@@ -8,14 +8,19 @@ The `sock_addr_local()` function retrieves the local address to which the socket
 
 ### Syntax
 
-```rust
-pub fn sock_addr_local<M: MemorySize>(
-    mut ctx: FunctionEnvMut<'_, WasiEnv>,
-    sock: WasiFd,
-    ret_addr: WasmPtr<__wasi_addr_port_t, M>,
-) -> Errno
+```ebnf
+  ;;; either IP4 or IP6.
+  ;;; When successful, the contents of the output buffer consist of an IP address,
+  ;;;
+  ;;; Note: This is similar to `getsockname` in POSIX
+  ;;;
+  ;;; Returns the local address to which the socket is bound.
+  (@interface func (export "sock_addr_local")
+    ;;; Socket that the address is bound to
+    (param $fd $fd)
+    (result $error (expected $addr_port (error $errno)))
+  )
 ```
-
 ### Parameters
 
 - `ctx`: A mutable reference to the function environment.
