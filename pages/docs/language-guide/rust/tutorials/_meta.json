@@ -1,9 +1,5 @@
 {
   "wasix-axum": "Wasix with Axum",
-  "thread-local": "Thread-local storage",
   "condvar": "Condition variables",
-  "multi-threading": "Multi-threading",
-  "http-ok": "TCP HTTP server",
-  "threading": "Threading with Wasix",
-  "unix-pipe": "Unix pipe"
+  "threading": "Threading with Wasix"
 }
