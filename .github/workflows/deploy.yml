@@ -20,10 +20,7 @@ jobs:
           toolchain: stable
 
       - name: Install the Deploy CLI
-        uses: actions-rs/install@v0.1
-        with:
-          crate: wasmer-deploy-cli
-          version: 0.1.9
+        run: cargo install wasmer-deploy-cli -F reqwest/rustls-tls
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
