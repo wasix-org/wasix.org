@@ -6,8 +6,8 @@ This sample project demonstrates how file-copying works using a C program compil
 
 The project requires the following tools to be installed on your system:
 
-- [WASIX](TODO: link to WASIX Installation with C)
-- [WASIX SDK](TODO: link to WASIX SDK Installation)
+- [wasi-sdk](https://github.com/WebAssembly/wasi-sdk)
+- [wasix-libc](https://github.com/wasix-org/wasix-libc)
 
 import { Steps } from "nextra-theme-docs";
 import { Callout, FileTree } from "nextra-theme-docs";
@@ -31,8 +31,10 @@ $ touch file-copy.c
 
 #### Link the SysRoot
 
-<Callout type="error" emoji="🔴">
-  TODO: Write about linking the SysRoot
+<Callout type="info" emoji="ℹ️">
+  You need to link the SysRoot to your project. The SysRoot is a directory that
+  contains the WASI libc headers and libraries. The SysRoot is located in the
+  Wasix-libc binary or you can compile it yourself.
 </Callout>
 
 ### Writing the Application
@@ -170,7 +172,7 @@ Hello, World!
 #### Let's try to build this example with WASIX.
 
 ```shell
-$ (TODO)/path/to/wasix-sdk/clang file-copy.c --target="wasm32-wasi" -o file-copy.wasm
+$ /path/to/wasix-sdk/clang file-copy.c --target="wasm32-wasi" -o file-copy.wasm
 ```
 
 It's compiling! Now, let's try to run it:

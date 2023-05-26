@@ -6,8 +6,8 @@ This sample project demonstrates how to read directories in WASIX.
 
 The project requires the following tools to be installed on your system:
 
-- [WASIX](TODO: link to WASIX Installation with C)
-- [WASIX SDK](TODO: link to WASIX SDK Installation)
+- [wasi-sdk](https://github.com/WebAssembly/wasi-sdk)
+- [wasix-libc](https://github.com/wasix-org/wasix-libc)
 
 import { Steps } from "nextra-theme-docs";
 import { Callout, FileTree } from "nextra-theme-docs";
@@ -31,8 +31,10 @@ $ touch readdir.c
 
 #### Link the SysRoot
 
-<Callout type="error" emoji="🔴">
-  TODO: Write about linking the SysRoot
+<Callout type="info" emoji="ℹ️">
+  You need to link the SysRoot to your project. The SysRoot is a directory that
+  contains the WASI libc headers and libraries. The SysRoot is located in the
+  Wasix-libc binary or you can compile it yourself.
 </Callout>
 
 ### Writing the Application
@@ -112,7 +114,7 @@ The `main` function takes the directory name as a command-line argument and call
 Let's compile the application with WASIX:
 
 ```shell
-$ (TODO)/path/to/wasix-sdk/clang readdir.c --target="wasm32-wasi" -o readdir.wasm
+$ /path/to/wasix-sdk/clang readdir.c --target="wasm32-wasi" -o readdir.wasm
 ```
 
 It's compiling! Now, let's try to run it:

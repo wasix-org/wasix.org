@@ -33,7 +33,7 @@ In addition to toolchain support that we hope to upstream.
 - rust `mio` support (abstraction of Wasm sockets)
 - C compiler support (including an installable toolchain)
 
-## Extension for WASI (TODO: WASI-Extended?)
+## Extension for [WASI](/docs/explanation/extensions-to-wasi)
 
 While WASI has been instrumental in advancing the Wasm community, its standardization process has been slow, lacking some crucial features necessary for traditional apps. WASI doesn't yet fully support threads, Berkeley sockets, forking, and other POSIX features that have been around for a long time.
 
@@ -67,17 +67,15 @@ WASIX currently supports the following languages:
 
 - Rust (link to rust specific guide for examples with Rust)
 - C (link to C specific guide for examples with C)
-- Zig ? (TODO: Ask @syrusakbary)
-- AssemblyScript (TODO: Ask @syrusakbary)
+- Zig
+- AssemblyScript (Support coming soon)
 
 ### How to run WASIX programs ?
 
 WASIX programs can be run on any WASI runtime that supports WASIX. Currently, the only runtime that supports WASIX is **Wasmer**. However, we expect more runtimes to join soon.
 
-See the (TODO: link to running programs in wasix with wasmer) for more information on how to run WASIX programs.
+See the [language guide](http://wasix.org/docs/language-guide/rust/usage) for more information on how to run programs with WASIX.
 
 ### Can I contribute to WASIX ?
 
 WASIX is fully Open Source and adheres to all licenses of the work it derives from and thus is open to contributions from anyone but must follow the key design requirements; especially the goal of long term support and stabilization. The intent is not to fork the WASI standard but to protect the progress already made so that engineers around the world can really get going with building great apps.
-
-For more information on how to contribute to WASIX, see the (TODO: link to contributing to wasix) guide.
