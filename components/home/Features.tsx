@@ -4,11 +4,11 @@ import { BsGlobe2, BsGearFill } from "react-icons/bs";
 import { TbRocket } from "react-icons/tb";
 import { FaSyncAlt } from "react-icons/fa";
 import { VscFileSymlinkDirectory } from "react-icons/vsc";
-import { HiLightningBolt } from "react-icons/hi";
 import { TbJumpRope } from "react-icons/tb";
 import { GiSpawnNode } from "react-icons/gi";
 import { MdForkRight } from "react-icons/md";
 import { BiTerminal } from "react-icons/bi";
+import { FaNetworkWired } from "react-icons/fa";
 import { classNames } from "../utils";
 
 const actions = [
@@ -37,7 +37,7 @@ const actions = [
         </ul>
       </p>
     ),
-    icon: BsGlobe2,
+    icon: FaNetworkWired,
     iconForeground: "text-sky-500",
     iconBackground: "bg-sky-100 dark:bg-sky-800 dark:bg-opacity-30",
   },
@@ -51,6 +51,20 @@ const actions = [
         </span>
         enabling applications to better utilize system resources and achieve
         superior performance.
+        <ul className="list-disc pl-4 font-bold">
+          <li>
+            <span className="bg-rose-100 dark:bg-rose-800 dark:bg-opacity-30 text-rose-700 px-1 py-[2px] rounded-md font-bold text-xs">
+              Rayon
+            </span>{" "}
+            in Rust
+          </li>
+          <li>
+            <span className="bg-rose-100 dark:bg-rose-800 dark:bg-opacity-30 text-rose-700 px-1 py-[2px] rounded-md font-bold text-xs">
+              pthreads
+            </span>{" "}
+            in C
+          </li>
+        </ul>
       </p>
     ),
     icon: TbRocket,
@@ -100,28 +114,17 @@ const actions = [
     iconBackground: "bg-yellow-100 dark:bg-yellow-800 dark:bg-opacity-30",
   },
   {
-    title: "Threading Support",
+    title: "Browser Support",
     Description: () => (
       <p>
-        WASIX supports threading in both Rust and C:
-        <ul className="list-disc pl-4 font-bold">
-          <li>
-            <span className="bg-rose-100 dark:bg-rose-800 dark:bg-opacity-30 text-rose-700 px-1 py-[2px] rounded-md font-bold text-xs">
-              Rayon
-            </span>{" "}
-            in Rust
-          </li>
-          <li>
-            <span className="bg-rose-100 dark:bg-rose-800 dark:bg-opacity-30 text-rose-700 px-1 py-[2px] rounded-md font-bold text-xs">
-              pthreads
-            </span>{" "}
-            in C
-          </li>
-        </ul>
+        WASIX compiled programs can directly run in the browser using
+        <span className="bg-rose-100 dark:bg-rose-800 dark:bg-opacity-30 text-rose-600 px-1 py-[2px] rounded-md font-bold text-xs">
+          WASM
+        </span>
       </p>
     ),
-    icon: HiLightningBolt,
-    iconForeground: "text-rose-700",
+    icon: BsGlobe2,
+    iconForeground: "text-rose-600",
     iconBackground: "bg-rose-100 dark:bg-rose-800 dark:bg-opacity-30",
   },
   {
