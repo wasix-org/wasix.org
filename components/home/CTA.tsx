@@ -19,7 +19,7 @@ export default function CTA() {
             Documentation
           </a>
           <a
-            href="#"
+            href="https://discord.gg/qBTfsNP7N8"
             className="text-sm font-semibold leading-6 text-white dark:text-black "
           >
             Join the Community <span aria-hidden="true">→</span>
