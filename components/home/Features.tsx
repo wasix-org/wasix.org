@@ -53,13 +53,13 @@ const actions = [
         superior performance.
         <ul className="list-disc pl-4 font-bold">
           <li>
-            <span className="bg-rose-100 dark:bg-rose-800 dark:bg-opacity-30 text-rose-700 px-1 py-[2px] rounded-md font-bold text-xs">
+            <span className="bg-violet-100 dark:bg-violet-900 dark:bg-opacity-30 text-purple-500 px-1 py-[2px] rounded-md font-bold text-xs">
               Rayon
             </span>{" "}
             in Rust
           </li>
           <li>
-            <span className="bg-rose-100 dark:bg-rose-800 dark:bg-opacity-30 text-rose-700 px-1 py-[2px] rounded-md font-bold text-xs">
+            <span className="bg-violet-100 dark:bg-violet-900 dark:bg-opacity-30 text-purple-500 px-1 py-[2px] rounded-md font-bold text-xs">
               pthreads
             </span>{" "}
             in C
