@@ -1,19 +1,21 @@
-## `sock_accept()`
+## `sock_accept_v2()`
 
 Accept a new incoming connection.
 
 ### Description
 
-The `sock_accept()` function is used to accept a new incoming connection on a listening socket. It is similar to the `accept` function in POSIX.
+The `sock_accept_v2()` function is used to accept a new incoming connection on a listening socket. It is similar to the `accept` function in POSIX.
 
 When a connection is accepted, a new socket is created and returned. This new socket represents the communication channel with the client.
+
+> WASI version of sock_accept does not return an address which obviously is a bit of a problem for those that want to know who actually connected to them. i.e. the peer address and port
 
 ### Syntax
 
 ```ebnf
   ;;; Accept a new incoming connection.
   ;;; Note: This is similar to `accept` in POSIX.
-  (@interface func (export "sock_accept")
+  (@interface func (export "sock_accept_v2")
     ;;; The listening socket.
     (param $fd $fd)
     ;;; The desired values of the file descriptor flags.
@@ -37,9 +39,9 @@ The function returns a `Result` containing the outcome of the operation. If the 
 
 ### Notes
 
-- The `sock_accept()` function accepts a new incoming connection on a listening socket.
+- The `sock_accept_v2()` function accepts a new incoming connection on a listening socket.
 - The function blocks until a connection request is received.
 - Upon successful acceptance of a connection, a new socket is created to handle communication with the client.
 - The file descriptor flags specified by `fd_flags` control the behavior of the new socket.
 - The address of the remote client, including the IP address and port number, is written to the memory location pointed to by `ro_addr`.
-- The specific behavior of the `sock_accept()` function may vary depending on the runtime environment and underlying networking implementation.
+- The specific behavior of the `sock_accept_v2()` function may vary depending on the runtime environment and underlying networking implementation.
