@@ -1,4 +1,8 @@
 import React from "react";
+
+import { VscCommentDiscussion } from "react-icons/vsc";
+import { TbBook2 } from "react-icons/tb";
+
 export default function CTA() {
   return (
     <div className="mb-28">
@@ -14,9 +18,20 @@ export default function CTA() {
         <div className="mt-10 flex items-center justify-center gap-x-6">
           <a
             href="/docs"
-            className="rounded-md bg-white dark:bg-black px-3.5 py-2.5 text-sm font-semibold text-gray-900 dark:text-white shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="inline-flex items-center gap-x-1.5 rounded-md bg-white dark:bg-black px-3.5 py-2.5 text-sm font-semibold text-gray-900 dark:text-white shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
+            <TbBook2 className="-ml-0.5 h-5 w-5" aria-hidden="true" />
             Documentation
+          </a>
+          <a
+            href="https://github.com/orgs/wasix-org/discussions/1"
+            className="items-center gap-x-1.5 hidden md:inline-flex rounded-md bg-white dark:bg-black px-3.5 py-2.5 text-sm font-semibold text-gray-900 dark:text-white shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+          >
+            <VscCommentDiscussion
+              className="-ml-0.5 h-5 w-5"
+              aria-hidden="true"
+            />
+            GitHub Discussions
           </a>
           <a
             href="https://discord.gg/qBTfsNP7N8"
