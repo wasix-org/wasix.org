@@ -6,6 +6,22 @@ The wasix ecosystem comprises of both Rust and C libraries to support both envir
 
 ![dependencies](../../assets/wasix-dependencies.png)
 
+## How do I add syscalls?
+
+Open a pull request on wasix-witx, make sure the syscall is forwards and backwards compatible with other syscalls and types. The syscall must also be documented to explain what it does and how it relates to POSIX.
+
+Once your pull request is accepted you may open pull requests on wasix-libc and the other projects that use the ABI.
+
+## How do i setup my environment for syscall development?
+
+Pull all the associated and relevant projects locally that are referenced in the dependencies graph. Pull your favorite runtime implementation. Write patches and compile and test locally. Once you are ready submit pull requests.
+
+## How do I implement WASIX in my runtime (e.g. wazero)?
+
+The WASI preview1 ABI must first be implemented then the WASIX extensions which live seperately under their own namespace (wasix32_v1). Care must be taken on abstracrions as it is intended that the 64bit equivalents will also ship soon.
+
+Once the ABI is implemented there are a suite of compiled integration tests under wasmerio/wasmer/tests/cli/integration which you are free to reuse.
+
 ## Language Specific Developer Guides
 
 You can get started with language specific developer guides below:
