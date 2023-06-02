@@ -142,9 +142,9 @@ tokio = { version = "=1.24.2", default-features = false, features = ["full"] } #
 parking_lot = { version = "=0.12.1", features = ["nightly"] } # ← Added Line
 
 [patch.crates-io]
-socket2 = { git = "https://github.com/john-sharratt/socket2.git", branch = "v0.4.7" } # ← Added Line
-libc = { git = "https://github.com/john-sharratt/libc.git" } # ← Added Line
-tokio = { git = "https://github.com/john-sharratt/tokio.git", branch = "wasix-1.24.2" } # ← Added Line
+socket2 = { git = "https://github.com/wasix-org/socket2.git", branch = "v0.4.7" } # ← Added Line
+libc = { git = "https://github.com/wasix-org/libc.git" } # ← Added Line
+tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "wasix-1.24.2" } # ← Added Line
 ```
 
 <Callout type="info" emoji="ℹ️">
@@ -165,7 +165,7 @@ $ cargo wasix build
     Updating crates.io index
     Blocking waiting for file lock on package cache
     Blocking waiting for file lock on package cache
-   Compiling tokio v1.24.2 (https://github.com/john-sharratt/tokio.git?branch=wasix-1.24.2#8ba16a72)
+   Compiling tokio v1.24.2 (https://github.com/wasix-org/tokio.git?branch=wasix-1.24.2#8ba16a72)
    Compiling tower v0.4.13
    Compiling hyper v0.14.26
    Compiling tower-http v0.4.0
