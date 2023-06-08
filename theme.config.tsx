@@ -94,7 +94,7 @@ const config: DocsThemeConfig = {
   },
   logo,
   chat: {
-    link: "https://discord.gg/qBTfsNP7N8",
+    link: "https://discord.gg/rWkMNStrEW",
   },
   head: function useHead() {
     const { title } = useConfig();

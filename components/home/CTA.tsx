@@ -34,7 +34,7 @@ export default function CTA() {
             GitHub Discussions
           </a>
           <a
-            href="https://discord.gg/qBTfsNP7N8"
+            href="https://discord.gg/rWkMNStrEW"
             className="text-sm font-semibold leading-6 text-white dark:text-black "
           >
             Join the Community <span aria-hidden="true">→</span>
