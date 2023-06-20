@@ -1,5 +1,0 @@
----
-kind: wasmer.io/App.v0
-name: wasix-docs
-app_id: da_DR9EIBt1UlJR
-package: wasmer/wasix-docs@0.60.0
