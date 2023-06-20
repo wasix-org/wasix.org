@@ -1,0 +1,10 @@
+[package]
+name = "wasmer/wasix-docs"
+version = "0.60.0"
+description = "Documentation for WASIX"
+
+[dependencies]
+"sharrattj/static-web-server" = "1"
+
+[fs]
+public = "release"
