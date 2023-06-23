@@ -22,7 +22,7 @@ jobs:
       - name: Setup Wasmer
         uses: wasmerio/setup-wasmer@v2
         with:
-          version: "v4.0.0-beta.3"
+          version: "v4.0.0"
 
       - name: Install pnpm
         uses: pnpm/action-setup@v2
@@ -53,4 +53,4 @@ jobs:
 
       # Publish to wasix.org
       - name: Publish
-        run: wasmer deploy --publish-package --registry https://registry.wasmer.io/graphql --token=${{ secrets.WAPM_PROD_TOKEN }} --non-interactive
+        run: wasmer deploy --publish-package --registry https://registry.wasmer.io/graphql --token=${{ secrets.WASMER_CIUSER_PROD_TOKEN }} --non-interactive
