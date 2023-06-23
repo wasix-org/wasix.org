@@ -53,4 +53,4 @@ jobs:
 
       # Publish to wasix.org
       - name: Publish
-        run: wasmer deploy --publish-package --registry https://registry.wasmer.io/graphql --token=${{ secrets.WASMER_CIUSER_PROD_TOKEN }} --non-interactive
+        run: wasmer deploy --publish-package --registry https://registry.wasmer.io/graphql --token=${{ secrets.WASMER_CIUSER_PROD_TOKEN }}
