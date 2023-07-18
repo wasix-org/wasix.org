@@ -141,7 +141,7 @@ tokio = { version = "=1.24.2", default-features = false, features = ["full"] } #
 parking_lot = { version = "=0.12.1", features = ["nightly"] } # ← Added Line
 
 [patch.crates-io]
-socket2 = { git = "https://github.com/wasix-org/socket2.git", branch = "v0.4.7" } # ← Added Line
+socket2 = { git = "https://github.com/wasix-org/socket2.git", branch = "v0.4.9" } # ← Added Line
 libc = { git = "https://github.com/wasix-org/libc.git" } # ← Added Line
 tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "wasix-1.24.2" } # ← Added Line
 ```
@@ -216,12 +216,18 @@ Now in a separate terminal, you can use `curl` to make a request to the server:
 
 ```shell
 $ curl http://localhost:3000
-Hello, Axum ❤️ WASIX!%
+Hello, Axum ❤️ WASIX!
 ```
 
 Yay, it works! 🎉
 
 </Steps>
+
+<Callout type="info" emoji="ℹ️">
+  You can also deploy you application to the edge. Checkout this
+  [tutorial](https://docs.wasmer.io/edge/quickstart/http-server) for deploying
+  your wasix-axum server to wasmer edge.
+</Callout>
 
 ## Conclusion
 
