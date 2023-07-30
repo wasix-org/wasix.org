@@ -1,0 +1,150 @@
+import { Callout } from "nextra-theme-docs";
+
+# WASIX: Epoll and TLS
+
+<Callout type="info" emoji="ℹ️">
+  As of [wasmer 4.1](https://wasmer.io/posts/wasmer-4.1), wasmer implements
+  `epoll` for polling on file descriptors. This syscall was added to improve
+  performance in wasix. However, `poll_oneoff` is still supported.
+</Callout>
+
+The release of wasmer 4.1 introduced `epoll` support for wasix. Works for both features, `epoll` and **TLS** support started in April 2023.
+Both features were very important for wasix, as they open up gates for new use cases and improve performance in aspects such as networking, file system access, cryptography, etc.
+
+## Epoll
+
+`epoll` is a variant of `poll` available in the Linux kernel, designed to be more efficient when dealing with large numbers of file descriptors.
+Unlike `poll`, which scans through all file descriptors each time it is called, epoll uses an event-driven approach.
+It maintains a **watch list** of file descriptors, and only those that have changed status since the last call will be returned to the user.
+
+You can learn more about `epoll`, `poll` and `select` in this [article](https://jvns.ca/blog/2017/06/03/async-io-on-linux--select--poll--and-epoll/) by Julia Evans and from a github repository dedicated to learning I/O polling [here](https://github.com/pniewiejski/learn-io-polling).
+
+### Implmentation history
+
+Works on `epoll` for WASIX started in April 2023, in the PR [#3830](https://github.com/wasmerio/wasmer/pull/3830).
+
+This PR was just a proof of concept, for asynchronous I/O multiplexing using `epoll` in WASIX. This POC would have given huge performance benefits when used correctly by a WASIX program.
+
+This PR served as a foundation for [#4050](https://github.com/wasmerio/wasmer/pull/4050) which was the implementation of **asynchronous I/O** using `epoll` in WASIX.
+
+(Can you elaborate more ?) - TODO @sharrattj ?
+
+### What this means for WASIX ?
+
+Before wasmer 4.1, wasmer runtime used the `poll_oneoff` syscall for non-blocking operations such as networking, file system access, etc. This meant that we had to fork mio to use the `poll_oneoff` syscall but found limitations with inconsistencies on how POSIX implements poll and how WASI specified `poll_oneoff`.
+By implementing the much more scalable epoll syscall this allows for a consistent implementation that matches closer to POSIX without hurting WASI backwards compatibility which WASIX is committed to retain.
+
+This means that:
+
+- `epoll` scales much better when running lots of file descriptors. E.g. a http server with hundreds of connections.
+- The I/O lattency is more deterministic and predictable when under heavy load.
+- CPU usage is more efficient than `poll_oneoff`
+- The new epoll calls are much more stable as the code paths are cleaner under the hood as they are much closer to how Linux works
+
+To sum up, the bread and butter of an HTTP Server is now more **stable** and **scalable**.
+
+### What this means for libraries ?
+
+`tokio` the most popular asynchronous runtime for Rust. It is used by many libraries such as `hyper`, `actix-web`, `tide`, `sqlx`, `async-std`, etc.
+It's multiplexed I/O is implemented using `mio` which is a library that provides a cross-platform interface for multiplexed I/O.
+`mio` uses `epoll` and `kqueue` in its native implementaiton but implements [`poll_oneoff`](https://github.com/tokio-rs/mio/blob/master/src/sys/wasi/mod.rs) for WASI.
+
+The official [notes](https://github.com/tokio-rs/mio/blob/2123bedbed00e24dccc036a0e1799e9e1d7dba1c/src/sys/wasi/mod.rs#L1-L14) from `mio`'s WASI implementation too state that:
+
+> The current implementation is somewhat limited. The `Waker` is not implemented, as at the time of writing there is no way to support to wake-up a thread from calling `poll_oneoff`.
+> Furthermore the (re/de)register functions also don't work while concurrently polling as both registering and polling requires a lock on the `subscriptions`.
+> Finally `Selector::try_clone`, required by `Registry::try_clone`, doesn't work. However this could be implemented by use of an `Arc`.
+> In summary, **this only (barely) works using a single thread.**
+
+**SINGLE THREADED!! ???** Would you settle for single threaded when you can have the full power of tokio in WASIX ! That's what we thought too.
+
+## TLS
+
+Now, comming to TLS. One of the most rewqested feature. (pun intended)
+
+TLS is a cryptographic protocol that provides end-to-end encryption and authentication over the internet.
+It is required by many applications such as HTTPS, SMTPS, SFTP, etc.
+
+Our primary focus for TLS was to enable HTTPS clients support for WASIX. This would allow WASIX to be used for outbound HTTPS requests, external API calls, etc.
+
+### Implementation history
+
+Okay, this story is kind of a roller coaster ride. So, buckle up.
+
+TLS works by using a **handshake** protocol to establish a secure connection between two parties. This handshake protocol is implemented by any cryptographic library such as OpenSSL, LibreSSL, BoringSSL, etc.
+For WASI this is under a proposal called [WASI Crypto](https://github.com/WebAssembly/wasi-crypto). This proposal is lead by [Frank Denis](https://github.com/jedisct1) and [Daiki Ueno](https://github.com/ueno).
+
+So there were two paths to implement TLS in WASIX:
+
+1. Use WASI Crypto to implement TLS in WASIX.
+2. Try to compile ring for WASIX.
+
+Like any sane person, we should have waited for WASI Crypto to be implemented or just tried the basic implementation of [WASI crypto](https://github.com/wasm-crypto/wasi-crypto-host-functions) in WASIX.
+But this would have meant that all the libraries that didn't have this implementation such as rustls would not work in WASIX.
+
+But, one thing I learnt at Wasmer is you don't compromise with the developer experience and implement the future NOW.
+So I went down the rabbit hole of trying to compile ring for WASIX.
+
+<Callout type="default" emoji="🥲">
+  **This didn't come in easy.**
+</Callout>
+
+The challenge was ring implements a lot of cryptographic algorithms and implements them using Assembly language which are precompiled for every target
+such as Linux, MacOS, Windows, etc. but for targets that don't have a precompiled assembly language implementation, ring uses a C implementation.
+
+Boom, this is what we needed. We just needed to compile the C implementation of ring for WASIX. But, this was not as easy as it sounds.
+
+I started exploring the ring codebase and found two potential PRs to test out:
+
+- [#1499](https://github.com/briansmith/ring/pull/1499)
+- [#1568](https://github.com/briansmith/ring/pull/1568)
+
+Sadly none of them compiled as **#1499** was not well updated and **#1568** resulted in an error of bn_mul_mont. Which is actually now fixed in the latest ring available on master.
+
+This too was back in April. I then moved on but interestingly one day I got a notification from [Frank Denis](https://github.com/jedisct1) that he compiled ring for WASI and WASIX in his [ring-wasi](https://github.com/jedisct1/ring-wasi) repository.
+This was really exciting and I started testing it out. I quickly forked the repo and started testing it out in WASIX. Sadly, it didn't work but it got us to a 99% working implementation.
+
+So, a few sleepless nights, lot's of energy drink and a dangling around trying to compile every possible `C` file in ring and adding a `bn_mul_mont` fallback. I finally got it to work.
+It was like first time looking at a rainbow 🌈.
+
+Now our implementation of ring which works for WASI/WASIX lives [here](https://github.com/wasix-org/ring).
+
+Compiling ring was the first step. The team quickly got to work to implement all other required libraries:
+
+- [rustls](https://github.com/wasix-org/rustls)
+- [tokio-rustls](https://github.com/wasix-org/tokio-rustls)
+- [hyper](https://github.com/wasix-org/hyper)
+- [hyper-rustls](https://github.com/wasix-org/hyper-rustls)
+- [reqwest](https://github.com/wasix-org/reqwest)
+- [webpki-roots](https://github.com/wasix-org/webpki-roots)
+- [webpki](https://github.com/wasix-org/webpki)
+- [sct](https://github.com/wasix-org/sct)
+
+<Callout type="info" emoji="ℹ️">
+  WASI/WASIX can't use the CA certificates available on a host machine so it
+  need `webpki-roots` to be able to verify the certificates.
+</Callout>
+
+### What this means for WASIX ?
+
+This means that WASIX can now be used for outbound HTTPS requests, external API calls, etc. This is a huge step for WASIX as it opens up a lot of use cases for WASIX.
+
+1. **Secure Access to APIs**: Many modern APIs require a client to communicate over HTTPS. With TLS support, WASIX applications can securely access these APIs directly.
+2. **Secure Database Connections**: WASIX applications can use TLS to connect securely to databases that support encrypted connections. This ensures that sensitive data is protected during transit.
+3. **Secure Third-Party Integrations**: If your WASIX applications need to interact with third-party services (like payment gateways, OAuth providers, etc.), TLS client support allows these interactions to occur securely.
+4. **Ingress and Egress Data Security**: Implementing TLS clients ensures that both incoming and outgoing data from the application is secure, a significant benefit in complex systems where both ingress and egress points need to be equally secure.
+5. **CDN and Edge Computing**: TLS client support can ensure secure communication with Content Delivery Networks (CDNs) and edge computing resources, protecting data integrity and confidentiality while improving content delivery speed.
+6. **Confidential Computing**: With TLS client support, applications can securely retrieve and use confidential data, cryptographic keys, or certificates from remote secure servers or key management systems.
+7. **IoT Applications**: In IoT applications, devices often need to communicate with a central server. TLS client support can be used to ensure these communications are secure.
+
+## Conclusion
+
+The power of `epoll` and `TLS` makes WASIX more stable, secure and scalable than ever.
+
+This was a huge step for WASIX and we are really excited to see what the community builds with this.
+We are also working on a few examples to showcase the power of WASIX.
+You can try out our starter tutorial for outbound proxies [here](/todo/). More examples will follow suit.
+
+At the end, I would like to thank Frank Denis on the behalf of whole Wasmer Team for his work on the ring-wasi implementation and all of the wasmer team for their support and guidance and ofcourse their work on Wasmer 4.1.
+
+If you have any questions, feel free to reach out to us on [Discord](https://discord.gg/rWkMNStrEW).

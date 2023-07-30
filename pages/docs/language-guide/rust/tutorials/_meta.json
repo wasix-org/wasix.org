@@ -1,5 +1,6 @@
 {
   "wasix-axum": "Wasix with Axum",
+  "wasix-reqwest": "Wasix with Reqwest",
   "condvar": "Condition variables",
   "threading": "Threading with Wasix"
 }
