@@ -1,9 +1,15 @@
 import { Steps } from "nextra-theme-docs";
 import { Callout, FileTree } from "nextra-theme-docs";
 
+<Callout type="default" emoji="🎉">
+  As of [wasmer 4.1](https://wasmer.io/posts/wasmer-4.1), `epoll` syscall and
+  `TLS` clients are now supported in WASIX. This was done by compiling ring.
+  Read our whole blog post about it [here](/link/blog/epoll-n-tls/TODO).
+</Callout>
+
 ## WASIX with Reqwest
 
-This is a sample project that shows how to use a Reqwest client to build an outbound proxy and compile it to the WASIX.
+This is a sample project that shows how to use a Reqwest client to build an outbound proxy and compile it to WASIX.
 
 ### Prerequisites
 
@@ -17,14 +23,14 @@ The project requires the following tools to be installed on your system:
 ### Start a new project
 
 ```shell
-$ cargo new --bin wasix-axum
-     Created binary (application) `wasix-axum` package
+$ cargo new --bin wasix-reqwest-proxy
+     Created binary (application) `wasix-reqwest-proxy` package
 ```
 
-Your `wasix-axum` directory structure should look like this:
+Your `wasix-reqwest-proxy` directory structure should look like this:
 
 <FileTree>
-  <FileTree.Folder name="wasix-axum" defaultOpen>
+  <FileTree.Folder name="wasix-reqwest-proxy" defaultOpen>
     <FileTree.Folder name="src" defaultOpen>
       <FileTree.File name="main.rs" />
     </FileTree.Folder>
@@ -35,146 +41,195 @@ Your `wasix-axum` directory structure should look like this:
 
 ### Add dependencies
 
+<Callout type="warning" emoji="⚠️">
+  We will use pinned dependencies from
+  [**wasix-org**](https://github.com/wasix-org) to make sure that our project
+  compiles with wasix.
+</Callout>
+
 ```shell
-$ cd wasix-axum
-$ cargo add axum --features tokio
-$ cargo add tokio --features full
+$ cd wasix-reqwest-proxy
+$ cargo add tokio --git https://github.com/wasix-org/tokio.git --branch wasix-1.24.2 --features rt-multi-thread,macros,fs,io-util,net,signal
+$ cargo add reqwest --git https://github.com/wasix-org/reqwest.git --features json,rustls-tls
+$ cargo add hyper --git https://github.com/wasix-org/hyper.git --branch v0.14.27 --features server
+$ cargo add anyhow
 ```
 
-Now your `Cargo.toml` should look like this:
+We also need to add some patch crates to our `Cargo.toml` so that all other dependencies compile with wasix:
 
 ```toml filename="Cargo.toml"
 [package]
-name = "wasix-axum"
+name = "wasix-reqwest-proxy"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.6.18", features = ["tokio"] }
-tokio = { version = "1.28.1", features = ["full"] }
+tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "epoll", default-features = false, features = [
+    "rt-multi-thread",
+    "macros",
+    "fs",
+    "io-util",
+    "net",
+    "signal",
+] }
+reqwest = { git = "https://github.com/wasix-org/reqwest.git", default-features = false, features = [
+    "json",
+    "rustls-tls",
+] }
+anyhow = { version = "1.0.71" }
+hyper = { git = "https://github.com/wasix-org/hyper.git", branch = "v0.14.27", features = [
+    "server",
+] }
+
+[patch.crates-io] # 👈🏼 Added section here
+socket2 = { git = "https://github.com/wasix-org/socket2.git", branch = "v0.4.9" }  # 👈🏼 Added line here
+libc = { git = "https://github.com/wasix-org/libc.git" }  # 👈🏼 Added line here
+tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "epoll" }  # 👈🏼 Added line here
+rustls = { git = "https://github.com/wasix-org/rustls.git", branch = "v0.21.5" }  # 👈🏼 Added line here
+hyper = { git = "https://github.com/wasix-org/hyper.git", branch = "v0.14.27" }  # 👈🏼 Added line here
+
 ```
+
+<Callout type="info" emoji="ℹ️">
+  For making certain features such as **networking**, **sockets**,
+  **threading**, etc. work with wasix we need patch dependencies for some crates
+  that use those features.
+</Callout>
 
 ### Writing the Application
 
-#### Basic Application Setup
+Our outbound proxy application will have two parts:
 
-Now, let's stub out a basic `get` route that returns a string using a `handler` function.
+1. Listen for incoming requests using the `hyper` server
+2. Forward the request to the destination using the `reqwest` client and return the response to the client
+
+#### Part 1. - Listening for incoming requests
+
+Let's setup a basic `hyper` server that listens on port `3000`. This code goes inside our main function.
 
 ```rust copy filename="src/main.rs"
-use axum::{routing::get, Router};
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+
+    println!("Listening on {}", addr);
+
+    // And a MakeService to handle each connection...
+    let make_service = make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(handle)) });
+    //                                                                                ^^^^^^
+    // 🔦 Focus here - This handle function is what connects to the part 2 of our application.
+
+    // Then bind and serve...
+    let server = Server::bind(&addr).serve(make_service);
+
+    // And run forever...
+    Ok(server.await?)
+```
+
+#### Part 2. - Forwarding the request to the destination
+
+Now let's write the `handle` function that will be called for each incoming request. This function will use the `reqwest` client to forward the request to the destination and return the response to the client.
+
+```rust copy filename="src/main.rs"
+async fn handle(req: Request<Body>) -> Result<Response<Body>, Infallible> {
+    // Create the destination URL
+    let path = format!(
+        "https://www.rust-lang.org/{}",
+        req.uri()
+            .path_and_query()
+            .map(|p| p.as_str())
+            .unwrap_or(req.uri().path())
+    ); // ← 1.
+
+    let mut status = StatusCode::OK;
+    let body = match async { reqwest::get(path).await?.text().await }.await {
+        Ok(b) => b,
+        Err(err) => {
+            status = err.status().unwrap_or(StatusCode::BAD_REQUEST);
+            format!("{err}")
+        }
+    }; // ← 2.
+    let body = String::from_utf8_lossy(body.as_bytes()).to_string(); // ← 3.
+
+    let mut res = Response::new(Body::from(body)); // ← 4.
+    *res.status_mut() = status; // ← 5.
+    Ok(res) // ← 6.
+}
+```
+
+Let's go through the code above:
+
+1. Create a `path` variable that contains the destination URL. We use the `req.uri()` to get the request URI and then append it to the destination URL.
+2. Use the `reqwest` client to make a request to the destination URL. We use the `await` keyword to wait for the response. If the request fails, we set the `status` variable to `BAD_REQUEST` and return the error message as the response body.
+3. Convert the response body to a `String` using `String::from_utf8_lossy`. This is required because the `Body` type requires the body to be `Send` and `Sync` and `String` implements both of these traits.
+4. Create a new `Response` with the body we received from the destination.
+5. Set the status of the response to the `status` variable we set earlier.
+6. Finally, Return the response.
+
+Your `src/main.rs` should now look like this:
+
+```rust copy filename="src/main.rs"
+use hyper::service::{make_service_fn, service_fn};
+use hyper::{Body, Request, Response, Server, StatusCode};
+use std::convert::Infallible;
 use std::net::SocketAddr;
 
+async fn handle(req: Request<Body>) -> Result<Response<Body>, Infallible> {
+    let path = format!(
+        "https://www.rust-lang.org/{}",
+        req.uri()
+            .path_and_query()
+            .map(|p| p.as_str())
+            .unwrap_or(req.uri().path())
+    );
+
+    let mut status = StatusCode::OK;
+    let body = match async { reqwest::get(path).await?.text().await }.await {
+        Ok(b) => b,
+        Err(err) => {
+            status = err.status().unwrap_or(StatusCode::BAD_REQUEST);
+            format!("{err}")
+        }
+    };
+    let body = String::from_utf8_lossy(body.as_bytes()).to_string();
+
+    let mut res = Response::new(Body::from(body));
+    *res.status_mut() = status;
+    Ok(res)
+}
+
 #[tokio::main]
-async fn main() {
-    // Building our application with a single Route
-    let app = Router::new().route("/", get(handler));
-
-    // Run the server with hyper on http://127.0.0.1:3000
+async fn main() -> anyhow::Result<()> {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
-        .await
-        .unwrap();
-}
 
-async fn handler() -> &'static str {
-    "Hello, Axum ❤️ WASIX!"
-}
+    println!("Listening on {}", addr);
 
+    // And a MakeService to handle each connection...
+    let make_service = make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(handle)) });
+
+    // Then bind and serve...
+    let server = Server::bind(&addr).serve(make_service);
+
+    // And run forever...
+    Ok(server.await?)
+}
 ```
 
 #### Running the Application
 
-Run the application with the `cargo`:
+Let's compile the application to WASIX and run it:
 
-```shell
-$ cargo run
-   Compiling wasix-axum v0.1.0 (/wasix-axum)
-    Finished dev [unoptimized + debuginfo] target(s) in 1.41s
-     Running `target/debug/wasix-axum`
-```
-
-Now in a separate terminal, you can use `curl` to make a request to the server:
-
-```shell
-$ curl http://127.0.0.1:3000
-Hello, Axum ❤️ WASIX!%
-```
-
-Hmm, but let's see does it work with wasix ? Let's try to build it with wasix:
+##### Compiling to WASIX
 
 ```shell
 $ cargo wasix build
-...
-    ::: .cargo/registry/src/index.crates.io/socket2-0.4.9/src/lib.rs:104:16
-     |
-104  |             fn from(socket: $from) -> $for {
-     |                ---- implicitly returns `()` as its body has no tail or `return` expression
-
-Some errors have detailed explanations: E0061, E0308, E0412, E0422, E0425, E0432, E0433, E0583, E0618.
-For more information about an error, try `rustc --explain E0061`.
-error: could not compile `socket2` (lib) due to 202 previous errors
-warning: build failed, waiting for other jobs to finish..
-...
+Compiling autocfg v1.1.0
+Compiling wasi v0.11.0+wasi-snapshot-preview1
+Compiling proc-macro2 v1.0.66
+Compiling cfg-if v1.0.0
+Compiling unicode-ident v1.0.11
+Compiling libc v0.2.139 (https://github.com/wasix-org/libc.git#4c0c6c29)
+Compiling wasix-reqwest-proxy v0.1.0 (/wasix-reqwest-proxy)
+   ...
 ```
-
-Oh no, it doesn't work. But why ?
-
-#### Compiling with WASIX
-
-<Callout type="info" emoji="ℹ️">
-  For making certain features such as networking, sockets, threading, etc. work
-  with wasix we need patch dependencies for some crates that use those features.
-</Callout>
-
-Let's add the following patch to our `Cargo.toml`:
-
-```toml copy filename="Cargo.toml"
-[package]
-name = "wasix-axum"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-axum = { version = "=0.6.9", features = ["tokio"] } # ← Updated Line
-tokio = { version = "=1.24.2", default-features = false, features = ["full"] } # ← Updated Line
-parking_lot = { version = "=0.12.1", features = ["nightly"] } # ← Added Line
-
-[patch.crates-io]
-socket2 = { git = "https://github.com/wasix-org/socket2.git", branch = "v0.4.9" } # ← Added Line
-libc = { git = "https://github.com/wasix-org/libc.git" } # ← Added Line
-tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "wasix-1.24.2" } # ← Added Line
-```
-
-<Callout type="info" emoji="ℹ️">
-  As you can see above the `parking_lot` crate works out of the box 🚀 with
-  wasix. It just needs the `nightly` feature to be enabled.
-</Callout>
-
-<Callout type="warning" emoji="🚧">
-  We need to pin and replace some dependencies to achieve wasix compatibility.
-  So, currently supported axum version is `0.6.9` and tokio version is `1.24.2`.
-</Callout>
-
-Now, let's try to build it with wasix again:
-
-```shell
-$ cargo wasix build
-    Blocking waiting for file lock on package cache
-    Updating crates.io index
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-   Compiling tokio v1.24.2 (https://github.com/wasix-org/tokio.git?branch=wasix-1.24.2#8ba16a72)
-   Compiling tower v0.4.13
-   Compiling hyper v0.14.26
-   Compiling tower-http v0.4.0
-   Compiling axum v0.6.9
-   Compiling wasix-axum v0.1.0 (/wasix-axum)
-    Finished dev [unoptimized + debuginfo] target(s) in 14.63s
-info: Post-processing WebAssembly files
-```
-
-Yay, it builds! Now, let's try to run it:
 
 <Callout type="error" emoji="🚨">
   It could happen that the above command might fail for you, this is because of
@@ -182,18 +237,13 @@ Yay, it builds! Now, let's try to run it:
   `cargo update` and then running `cargo wasix build` again.
 </Callout>
 
+Yay, it builds! Now, let's try to run it:
+
+##### Running the Application with Wasmer
+
 ```shell
-$ cargo wasix run
-    Finished dev [unoptimized + debuginfo] target(s) in 0.23s
-     Running `/Users/xorcist/.cargo/bin/cargo-wasix target/wasm32-wasmer-wasi/debug/wasix-axum.wasm`
-info: Post-processing WebAssembly files
-     Running `target/wasm32-wasmer-wasi/debug/wasix-axum.wasm`
-thread 'main' panicked at 'error binding to 127.0.0.1:3000: error creating server listener: Not supported (os error 58)', .cargo/registry/src/index.crates.io-/hyper-0.14.26/src/server/server.rs:79:13
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-error: failed to run `target/wasm32-wasmer-wasi/debug/wasix-axum.wasm`
-╰─▶ 1: RuntimeError: unreachable
-error: failed to execute "wasmer" "--enable-threads" "--" "target/wasm32-wasmer-wasi/debug/wasix-axum.wasm"
-    status: exit status: 134
+$ wasmer run target/wasm32-wasmer-wasi/debug/wasix-reqwest-proxy.wasm
+
 ```
 
 <Callout type="warning" emoji="🚧">
@@ -204,7 +254,7 @@ error: failed to execute "wasmer" "--enable-threads" "--" "target/wasm32-wasmer-
 Let's try to run it with wasmer:
 
 ```shell copy
-$ wasmer run target/wasm32-wasmer-wasi/debug/wasix-axum.wasm --net --enable-threads
+$ wasmer run target/wasm32-wasmer-wasi/debug/wasix-reqwest-proxy.wasm --net --enable-threads
 ```
 
 Let's go through the flags we used above:
@@ -215,26 +265,55 @@ Let's go through the flags we used above:
 Now in a separate terminal, you can use `curl` to make a request to the server:
 
 ```shell
-$ curl http://localhost:3000
-Hello, Axum ❤️ WASIX!
+$ curl localhost:3000
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <title>
+        Rust Programming Language
+        ...
 ```
 
-Yay, it works! 🎉
+Congratulations! You have successfully built an outbound proxy server using hyper, reqwest and wasix.
 
 </Steps>
 
 <Callout type="info" emoji="ℹ️">
   You can also deploy you application to the edge. Checkout this
-  [tutorial](https://docs.wasmer.io/edge/quickstart/http-server) for deploying
-  your wasix-axum server to wasmer edge.
+  [tutorial](TODO) for deploying your wasix-reqwest-proxy server to wasmer edge.
+</Callout>
+
+## Exercises
+
+### Exercise 1
+
+Try to take the destination URL as a query parameter.
+
+```shell
+$ curl localhost:3000?url=https://www.rust-lang.org
+```
+
+### Exercise 2
+
+Try to take the destination URL as a parameter for the `.wasm` file.
+
+```shell
+$ wasmer run target/wasm32-wasmer-wasi/debug/wasix-reqwest-proxy.wasm --net --enable-threads -- --url=https://www.rust-lang.org
+```
+
+<Callout type="default" emoji="💡">
+  You can use the `--` to pass arguments to the `.wasm` file and use the rust's
+  default `std::env::args` to parse the arguments. Learn more about
+  [wasmer-cli](/todo/).
 </Callout>
 
 ## Conclusion
 
 In this tutorial, we learned:
 
-- How to build a simple web server using axum and **compile it with wasix**.
-- How to **patch** dependencies add WASIX support until changes are adopted upstream.
+- How to build a simple outbound proxy server using `hyper` and `reqwest`.
+- How to **patch** dependencies add WASIX support.
 - How to run wasix based `.wasm` files with **Wasmer**.
 - How to enable **networking** and **threading** support for wasm files.
 
@@ -249,6 +328,6 @@ import { Card, Cards } from "nextra-theme-docs";
       />
     </svg>
   }
-  title="wasix-rust-examples/wasix-axum"
-  href="https://github.com/wasix-org/wasix-rust-examples/tree/main/wasix-axum"
+  title="wasix-rust-examples/wasix-reqwest-proxy"
+  href="https://github.com/wasix-org/wasix-rust-examples/tree/main/wasix-reqwest-proxy"
 />
