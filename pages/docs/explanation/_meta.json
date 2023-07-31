@@ -1,6 +1,5 @@
 {
   "features": "Features",
   "extensions-to-wasi": "Extensions to WASI",
-  "epoll-and-tls": "Epoll and TLS",
   "faqs": "FAQs"
 }
