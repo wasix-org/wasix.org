@@ -16,7 +16,7 @@ function Home() {
   }, []);
   return (
     <>
-      <div className="h-[100lvh] w-[100lvw] flex flex-col items-center justify-center">
+      <div className="h-[100lvh] w-full flex flex-col items-center justify-center">
         <WasixLogo className="h-[100%] w-[100%] sm:h-[80%] sm:w-[80%] dark:shadow-xl dark:shadow-white text-black dark:text-white rounded-xl p-12 sm:p-24 md:p-36 md:mb-4" />
         <div className="-translate-y-48 sm:-translate-y-36 text-center flex flex-col">
           <h2 className="text-3xl md:text-5xl mb-4 justify-center items-center">
