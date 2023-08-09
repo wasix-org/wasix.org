@@ -109,7 +109,7 @@ $ cargo wasix build
     ::: .cargo/registry/src/index.crates.io/socket2-0.4.9/src/lib.rs:104:16
      |
 104  |             fn from(socket: $from) -> $for {
-     |                ---- implicitly returns `()` as its body has no tail or `return` expression
+     |                ---- implicitly returns "()" as its body has no tail or `return` expression
 
 Some errors have detailed explanations: E0061, E0308, E0412, E0422, E0425, E0432, E0433, E0583, E0618.
 For more information about an error, try `rustc --explain E0061`.
@@ -224,7 +224,7 @@ Yay, it works! 🎉
 </Steps>
 
 <Callout type="info" emoji="ℹ️">
-  You can also deploy you application to the edge. Checkout this
+  You can also deploy your application to the edge. Checkout this
   [tutorial](https://docs.wasmer.io/edge/quickstart/http-server) for deploying
   your wasix-axum server to wasmer edge.
 </Callout>

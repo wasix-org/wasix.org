@@ -1,0 +1,332 @@
+import { Steps } from "nextra-theme-docs";
+import { Callout, FileTree } from "nextra-theme-docs";
+
+<Callout type="default" emoji="🎉">
+  As of [wasmer 4.1](https://wasmer.io/posts/wasmer-4.1), `epoll` syscall and
+  `TLS` clients are now supported in WASIX. This was done by compiling ring.
+</Callout>
+
+## WASIX with Reqwest
+
+This is a sample project that shows how to use a `reqwest` client to build an outbound proxy and compile it to WASIX.
+
+### Prerequisites
+
+The project requires the following tools to be installed on your system:
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [WASIX](/docs/language-guide/rust/installation)
+
+<Steps>
+
+### Start a new project
+
+```shell
+$ cargo new --bin wasix-reqwest-proxy
+     Created binary (application) `wasix-reqwest-proxy` package
+```
+
+Your `wasix-reqwest-proxy` directory structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="wasix-reqwest-proxy" defaultOpen>
+    <FileTree.Folder name="src" defaultOpen>
+      <FileTree.File name="main.rs" />
+    </FileTree.Folder>
+    <FileTree.File name=".gitignore" />
+    <FileTree.File name="Cargo.toml" />
+  </FileTree.Folder>
+</FileTree>
+
+### Add dependencies
+
+<Callout type="warning" emoji="⚠️">
+  We will use pinned dependencies from
+  [**wasix-org**](https://github.com/wasix-org) to make sure that our project
+  compiles with wasix.
+</Callout>
+
+```shell
+$ cd wasix-reqwest-proxy
+$ cargo add tokio --git https://github.com/wasix-org/tokio.git --branch wasix-1.24.2 --features rt-multi-thread,macros,fs,io-util,net,signal
+$ cargo add reqwest --git https://github.com/wasix-org/reqwest.git --features json,rustls-tls
+$ cargo add hyper --git https://github.com/wasix-org/hyper.git --branch v0.14.27 --features server
+$ cargo add anyhow
+```
+
+We also need to add some patch crates to our `Cargo.toml` so that all other dependencies compile with wasix:
+
+```toml filename="Cargo.toml"
+[package]
+name = "wasix-reqwest-proxy"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "epoll", default-features = false, features = [
+    "rt-multi-thread",
+    "macros",
+    "fs",
+    "io-util",
+    "net",
+    "signal",
+] }
+reqwest = { git = "https://github.com/wasix-org/reqwest.git", default-features = false, features = [
+    "json",
+    "rustls-tls",
+] }
+anyhow = { version = "1.0.71" }
+hyper = { git = "https://github.com/wasix-org/hyper.git", branch = "v0.14.27", features = [
+    "server",
+] }
+
+[patch.crates-io] # 👈🏼 Added section here
+socket2 = { git = "https://github.com/wasix-org/socket2.git", branch = "v0.4.9" }  # 👈🏼 Added line here
+libc = { git = "https://github.com/wasix-org/libc.git" }  # 👈🏼 Added line here
+tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "epoll" }  # 👈🏼 Added line here
+rustls = { git = "https://github.com/wasix-org/rustls.git", branch = "v0.21.5" }  # 👈🏼 Added line here
+hyper = { git = "https://github.com/wasix-org/hyper.git", branch = "v0.14.27" }  # 👈🏼 Added line here
+
+```
+
+<Callout type="info" emoji="ℹ️">
+  For making certain features such as **networking**, **sockets**,
+  **threading**, etc. work with wasix we need patch dependencies for some crates
+  that use those features.
+</Callout>
+
+### Writing the Application
+
+Our outbound proxy application will have two parts:
+
+1. Listen for incoming requests using the `hyper` server
+2. Forward the request to the destination using the `reqwest` client and return the response to the client
+
+#### Part 1. - Listening for incoming requests
+
+Let's setup a basic `hyper` server that listens on port `3000`. This code goes inside our main function.
+
+```rust copy filename="src/main.rs"
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+
+    println!("Listening on {}", addr);
+
+    // And a MakeService to handle each connection...
+    let make_service = make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(handle)) });
+    //                                                                                ^^^^^^
+    // 🔦 Focus here - This handle function is what connects to the part 2 of our application.
+
+    // Then bind and serve...
+    let server = Server::bind(&addr).serve(make_service);
+
+    // And run forever...
+    Ok(server.await?)
+```
+
+#### Part 2. - Forwarding the request to the destination
+
+Now let's write the `handle` function that will be called for each incoming request. This function will use the `reqwest` client to forward the request to the destination and return the response to the client.
+
+```rust copy filename="src/main.rs"
+async fn handle(req: Request<Body>) -> Result<Response<Body>, Infallible> {
+    // Create the destination URL
+    let path = format!(
+        "https://www.rust-lang.org/{}",
+        req.uri()
+            .path_and_query()
+            .map(|p| p.as_str())
+            .unwrap_or(req.uri().path())
+    ); // ← 1.
+
+    let mut status = StatusCode::OK;
+    let body = match async { reqwest::get(path).await?.text().await }.await {
+        Ok(b) => b,
+        Err(err) => {
+            status = err.status().unwrap_or(StatusCode::BAD_REQUEST);
+            format!("{err}")
+        }
+    }; // ← 2.
+    let body = String::from_utf8_lossy(body.as_bytes()).to_string(); // ← 3.
+
+    let mut res = Response::new(Body::from(body)); // ← 4.
+    *res.status_mut() = status; // ← 5.
+    Ok(res) // ← 6.
+}
+```
+
+Let's go through the code above:
+
+1. Create a `path` variable that contains the destination URL. We use the `req.uri()` to get the request URI and then append it to the destination URL.
+2. Use the `reqwest` client to make a request to the destination URL. We use the `await` keyword to wait for the response. If the request fails, we set the `status` variable to `BAD_REQUEST` and return the error message as the response body.
+3. Convert the response body to a `String` using `String::from_utf8_lossy`. This is required because the `Body` type requires the body to be `Send` and `Sync` and `String` implements both of these traits.
+4. Create a new `Response` with the body we received from the destination.
+5. Set the status of the response to the `status` variable we set earlier.
+6. Finally, Return the response.
+
+Your `src/main.rs` should now look like this:
+
+```rust copy filename="src/main.rs"
+use hyper::service::{make_service_fn, service_fn};
+use hyper::{Body, Request, Response, Server, StatusCode};
+use std::convert::Infallible;
+use std::net::SocketAddr;
+
+async fn handle(req: Request<Body>) -> Result<Response<Body>, Infallible> {
+    let path = format!(
+        "https://www.rust-lang.org/{}",
+        req.uri()
+            .path_and_query()
+            .map(|p| p.as_str())
+            .unwrap_or(req.uri().path())
+    );
+
+    let mut status = StatusCode::OK;
+    let body = match async { reqwest::get(path).await?.text().await }.await {
+        Ok(b) => b,
+        Err(err) => {
+            status = err.status().unwrap_or(StatusCode::BAD_REQUEST);
+            format!("{err}")
+        }
+    };
+    let body = String::from_utf8_lossy(body.as_bytes()).to_string();
+
+    let mut res = Response::new(Body::from(body));
+    *res.status_mut() = status;
+    Ok(res)
+}
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
+
+    println!("Listening on {}", addr);
+
+    // And a MakeService to handle each connection...
+    let make_service = make_service_fn(|_conn| async { Ok::<_, Infallible>(service_fn(handle)) });
+
+    // Then bind and serve...
+    let server = Server::bind(&addr).serve(make_service);
+
+    // And run forever...
+    Ok(server.await?)
+}
+```
+
+#### Running the Application
+
+Let's compile the application to WASIX and run it:
+
+##### Compiling to WASIX
+
+```shell
+$ cargo wasix build
+Compiling autocfg v1.1.0
+Compiling wasi v0.11.0+wasi-snapshot-preview1
+Compiling proc-macro2 v1.0.66
+Compiling cfg-if v1.0.0
+Compiling unicode-ident v1.0.11
+Compiling libc v0.2.139 (https://github.com/wasix-org/libc.git#4c0c6c29)
+Compiling wasix-reqwest-proxy v0.1.0 (/wasix-reqwest-proxy)
+   ...
+```
+
+<Callout type="error" emoji="🚨">
+  It could happen that the above command might fail for you, this is because of
+  dependencies not resolving correctly. You can easily fix this by running
+  `cargo update` and then running `cargo wasix build` again.
+</Callout>
+
+Yay, it builds! Now, let's try to run it:
+
+##### Running the Application with Wasmer
+
+```shell
+$ wasmer run target/wasm32-wasmer-wasi/debug/wasix-reqwest-proxy.wasm
+
+```
+
+<Callout type="warning" emoji="🚧">
+  Currently, we need to run it using `wasmer run`. See the
+  [issue](https://github.com/wasix-org/cargo-wasix/issues/13)
+</Callout>
+
+Let's try to run it with wasmer:
+
+```shell copy
+$ wasmer run target/wasm32-wasmer-wasi/debug/wasix-reqwest-proxy.wasm --net --enable-threads
+```
+
+Let's go through the flags we used above:
+
+1. `--net` - This flag enables networking support for wasm files.
+2. `--enable-threads` - This flag enables threading support for wasm files.
+
+Now in a separate terminal, you can use `curl` to make a request to the server:
+
+```shell
+$ curl localhost:3000
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <title>
+        Rust Programming Language
+        ...
+```
+
+Congratulations! You have successfully built an outbound proxy server using hyper, reqwest and wasix.
+
+</Steps>
+
+<Callout type="info" emoji="ℹ️">
+  You can also deploy you application to the edge. Checkout this
+  [tutorial](TODO) for deploying your wasix-reqwest-proxy server to wasmer edge.
+</Callout>
+
+## Exercises
+
+### Exercise 1
+
+Try to take the destination URL as a query parameter.
+
+```shell
+$ curl localhost:3000?url=https://www.rust-lang.org
+```
+
+### Exercise 2
+
+Try to take the destination URL as a parameter for the `.wasm` file.
+
+```shell
+$ wasmer run target/wasm32-wasmer-wasi/debug/wasix-reqwest-proxy.wasm --net --enable-threads -- --url=https://www.rust-lang.org
+```
+
+<Callout type="default" emoji="💡">
+  You can use the `--` to pass arguments to the `.wasm` file and use the rust's
+  default `std::env::args` to parse the arguments. Learn more about
+  [wasmer-cli](/todo/).
+</Callout>
+
+## Conclusion
+
+In this tutorial, we learned:
+
+- How to build a simple outbound proxy server using `hyper` and `reqwest`.
+- How to **patch** dependencies add WASIX support.
+- How to run wasix based `.wasm` files with **Wasmer**.
+- How to enable **networking** and **threading** support for wasm files.
+
+import { Card, Cards } from "nextra-theme-docs";
+
+<Card
+  icon={
+    <svg viewBox="0 0 24 24" className=" transform scale-[120%] mr-2">
+      <path
+        fill="currentColor"
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
+    </svg>
+  }
+  title="wasix-rust-examples/wasix-reqwest-proxy"
+  href="https://github.com/wasix-org/wasix-rust-examples/tree/main/wasix-reqwest-proxy"
+/>
