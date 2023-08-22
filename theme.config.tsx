@@ -136,6 +136,19 @@ const config: DocsThemeConfig = {
   editLink: {
     text: "Edit this page on GitHub →",
   },
+  banner: (() => {
+    return {
+      key: "2.0-release",
+      text: (
+        <a
+          href="/docs/language-guide/rust/tutorials/wasix-reqwest"
+          target="_self"
+        >
+          📖 New Tutorial released - WASIX with reqwest. Read more →
+        </a>
+      ),
+    };
+  })(),
   feedback: {
     content: "Question? Give us feedback →",
     labels: "feedback",
