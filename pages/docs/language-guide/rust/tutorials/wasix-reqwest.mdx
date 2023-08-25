@@ -1,5 +1,6 @@
 import { Steps } from "nextra-theme-docs";
 import { Callout, FileTree } from "nextra-theme-docs";
+import CliVersionCallout from "../../../../../components/CliVersionCallout.mdx";
 
 <Callout type="default" emoji="🎉">
   As of [wasmer 4.1](https://wasmer.io/posts/wasmer-4.1), `epoll` syscall and
@@ -11,6 +12,8 @@ import { Callout, FileTree } from "nextra-theme-docs";
 This is a sample project that shows how to use a `reqwest` client to build an outbound proxy and compile it to WASIX.
 
 ### Prerequisites
+
+<CliVersionCallout />
 
 The project requires the following tools to be installed on your system:
 
@@ -41,9 +44,8 @@ Your `wasix-reqwest-proxy` directory structure should look like this:
 ### Add dependencies
 
 <Callout type="warning" emoji="⚠️">
-  We will use pinned dependencies from
-  [**wasix-org**](https://github.com/wasix-org) to make sure that our project
-  compiles with wasix.
+  We will use pinned dependencies from [**wasix-org**](../patched-repos) to make
+  sure that our project compiles with wasix.
 </Callout>
 
 ```shell
