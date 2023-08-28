@@ -1,6 +1,7 @@
 {
-  "wasix-axum": "Wasix with Axum",
-  "wasix-reqwest": "Wasix with Reqwest",
+  "wasix-axum": "WASIX with Axum",
+  "wasix-reqwest": "WASIX with Reqwest",
   "condvar": "Condition variables",
-  "threading": "Threading with Wasix"
+  "threading": "Threading with WASIX",
+  "wasix-grpc": "WASIX with gRPC"
 }
