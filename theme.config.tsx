@@ -140,11 +140,8 @@ const config: DocsThemeConfig = {
     return {
       key: "2.0-release",
       text: (
-        <a
-          href="/docs/language-guide/rust/tutorials/wasix-reqwest"
-          target="_self"
-        >
-          📖 New Tutorial released - WASIX with reqwest. Read more →
+        <a href="/docs/language-guide/rust/tutorials/wasix-grpc" target="_self">
+          📖 New Tutorial released - WASIX with gRPC. Read the full tutorial →
         </a>
       ),
     };
