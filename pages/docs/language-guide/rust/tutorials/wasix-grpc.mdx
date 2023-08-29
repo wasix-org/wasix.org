@@ -9,7 +9,7 @@ import CliVersionCallout from "../../../../../components/CliVersionCallout.mdx";
 This is a tutorial on how to use gRPC with https in WASIX. We will use the [tonic](https://github.com/hyperium/tonic) crate to implement a simple gRPC server and client in Rust.
 
 <Callout type="default" emoji="❗️">
-  This tutorial does not focuses on instantiating gRPC with rust but is rather
+  This tutorial does not focus on instantiating gRPC with rust but is rather
   focused on getting WASIX compatability in gRPC with tonic.
 </Callout>
 
@@ -290,7 +290,7 @@ Copy the `ca.pem`, `server.pem` and `server.key` files from [tonic's repo](https
 
 Modify the `server.rs` file to use the certificates.
 
-> Note: I'm just copy pasting most of the code from the tonic repo's [tls_rustls](https://github.com/hyperium/tonic/tree/master/examples/src/tls_rustls) example and modifying it according to our proto file.
+> Note: I'm just copy-pasting most of the code from the tonic repo's [tls_rustls](https://github.com/hyperium/tonic/tree/master/examples/src/tls_rustls) example and modifying it according to our proto file.
 
 ```rust
 use hyper::server::conn::Http;
@@ -503,7 +503,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         })
         .map_request(|_: Uri| Uri::from_static("https://127.0.0.1:50051"))
         .service(http);
-    // .boxed_clone();
 
     let client = hyper::Client::builder().build(connector);
 
@@ -639,7 +638,7 @@ To know more about the flags run `wasmer run --help`.
 
 ## Conclusion
 
-In this tutorial we learnt
+In this tutorial we learned:
 
 - how to use gRPC with https in WASIX. We used the [tonic](https://crates.io/crates/tonic) crate to implement a simple gRPC server and client in Rust
 - how to compile the project to WASIX
