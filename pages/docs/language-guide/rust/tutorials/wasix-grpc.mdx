@@ -562,7 +562,7 @@ tower = "0.4.13"
 http-body = "0.4.5"
 tower-http = { version = "0.4.3", features = ["util", "add-extension"] }
 rustls-pemfile = "1.0.3"
-rustls-native-certs = { path = "/Volumes/Work/Projects/Rust/rustls-native-certs" } # 👈🏼 pinned to wasix fork
+rustls-native-certs = { git = "https://github.com/wasix-org/rustls-native-certs.git" } # 👈🏼 pinned to wasix fork
 
 [build-dependencies]
 tonic-build = "0.9"
