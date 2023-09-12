@@ -1,0 +1,245 @@
+import { Steps } from "nextra-theme-docs";
+import { Callout, FileTree } from "nextra-theme-docs";
+import CliVersionCallout from "../../../../../components/CliVersionCallout.mdx";
+
+# WASIX with Postgres
+
+## Introduction
+
+This is a tutorial on to connect to the Postgres Database from WASIX.
+
+PostgreSQL is a powerful, open source object-relational database system with over 30 years of active development that has earned it a strong reputation for reliability, feature robustness, and performance.
+
+Connecting to any database is essential for any application that needs to store data. For achieving this we will be using the [`tokio_postgres`](https://crates.io/crates/tokio-postgres) crate.
+
+## Prerequisites
+
+<CliVersionCallout />
+
+The project requires the following tools to be installed on your system:
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [Wasmer](https://docs.wasmer.io/install)
+- [WASIX](/docs/language-guide/rust/installation)
+- [PostgreSQL](https://www.postgresql.org/download/)
+
+## Project Description
+
+We’ll be following [`tokio_postgres`](https://docs.rs/tokio-postgres/latest/tokio_postgres/#example) example from its official docs on crates.rs.
+This example demonstrates how to connect to a Postgres database, execute a simple statement that just returns its parameter but we would be modifying it to read data from a **students** table.
+
+<Steps>
+### Project Setup
+
+Let's create a new project with cargo.
+
+```shell
+$ cargo new --bin wasix-postgres && cd wasix-postgres
+    Created binary (application) `wasix-postgres` package
+```
+
+Your `wasix-postgres` directory structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="wasix-postgres" defaultOpen>
+    <FileTree.Folder name="src" defaultOpen>
+      <FileTree.File name="main.rs" />
+    </FileTree.Folder>
+    <FileTree.File name=".gitignore" />
+    <FileTree.File name="Cargo.toml" />
+  </FileTree.Folder>
+</FileTree>
+
+Let's add the following dependencies to our `Cargo.toml` file.
+
+```toml filename="Cargo.toml" copy
+[dependencies]
+tokio = {version = "1",features = [
+    "macros",
+    "net",
+    "rt",
+    "rt-multi-thread",
+    "time",
+    "fs",
+]}
+parking_lot = version = "0.12.1"
+tokio-postgres="0.7.8"
+```
+
+### Setting up our Postgres Database
+
+Let's create a new database and table in our Postgres Database.
+
+<Callout type="warning" emoji="⚠️">
+  Make sure you have Postgres installed and running on your system.
+</Callout>
+
+1. Login to your Postgres Database.
+
+```shell
+$ psql -U postgres
+```
+
+2. Create a new database.
+
+```shell
+postgres=# CREATE DATABASE wasix;
+```
+
+3. Connect to the new database.
+
+```shell
+postgres=# \c postgres
+```
+
+4. Create a students table with the following schema.
+
+create a table with a roll number as primary key and name as a string.
+
+```shell
+postgres=# CREATE TABLE students (roll_no INT PRIMARY KEY, name VARCHAR(50));
+```
+
+5. Insert some data into the table.
+
+```shell
+postgres=# INSERT INTO students (roll_no, name) VALUES (1, 'Rudra');
+postgres=# INSERT INTO students (roll_no, name) VALUES (2, 'Arthur');
+```
+
+### Writing the code
+
+Let's modify the example code from `tokio_postgres` to connect to our Postgres Database.
+
+```rust filename="src/main.rs" copy
+use tokio_postgres::{Error, NoTls};
+
+#[tokio::main] // By default, tokio_postgres uses the tokio crate as its runtime.
+async fn main() -> Result<(), Error> {
+    // Connect to the database.
+    let (client, connection) = tokio_postgres::connect(
+        format!(
+            "host={} user={} password={} dbname={} port={}",
+            "127.0.0.1", "postgres", "postgres", "postgres", "5432"
+        )
+        .as_str(),
+        NoTls,
+    )
+    .await?;
+
+    // The connection object performs the actual communication with the database,
+    // so spawn it off to run on its own.
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+
+    // Now we can execute a simple statement that just returns its parameter.
+    let students = client.query("SELECT * FROM students", &[]).await?;
+
+    for row in students.iter() {
+        // Assume the "student" table has columns named "id" and "name"
+        let roll_number: i32 = row.get("roll_no");
+        let name: String = row.get("name");
+
+        println!("Roll Number: {}, name: {}", roll_number, name);
+    }
+
+    Ok(())
+}
+```
+
+#### Testing the code
+
+Let's test our code.
+
+1. Run the code.
+
+```shell
+$ cargo run
+    Finished dev [unoptimized + debuginfo] target(s) in 0.29s
+     Running `target/debug/wasix-postgres`
+Roll Number: 1, name: Rudra
+Roll Number: 2, name: Arthur
+```
+
+### WASIX Compatability
+
+For adding **WASIX** support we need to pin and patch some dependencies in our `Cargo.toml` file. You can read more about this [here](../patched-repos).
+
+```toml filename="Cargo.toml" copy
+[dependencies]
+tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "epoll", features = [
+    "macros",
+    "net",
+    "rt",
+    "rt-multi-thread",
+    "time",
+    "fs",
+], version = "=1.24.2" } # 👈🏼 pinned to 1.24.2 from wasix-org/tokio
+parking_lot = { git = "https://github.com/wasix-org/parking_lot.git", version = "0.12.1" } # 👈🏼 pinned to 0.12.1
+tokio-postgres = { git = "https://github.com/wasix-org/rust-postgres.git", branch = "wasix" } # 👈🏼 pinned to wasix branch
+
+[patch.crates-io]
+tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "epoll" } # 👈🏼 patched to wasix-org/epoll branch
+parking_lot = { git = "https://github.com/wasix-org/parking_lot.git" } # 👈🏼 patched to wasix-org/parking_lot
+tokio-postgres = { git = "https://github.com/wasix-org/rust-postgres.git", branch = "wasix" } # 👈🏼 patched to wasix branch
+```
+
+#### Compiling the project to WASIX
+
+```shell
+$ cargo wasix build --release
+...
+   Compiling wasix-postgres v0.1.0 (/.../wasix-rust-examples/wasix-postgres)
+    Finished release [optimized] target(s) in 1.90s
+info: Post-processing WebAssembly files
+  Optimizing with wasm-opt
+```
+
+#### Testing the code in WASIX
+
+```shell
+$ wasmer run target/wasm32-wasmer-wasi/release/wasix-postgres.wasm --net
+Roll Number: 1, name: Rudra
+Roll Number: 2, name: Arthur
+```
+
+**Works the same!**
+
+#### Flags Information
+
+- `--net` - enables networking support
+
+To know more about the flags run `wasmer run --help`.
+
+</Steps>
+
+### 🤸🏼 Exercise Time
+
+- Try to make a new table in the database and insert some data into it using the `tokio_postgres` crate.
+
+# Conclusion
+
+In this tutorial we learnt
+
+- how to use the `tokio_postgres` crate to connect to the Postgres Database from WASIX.
+- how to use the `--net` flags in Wasmer to enable networking support.
+
+For the full example code, you can checkout the repository below.
+
+import { Card, Cards } from "nextra-theme-docs";
+
+<Card
+  icon={
+    <svg viewBox="0 0 24 24" className=" transform scale-[120%] mr-2">
+      <path
+        fill="currentColor"
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
+    </svg>
+  }
+  title="wasix-rust-examples/wasix-postgres"
+  href="https://github.com/wasix-org/wasix-rust-examples/tree/main/wasix-postgres"
+/>

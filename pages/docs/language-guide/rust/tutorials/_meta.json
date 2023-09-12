@@ -4,5 +4,6 @@
   "condvar": "Condition variables",
   "threading": "Threading with WASIX",
   "wasix-grpc": "WASIX with gRPC",
-  "wasix-nats": "WASIX with NATS"
+  "wasix-nats": "WASIX with NATS",
+  "wasix-postgres": "WASIX with Postgres"
 }
