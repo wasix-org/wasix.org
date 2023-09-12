@@ -1,0 +1,327 @@
+import { Steps } from "nextra-theme-docs";
+import { Callout, FileTree } from "nextra-theme-docs";
+import CliVersionCallout from "../../../../../components/CliVersionCallout.mdx";
+
+# WASIX with NATS
+
+## Introduction
+
+This is a tutorial on how to connect to a NATS server from WASIX. We'll be using the [async-nats](https://crates.io/crates/async-nats) crate to connect to the NATS server.
+
+NATS is a simple, secure and high performance open source messaging system for cloud native applications, IoT messaging, and microservices architectures.
+
+NATS features:
+
+- Publish/Subscribe: Basic messaging pattern that allows one-to-many communication.
+- Request/Reply: Enables synchronous communication by sending a request and waiting for a reply.
+- Fault Tolerance: Provides built-in mechanisms to handle system failures.
+- High Throughput: Designed for high performance, with minimal latency.
+- Security: Can be configured for secure communication using TLS/SSL.
+
+## Prerequisites
+
+<CliVersionCallout />
+
+The project requires the following tools to be installed on your system:
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [Wasmer](https://docs.wasmer.io/install)
+- [WASIX](/docs/language-guide/rust/installation)
+- [NATS Server](https://docs.nats.io/nats-server/installation)
+- [NATS CLI](https://docs.nats.io/using-nats/nats-tools/nats_cli)
+
+## Project Description
+
+We’ll be following [async_nats](https://docs.rs/async-nats/latest/async_nats/#complete-example) example from its official docs on crates.io.
+This example demonstrates how to connect to a NATS server, subscribe to a subject, and publish messages to a subject.
+
+<Steps>
+### Project Setup
+
+Let's create a new project with cargo.
+
+```shell
+$ cargo new --bin wasix-nats
+    Created binary (application) `wasix-nats` package
+```
+
+<Callout type="info" emoji="ℹ️">
+  The `nats-server.conf` also has **jetstream** enabled. JetStream is a
+  high-performance datastore for NATS. It is designed to be the backing store
+  for NATS Streaming, but is also directly accessible using the NATS API.
+  <br />
+  So, we create an empty directory for the jetstream data.
+</Callout>
+
+```shell
+$ cd wasix-nats
+$ mkdir jetstream
+```
+
+Your `wasix-nats` directory structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="wasix-nats" defaultOpen>
+    <FileTree.Folder name="jetstream" />
+    <FileTree.Folder name="src" defaultOpen>
+      <FileTree.File name="main.rs" />
+    </FileTree.Folder>
+    <FileTree.File name=".gitignore" />
+    <FileTree.File name="Cargo.toml" />
+  </FileTree.Folder>
+</FileTree>
+
+Let's add the following dependencies to our `Cargo.toml` file.
+
+```toml filename="Cargo.toml" copy
+[dependencies]
+tokio="1"
+async-nats="0.31.0"
+bytes="1.4.0"
+futures="0.3.28"
+```
+
+### Writing the code
+
+Let's write the basic NATS Publish and Subscribe.
+
+```rust filename="src/main.rs"
+// src/main.rs
+use futures::StreamExt;
+
+const PUBLISH_SUBJECT: &str = "wasix.messages.rust";  // 👈🏼 subject to publish messages to
+const SUBSCRIBE_SUBJECT: &str = "wasix.messages.cli"; // 👈🏼 subject to subscribe to
+
+#[tokio::main]
+async fn main() -> Result<(), async_nats::Error> {
+    // Connect to the NATS server
+    let client = async_nats::connect("127.0.0.1:4222").await?;
+    println!("Connected to NATS server");
+
+    // Subscribe to the "messages" subject
+    let mut subscriber = client.subscribe(SUBSCRIBE_SUBJECT.into()).await?;
+
+    // Publish messages to the "messages" subject
+    for i in 0..10 {
+        println!("Published message - before: {}", i);
+        client
+            .publish(PUBLISH_SUBJECT.into(), format!("Hello - {}", i).into())
+            .await?;
+        client.flush().await?; // 👈🏼 flush the message to the server
+        println!("Published message - after: {}", i);
+    }
+
+    // Receive and process messages
+    while let Some(message) = subscriber.next().await {
+        println!("Received message {:?}", message);
+    }
+
+    Ok(())
+}
+```
+
+The changes we made to the example code from `async_nats` are:
+
+1. Creating a `PUBLISH_SUBJECT` and `SUBSCRIBE_SUBJECT` constants.
+
+#### Testing the code
+
+Let's test our code.
+
+1. In a terminal run the NATS server.
+
+```shell copy
+$ nats-server -c nats-server.conf
+```
+
+2. In a second terminal subscribe to the subject `wasix.messages.rust` using the NATS CLI.
+
+```shell copy
+$ nats sub wasix.messages.rust
+```
+
+3. Now in another terminal run the code.
+
+```shell
+$ cargo run
+    Finished dev [unoptimized + debuginfo] target(s) in 0.32s
+     Running `target/debug/wasix-nats`
+Connected to NATS server
+Published message - before: 0
+Published message - after: 0
+Published message - before: 1
+Published message - after: 1
+Published message - before: 2
+Published message - after: 2
+Published message - before: 3
+Published message - after: 3
+Published message - before: 4
+Published message - after: 4
+Published message - before: 5
+Published message - after: 5
+Published message - before: 6
+Published message - after: 6
+Published message - before: 7
+Published message - after: 7
+Published message - before: 8
+Published message - after: 8
+Published message - before: 9
+Published message - after: 9
+```
+
+You should see the messages being published in the terminal where you subscribed to the subject.
+
+```shell
+13:27:12 Subscribing on wasix.messages.rust
+[#1] Received on "wasix.messages.rust"
+Hello - 0
+
+[#2] Received on "wasix.messages.rust"
+Hello - 1
+
+[#3] Received on "wasix.messages.rust"
+Hello - 2
+
+[#4] Received on "wasix.messages.rust"
+Hello - 3
+
+[#5] Received on "wasix.messages.rust"
+Hello - 4
+
+[#6] Received on "wasix.messages.rust"
+Hello - 5
+
+[#7] Received on "wasix.messages.rust"
+Hello - 6
+
+[#8] Received on "wasix.messages.rust"
+Hello - 7
+
+[#9] Received on "wasix.messages.rust"
+Hello - 8
+
+[#10] Received on "wasix.messages.rust"
+Hello - 9
+
+```
+
+4. Now, let's try to publish messages from the NATS CLI.
+
+```shell copy
+$ nats pub wasix.messages.cli "Hello from NATS CLI"
+```
+
+You should see the message being received in the terminal where you ran the code.
+
+```shell
+Received message Message { subject: "wasix.messages.cli", reply: None, payload: b"Hello from NATS CLI", headers: None, status: None, description: None, length: 37 }
+```
+
+### WASIX Compatability
+
+For adding **WASIX** support we need to pin and patch some dependencies in our `Cargo.toml` file. You can read more about this [here](../patched-repos).
+
+```toml filename="Cargo.toml" copy
+[dependencies]
+tokio = { version = "=1.24.2", git = "https://github.com/wasix-org/tokio.git", branch = "epoll", default-features = false, features = [
+    "full",
+] } # 👈🏼 pinned to wasix fork
+async-nats = { version = "0.31.0", git = "https://github.com/wasix-org/nats.rs.git", branch = "wasix" } # 👈🏼 pinned to wasix fork
+bytes = "1.4.0"
+futures = "0.3.28"
+
+[patch.crates-io]
+tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "epoll" } # 👈🏼 patched to wasix fork
+async-nats = { version = "0.31.0", git = "https://github.com/wasix-org/nats.rs.git", branch = "wasix" } # 👈🏼 patched to wasix fork
+```
+
+#### Compiling the project to WASIX
+
+```shell
+$ cargo wasix build --release
+...
+    Finished release [optimized] target(s) in 26.73s
+info: Post-processing WebAssembly files
+  Optimizing with wasm-opt
+```
+
+#### Testing the code in WASIX
+
+```shell
+$ wasmer run target/wasm32-wasmer-wasi/release/wasix-nats.wasm --net
+Connected to NATS server
+Published message - before: 0
+Published message - after: 0
+Published message - before: 1
+Published message - after: 1
+Published message - before: 2
+Published message - after: 2
+Published message - before: 3
+Published message - after: 3
+Published message - before: 4
+Published message - after: 4
+Published message - before: 5
+Published message - after: 5
+Published message - before: 6
+Published message - after: 6
+Published message - before: 7
+Published message - after: 7
+Published message - before: 8
+Published message - after: 8
+Published message - before: 9
+Published message - after: 9
+```
+
+**Works the same!**
+
+You can also try to publish messages from the NATS CLI.
+
+```shell copy
+$ nats pub wasix.messages.cli "Hello to WASIX from NATS CLI"
+```
+
+You should see the message being received in the terminal where you ran the code.
+
+```shell
+Received message Message { subject: "wasix.messages.cli", reply: None, payload: b"Hello to WASIX from NATS CLI", headers: None, status: None, description: None, length: 46 }
+```
+
+#### Flags Information
+
+- `--net` - enables networking support
+
+To know more about the flags run `wasmer run --help`.
+
+</Steps>
+
+### 🤸🏼 Exercise Time
+
+- Try to implement a NATS client streaming example with WASIX.
+- Try to take message as input from the user and publish it to the NATS server.
+- Try to take the subject as env variable from the user and publish/subscribe to that subject.
+
+# Conclusion
+
+In this tutorial we learnt
+
+- how to connect to a NATS server from WASIX
+- how to compile the project to WASIX
+- how to use the `--net` flags in Wasmer to enable networking support.
+
+For the full example code, you can checkout the repository below.
+
+import { Card, Cards } from "nextra-theme-docs";
+
+<Card
+  icon={
+    <svg viewBox="0 0 24 24" className=" transform scale-[120%] mr-2">
+      <path
+        fill="currentColor"
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
+    </svg>
+  }
+  title="wasix-rust-examples/wasix-nats"
+  href="https://github.com/wasix-org/wasix-rust-examples/tree/main/wasix-nats"
+/>
+`````
