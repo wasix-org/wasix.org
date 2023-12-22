@@ -1,0 +1,196 @@
+import { Steps } from "nextra-theme-docs";
+import { Callout, FileTree } from "nextra-theme-docs";
+import CliVersionCallout from "../../../../../components/CliVersionCallout.mdx";
+
+## Spawning a process in WASIX
+
+This is a sample project that shows how to spawn a new `process` in WASIX.
+
+### Prerequisites
+
+<CliVersionCallout />
+
+The project requires the following to be installed on your system:
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [WASIX](/docs/language-guide/rust/installation)
+- [Wasmer](https://docs.wasmer.io/install)
+
+<Steps>
+
+### Start a new project
+
+```shell
+$ cargo new --bin wasix-spawn
+     Created binary (application) `wasix-spawn` package
+```
+
+Your `wasix-spawn` directory structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="wasix-spawn" defaultOpen>
+    <FileTree.Folder name="src" defaultOpen>
+      <FileTree.File name="main.rs" />
+    </FileTree.Folder>
+    <FileTree.File name=".gitignore" />
+    <FileTree.File name="Cargo.toml" />
+  </FileTree.Folder>
+</FileTree>
+
+### Writing the Application
+
+Let's write the application in `src/main.rs`:
+
+```rust
+use std::process::Command;
+
+fn main() {
+    std::env::set_var("PATH", "/bin"); // 1.
+
+    let child = Command::new("ls") // 2.
+        .arg("-l")
+        .spawn()
+        .expect("Failed to spawn child process");
+
+    let result = child.wait_with_output().expect("Failed to wait on child"); // 3.
+
+    println!("status: {}", result.status); // 4.
+    println!("Child stdout: {}", String::from_utf8_lossy(&result.stdout)); // 4.
+    println!("Child stderr: {}", String::from_utf8_lossy(&result.stderr)); // 4.
+}
+```
+
+Let's go through the code above:
+
+1. We set the `PATH` environment variable to `/bin`. This is required because
+   the `ls` command is located in `/bin` directory.
+2. We spawn a new process using `Command::new("ls").arg("-l").spawn()`.
+3. We wait for the child process to finish using `child.wait_with_output()`.
+4. We print the status code, stdout and stderr of the child process.
+
+<Callout type="info" emoji="ℹ️">
+  The command is located in the `/bin` directory because our application would
+  depend on `sharrattj/coreutils` which provides all the core utilities like
+  `ls`, `cat`, `echo` etc. and places them in the `/bin` directory.
+</Callout>
+
+### Setting up our `wasmer.toml`
+
+In this application, we need to setup our `wasmer.toml` file in order to use the `sharrattj/coreutils` package as a dependency.
+This is required because if we compile the program directly to WASIX, it would not work as there would be no binaries available.
+
+Let's setup our `wasmer.toml` file:
+
+```toml
+[package]
+name = 'wasmer/wasix-spawn-example' # Replace with <your-namespace>/<your-package-name
+version = '0.1.0'
+description = 'An example of using spawn in wasix'
+readme = 'README.md'
+
+# See more keys and definitions at https://docs.wasmer.io/registry/manifest
+
+[[module]]
+name = 'wasix-spawn'
+source = 'target/wasm32-wasmer-wasi/release/wasix-spawn.wasm'
+abi = 'wasi'
+
+[dependencies]
+"sharrattj/coreutils" = "1"
+
+
+[[command]]
+name = 'wasix-spawn'
+module = 'wasix-spawn'
+```
+
+### Running the Application
+
+Let's compile the application to WASIX and run it:
+
+#### Compiling to WASIX
+
+```shell
+$ cargo wasix build -r
+   Compiling wasix-spawn v0.1.0 (.../wasix-rust-examples/wasix-spawn)
+    Finished dev [unoptimized + debuginfo] target(s) in 0.37s
+info: Post-processing WebAssembly files
+  Optimizing with wasm-opt
+```
+
+Yay, it builds! Now, let's try to run it:
+
+#### Running the Application with Wasmer
+
+Now that we have compiled our application to WASIX, we can run it using Wasmer:
+
+```shell
+$ wasmer run target/wasm32-wasmer-wasi/release/wasix-spawn.wasm
+---------- 1 somebody somegroup 0 Jan  1  1970 bin
+---------- 1 somebody somegroup 0 Jan  1  1970 dev
+---------- 1 somebody somegroup 0 Jan  1  1970 etc
+---------- 1 somebody somegroup 0 Jan  1  1970 tmp
+status: exit code: 0
+Child stdout:
+Child stderr:
+```
+
+You could also run the application using `wasmer run`:
+
+```shell
+$ wasmer run .
+---------- 1 somebody somegroup 0 Jan  1  1970 bin
+---------- 1 somebody somegroup 0 Jan  1  1970 dev
+---------- 1 somebody somegroup 0 Jan  1  1970 etc
+---------- 1 somebody somegroup 0 Jan  1  1970 tmp
+status: exit code: 0
+Child stdout:
+Child stderr:
+```
+
+The above works because we have setup our `wasmer.toml` file with the `[[command]]` section.
+
+Yay, it works! 🎉
+
+</Steps>
+
+## Exercises
+
+### Exercise 1
+
+Try to run the application with a different command.
+
+### Exercise 2
+
+Try to take the command as an argument from the user.
+
+```shell
+$ wasmer run . -- --command="ls"
+```
+
+<Callout type="default" emoji="💡">
+  You can use the `--` to pass arguments to the `.wasm` file and use the rust's
+  default `std::env::args` to parse the arguments. Learn more about
+  [wasmer-cli](https://docs.wasmer.io/runtime/cli).
+</Callout>
+
+## Conclusion
+
+In this tutorial, we learned:
+
+- How to spawn a new process in WASIX
+
+import { Card } from "nextra-theme-docs";
+
+<Card
+  icon={
+    <svg viewBox="0 0 24 24" className=" transform scale-[120%] mr-2">
+      <path
+        fill="currentColor"
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
+    </svg>
+  }
+  title="wasix-rust-examples/wasix-spawn"
+  href="https://github.com/wasix-org/wasix-rust-examples/tree/main/wasix-spawn"
+/>
