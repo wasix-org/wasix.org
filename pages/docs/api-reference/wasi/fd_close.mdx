@@ -42,4 +42,5 @@ This function has been instrumented with debug-level logging. It will log the fo
 
 ### Note
 
-The `fd_close()` function is used to close an open file descriptor. It releases any resources associated with the file descriptor. For sockets, it ensures that any pending data is flushed before closing the socket.
+The `fd_close()` function is used to close an open file descriptor. It releases any resources associated with the file descriptor.
+For sockets, it is best practise to run [`sock_shutdown()`](./sock_shutdown) before closing, because otherwise it can have unexpected runtime and latency side affects in some wasm runtimes.
