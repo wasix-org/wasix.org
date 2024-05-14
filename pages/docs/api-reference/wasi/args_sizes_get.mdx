@@ -11,6 +11,8 @@ The `args_sizes_get()` function is used to retrieve the sizes of the command-lin
 ```ebnf
   ;;; Return command-line argument data sizes.
   (@interface func (export "args_sizes_get")
+    (param $argc (@witx pointer (@witx pointer u32)))
+    (param $argv_buf_size (@witx pointer (@witx pointer u32)))
     ;;; Returns the number of arguments and the size of the argument string
     ;;; data, or an error.
     (result $error (expected (tuple $size $size) (error $errno)))
