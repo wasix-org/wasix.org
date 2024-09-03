@@ -1,5 +1,7 @@
----
 kind: wasmer.io/App.v0
 name: wasix-docs
-app_id: da_DR9EIBt1UlJR
-package: wasmer/wasix-docs@0.60.0
+owner: wasmer
+package: .
+app_id: da_K6AIot5UVLy2
+domains:
+  - wasmer--wasix-docs.wasmer.app
