@@ -30,7 +30,9 @@ $ cargo wasix --version
 cargo-wasix 0.1.17
 ```
 
-Check that the `wasix` toolchain was installed correctly by running:
+`wasix` toolchain will be installed when you first run a commad that requires it, like `cargo wasix check` or `cargo wasix build`.
+
+Once it is installed you can check by running:
 
 ```shell
 $ rustup toolchain list | grep wasix
