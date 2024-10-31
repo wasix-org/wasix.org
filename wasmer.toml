@@ -2,4 +2,4 @@
 "sharrattj/static-web-server" = "^1"
 
 [fs]
-public = "release"
+public = "out"
