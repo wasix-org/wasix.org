@@ -35,6 +35,18 @@ $ cargo wasix build
 $ cargo wasix bench <path-to-wasm-file>
 ```
 
+### Setting up a project
+
+```shell copy
+$ cargo wasix init
+```
+
+Writes the [WASIX registry](/docs/language-guide/rust/patched-repos) config
+into the workspace's `.cargo/config.toml` without building anything. The
+other commands apply the same config automatically, so running `init` is
+optional — it exists to set up (or verify) a project explicitly, e.g. before
+committing the config.
+
 ## `wasmer`
 
 `wasmer-cli` can also be used to run `wasix` binaries. As well as provide additional flags such as `--enable-bulk-memory`, `--enable-threads` and `--net`.
@@ -48,9 +60,10 @@ $ cargo wasix bench <path-to-wasm-file>
   flags](https://docs.wasmer.io/ecosystem/wasmer/usage)
 </Callout>
 
-### Patched Repos
+### The WASIX Registry
 
 <Callout type="default" emoji="📦">
-  Some crates require patches to work. We have assembled a list of patched repos
-  [here](/docs/language-guide/rust/patched-repos)
+  Crates that need WASIX-specific patches resolve automatically through the
+  [WASIX registry](/docs/language-guide/rust/patched-repos) — no
+  `[patch.crates-io]` entries required.
 </Callout>

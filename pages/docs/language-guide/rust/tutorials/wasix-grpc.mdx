@@ -542,6 +542,15 @@ Yup, it works.
 
 ### WASIX Compatability
 
+<Callout type="warning" emoji="🚧">
+  The pinned git forks below are the legacy approach from before the [WASIX
+  registry](/docs/language-guide/rust/patched-repos) existed. The registry
+  now serves a `tonic` fork (`0.14.x+wasix.N`) that resolves with plain
+  version requirements, but this tutorial's code targets the older tonic
+  0.9 API and hasn't been modernized yet — until it is, the instructions
+  below remain the tested path.
+</Callout>
+
 For compiling our project to wasix, we need to pin and patch some dependencies in our `Cargo.toml` file.
 
 ```toml
