@@ -22,11 +22,14 @@ The project requires the following tools to be installed on your system:
 - [Rust](https://www.rust-lang.org/tools/install)
 - [Wasmer](https://docs.wasmer.io/install)
 - [WASIX](/docs/language-guide/rust/installation)
+- [protoc](https://protobuf.dev/installation/) — the protobuf compiler,
+  needed by `tonic-prost-build` (e.g. `apt install protobuf-compiler` or
+  `brew install protobuf`)
 
 ## Project Description
 
-We’ll be following [tls_rustls](https://github.com/hyperium/tonic/tree/master/examples/src/tls_rustls) example from tonic’s official repo.
-This example implements a unary hello world example with https support.
+We'll implement a unary hello world service with https support, based on the
+examples from tonic's official repo.
 
 <Steps>
 ### Project Setup
@@ -73,31 +76,20 @@ Let's also add the following dependencies to our `Cargo.toml` file.
 
 ```toml
 [dependencies]
-tonic = { version = "0.9", features = ["tls"] }
-prost = "0.11"
-tokio = { version = "=1.24.2", default-features = false, features = [
-    "full",
-] }
-
-tokio-stream = "0.1.14"
-
-hyper-rustls = { version="0.24.1", features = [
-    "http2",
-] }
-
-tokio-rustls = "0.24.1"
-hyper = "0.14.27"
-tower = "0.4.13"
-http-body = "0.4.5"
-tower-http = "0.4.3"
-rustls-pemfile = "1.0.3"
-rustls-native-certs = "0.6.3"
+tonic = { version = "0.14", features = ["tls-ring"] }
+tonic-prost = "0.14"
+prost = "0.14"
+tokio = { version = "1", features = ["full"] }
 
 [build-dependencies]
-tonic-build = "0.9"
+tonic-prost-build = "0.14"
 ```
 
 <Callout type="info" emoji="ℹ️">
+  Plain versions from crates.io — no git URLs, no pins, no
+  `[patch.crates-io]` section. The WASIX forks of `tonic` and the stack
+  underneath it (`tokio`, `hyper`, `h2`, `ring`, …) resolve automatically
+  through the [WASIX registry](/docs/language-guide/rust/patched-repos).
   The `build-dependencies` section is required to compile the proto file.
 </Callout>
 
@@ -122,7 +114,7 @@ $ touch build.rs
 ```rust
 // build.rs
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    tonic_build::compile_protos("proto/helloworld.proto")?;
+    tonic_prost_build::compile_protos("proto/helloworld.proto")?;
     Ok(())
 }
 ```
@@ -239,7 +231,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         name: "Tonic".into(),
     });
 
-    let response = client.say_hello(request).await?;
+    let response = client.send(request).await?;
 
     println!("RESPONSE={:?}", response);
 
@@ -253,7 +245,7 @@ Let's test our server and client.
 
 ```shell
 $ cargo run --bin helloworld-server
-    Finished dev [unoptimized + debuginfo] target(s) in 0.14s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.14s
      Running `target/debug/helloworld-server`
 Server listening on 127.0.0.1:50051
 ```
@@ -262,9 +254,9 @@ Now, in another terminal run the client.
 
 ```shell
 $ cargo run --bin helloworld-client
-    Finished dev [unoptimized + debuginfo] target(s) in 0.15s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 0.15s
      Running `target/debug/helloworld-client`
-RESPONSE=Response \{ metadata: MetadataMap { headers: {"content-type": "application/grpc", "date": "Mon, 28 Aug 2023 12:54:16 GMT", "grpc-status": "0"} }, message: HelloReply { message: "Hello Tonic!" }, extensions: Extensions }
+RESPONSE=Response \{ metadata: MetadataMap { headers: {"content-type": "application/grpc", "grpc-status": "0"} }, message: HelloReply { message: "Hello Tonic!" }, extensions: Extensions }
 ```
 
 ### Adding in **https** support
@@ -282,237 +274,91 @@ Copy the `ca.pem`, `server.pem` and `server.key` files from [tonic's repo](https
 <Callout type="info" emoji="ℹ️">
   **Certificates Infomation**:
   <ul>
-    <li>`ca.pem` - Client Certificate</li>
+    <li>`ca.pem` - The CA certificate the client trusts</li>
     <li>`server.pem` - Server certificate</li>
     <li>`server.key` - Server private key</li>
   </ul>
 </Callout>
 
-Modify the `server.rs` file to use the certificates.
-
-> Note: I'm just copy-pasting most of the code from the tonic repo's [tls_rustls](https://github.com/hyperium/tonic/tree/master/examples/src/tls_rustls) example and modifying it according to our proto file.
+tonic's built-in TLS support (the `tls-ring` feature we enabled earlier)
+makes this a small change on both sides. Modify the `server.rs` main
+function to load the certificates:
 
 ```rust
-use hyper::server::conn::Http;
-use tokio_rustls::rustls::{OwnedTrustAnchor, RootCertStore, ServerConfig};
-use tonic::{transport::Server, Request, Response, Status};
+// src/server.rs
+use tonic::transport::{Identity, Server, ServerTlsConfig};
 
-use hello_world::greeter_server::Greeter;
-use hello_world::{HelloReply, HelloRequest};
-
-use tokio::sync::mpsc;
-use tokio_stream::{wrappers::ReceiverStream, Stream, StreamExt};
-
-use std::error::Error;
-use std::io::ErrorKind;
-use std::pin::Pin;
-use std::time::Duration;
-
-use std::sync::Arc;
-use tokio::net::TcpListener;
-use tokio_rustls::{
-    rustls::{Certificate, PrivateKey},
-    TlsAcceptor,
-};
-use tower_http::ServiceBuilderExt;
-
-pub mod hello_world {
-    tonic::include_proto!("helloworld"); // The string specified here must match the proto package name
-}
-
-#[derive(Debug, Default)]
-pub struct MyGreeter {}
-
-#[tonic::async_trait]
-impl Greeter for MyGreeter {
-    async fn send(&self, request: Request<HelloRequest>) -> Result<Response<HelloReply>, Status> {
-        Ok(Response::new(HelloReply {
-            message: format!("hello {}", request.get_ref().name),
-        }))
-    }
-}
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-     let data_dir = if cfg!(target_os = "wasi") {
+    let data_dir = if cfg!(target_os = "wasi") {
         std::env::current_dir()?
     } else {
         std::path::PathBuf::from(std::env!("CARGO_MANIFEST_DIR"))
     };
-    let certs = {
-        let fd = std::fs::File::open(data_dir.join("tls/server.pem"))?;
-        let mut buf = std::io::BufReader::new(&fd);
-        rustls_pemfile::certs(&mut buf)?
-            .into_iter()
-            .map(Certificate)
-            .collect()
-    };
-    let key = {
-        let fd = std::fs::File::open(data_dir.join("tls/server.key"))?;
-        let mut buf = std::io::BufReader::new(&fd);
-        rustls_pemfile::pkcs8_private_keys(&mut buf)?
-            .into_iter()
-            .map(PrivateKey)
-            .next()
-            .unwrap()
-    };
 
-    let mut tls = ServerConfig::builder()
-        .with_safe_defaults()
-        .with_no_client_auth()
-        .with_single_cert(certs, key)?;
-    tls.alpn_protocols = vec![b"h2".to_vec()];
+    let cert = std::fs::read_to_string(data_dir.join("tls/server.pem"))?;
+    let key = std::fs::read_to_string(data_dir.join("tls/server.key"))?;
+    let identity = Identity::from_pem(cert, key);
 
-    let server = MyGreeter::default();
+    let addr = "127.0.0.1:50051".parse()?;
+    println!("Server listening on {}", addr);
 
-    let svc = Server::builder()
-        .add_service(hello_world::greeter_server::GreeterServer::new(server))
-        .into_service();
+    Server::builder()
+        .tls_config(ServerTlsConfig::new().identity(identity))?
+        .add_service(GreeterServer::new(MyGreeter::default()))
+        .serve(addr)
+        .await?;
 
-    let mut http = Http::new();
-    http.http2_only(true);
-
-    let listener = TcpListener::bind("127.0.0.1:50051").await?;
-    let tls_acceptor = TlsAcceptor::from(Arc::new(tls));
-
-    println!("Server listening on {}", listener.local_addr()?);
-
-    loop {
-        let (conn, addr) = match listener.accept().await {
-            Ok(incoming) => incoming,
-            Err(e) => {
-                eprintln!("Error accepting connection: {}", e);
-                continue;
-            }
-        };
-
-        let http = http.clone();
-        let tls_acceptor = tls_acceptor.clone();
-        let svc = svc.clone();
-
-        tokio::spawn(async move {
-            let mut certificates = Vec::new();
-
-            let conn = tls_acceptor
-                .accept_with(conn, |info| {
-                    if let Some(certs) = info.peer_certificates() {
-                        for cert in certs {
-                            certificates.push(cert.clone());
-                        }
-                    }
-                })
-                .await
-                .unwrap();
-
-            let svc = tower::ServiceBuilder::new()
-                .add_extension(Arc::new(ConnInfo { addr, certificates }))
-                .service(svc);
-
-
-            http.serve_connection(conn, svc)
-                .await
-                .map_err(|e| {
-                    eprintln!("Error serving connection: {}", e);
-                    e
-                })
-                .unwrap();
-        });
-    }
-}
-
-#[derive(Debug)]
-struct ConnInfo {
-    addr: std::net::SocketAddr,
-    certificates: Vec<Certificate>,
+    Ok(())
 }
 ```
 
-Now the client.
+<Callout type="default" emoji="💡">
+  The `data_dir` dance lets the same binary find the certificates both
+  natively (relative to the crate) and under WASIX (relative to the mounted
+  working directory).
+</Callout>
+
+Now the client: trust our CA and connect over `https`.
 
 ```rust
-
-use std::{sync::Arc, time::Duration};
-
+// src/client.rs
 use hello_world::greeter_client::GreeterClient;
 use hello_world::HelloRequest;
-
-use http_body::{combinators::UnsyncBoxBody, Body};
-use hyper::{body::Bytes, client::HttpConnector, Client, Request, Uri};
-use hyper_rustls::HttpsConnector;
-use tokio_rustls::rustls::{ClientConfig, ConfigBuilder, OwnedTrustAnchor, RootCertStore};
-use tokio_stream::{Stream, StreamExt};
-use tonic::{
-    body::BoxBody,
-    client::GrpcService,
-    transport::{Channel, ClientTlsConfig},
-    Status,
-};
-use tower::{util::MapRequest, ServiceExt};
+use tonic::transport::{Certificate, Channel, ClientTlsConfig};
 
 pub mod hello_world {
     tonic::include_proto!("helloworld");
 }
 
-async fn say_hello<T>(client: &mut GreeterClient<T>)
-where
-    T: tonic::client::GrpcService<tonic::body::BoxBody> + Send + 'static,
-    T::ResponseBody: Body<Data = Bytes> + Send + 'static,
-    <T::ResponseBody as Body>::Error: Into<Box<dyn std::error::Error + Send + Sync>> + Send,
-{
-    let request = tonic::Request::new(HelloRequest {
-        name: "Alice".into(),
-    });
-
-    let response = client.send(request).await.unwrap();
-
-    println!("RESPONSE={:?}", response);
-}
-
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-     let data_dir = if cfg!(target_os = "wasi") {
+    let data_dir = if cfg!(target_os = "wasi") {
         std::env::current_dir()?
     } else {
         std::path::PathBuf::from(std::env!("CARGO_MANIFEST_DIR"))
     };
-    let fd = std::fs::File::open(data_dir.join("tls/ca.pem"))?;
 
-    let mut roots = RootCertStore::empty();
+    // The server's certificate is signed by our own CA, so trust that CA.
+    let ca = Certificate::from_pem(std::fs::read_to_string(data_dir.join("tls/ca.pem"))?);
+    let tls = ClientTlsConfig::new()
+        .ca_certificate(ca)
+        .domain_name("localhost");
 
-    let mut buf = std::io::BufReader::new(&fd);
-    let certs = rustls_pemfile::certs(&mut buf)?;
-    roots.add_parsable_certificates(&certs);
+    let channel = Channel::from_static("https://127.0.0.1:50051")
+        .tls_config(tls)?
+        .connect()
+        .await?;
 
-    let tls = ClientConfig::builder()
-        .with_safe_defaults()
-        .with_root_certificates(roots)
-        .with_no_client_auth();
+    let mut client = GreeterClient::new(channel);
 
-    let mut http = HttpConnector::new();
-    http.enforce_http(false);
+    let request = tonic::Request::new(HelloRequest {
+        name: "Alice".into(),
+    });
 
-    let connector = tower::ServiceBuilder::new()
-        .layer_fn(move |s| {
-            let tls = tls.clone();
+    let response = client.send(request).await?;
 
-            hyper_rustls::HttpsConnectorBuilder::new()
-                .with_tls_config(tls)
-                .https_or_http()
-                .enable_http2()
-                .wrap_connector(s)
-        })
-        .map_request(|_: Uri| Uri::from_static("https://127.0.0.1:50051"))
-        .service(http);
-
-    let client = hyper::Client::builder().build(connector);
-
-    // Using `with_origin` will let the codegenerated client set the `scheme` and
-    // `authority` from the provided `Uri`.
-    let uri = Uri::from_static("https://example.com");
-
-    let mut client = GreeterClient::with_origin(client, uri);
-
-    say_hello(&mut client).await;
+    println!("RESPONSE={:?}", response);
 
     Ok(())
 }
@@ -524,7 +370,6 @@ In a terminal run the server.
 
 ```shell
 $ cargo run --bin helloworld-server
-    Finished dev [unoptimized + debuginfo] target(s) in 1.77s
      Running `target/debug/helloworld-server`
 Server listening on 127.0.0.1:50051
 ```
@@ -533,128 +378,68 @@ Now, in another terminal run the client.
 
 ```shell
 $ cargo run --bin helloworld-client
-    Finished dev [unoptimized + debuginfo] target(s) in 2.55s
      Running `target/debug/helloworld-client`
-RESPONSE=Response \{ metadata: MetadataMap { headers: {"content-type": "application/grpc", "date": "Mon, 28 Aug 2023 13:29:27 GMT", "grpc-status": "0"} }, message: HelloReply { message: "hello Alice" }, extensions: Extensions }
+RESPONSE=Response \{ metadata: MetadataMap { headers: {"content-type": "application/grpc", "grpc-status": "0"} }, message: HelloReply { message: "hello Alice" }, extensions: Extensions }
 ```
 
 Yup, it works.
 
-### WASIX Compatability
-
-<Callout type="warning" emoji="🚧">
-  The pinned git forks below are the legacy approach from before the [WASIX
-  registry](/docs/language-guide/rust/patched-repos) existed. The registry
-  now serves a `tonic` fork (`0.14.x+wasix.N`) that resolves with plain
-  version requirements, but this tutorial's code targets the older tonic
-  0.9 API and hasn't been modernized yet — until it is, the instructions
-  below remain the tested path.
-</Callout>
-
-For compiling our project to wasix, we need to pin and patch some dependencies in our `Cargo.toml` file.
-
-```toml
-[dependencies]
-tonic = { version = "0.9", features = ["tls"] }
-prost = "0.11"
-tokio = { version = "=1.24.2", git = "https://github.com/wasix-org/tokio.git", branch = "epoll", default-features = false, features = [
-    "full",
-] } # 👈🏼 pinned to wasix fork
-libc = { version = "0.2.139", git = "https://github.com/wasix-org/libc.git", branch = "master" } # 👈🏼 pinned to wasix fork
-tokio-stream = "0.1.14"
-hyper-rustls = { git = "https://github.com/wasix-org/hyper-rustls.git", branch = "main", features = [
-    "http2",
-] } # 👈🏼 pinned to wasix fork
-tokio-rustls = { version = "0.24.1", git = "https://github.com/wasix-org/tokio-rustls.git", branch = "main" } # 👈🏼 pinned to wasix fork
-hyper = { git = "https://github.com/wasix-org/hyper.git", branch = "v0.14.27" } # 👈🏼 pinned to wasix fork
-tower = "0.4.13"
-http-body = "0.4.5"
-tower-http = { version = "0.4.3", features = ["util", "add-extension"] }
-rustls-pemfile = "1.0.3"
-rustls-native-certs = { git = "https://github.com/wasix-org/rustls-native-certs.git" } # 👈🏼 pinned to wasix fork
-
-[build-dependencies]
-tonic-build = "0.9"
-
-[patch.crates-io]
-rustls-native-certs = { git = "https://github.com/wasix-org/rustls-native-certs.git" } # 👈🏼 patched to wasix fork
-socket2 = { git = "https://github.com/wasix-org/socket2.git", branch = "v0.4.9" } # 👈🏼 patched to wasix fork
-tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "epoll" } # 👈🏼 patched to wasix fork
-hyper = { git = "https://github.com/wasix-org/hyper.git", branch = "v0.14.27" } # 👈🏼 patched to wasix fork
-ring = { git = "https://github.com/wasix-org/ring.git", branch = "wasix" } # 👈🏼 patched to wasix fork
-rustls = { git = "https://github.com/wasix-org/rustls.git", branch = "v0.21.5" } # 👈🏼 patched to wasix fork
-```
-
-For a list of all of our forks, you can checkout the [patched repos](../patched-repos) page.
-
-#### Compiling the project to WASIX
+### Compiling to WASIX
 
 ```shell
 $ cargo wasix build --release
-...
-warning: `wasix-grpc` (bin "helloworld-server") generated 2 warnings (run `cargo fix --bin "helloworld-server"` to apply 1 suggestion)
-warning: `wasix-grpc` (bin "helloworld-client") generated 6 warnings (run `cargo fix --bin "helloworld-client"` to apply 3 suggestions)
-    Finished release [optimized] target(s) in 26.41s
+    Updating `.cargo/config.toml` to resolve crates through the WASIX registry
+   Compiling tokio v1.47.0+wasix.1
+   Compiling tonic v0.14.2+wasix.1
+   ...
+    Finished `release` profile [optimized] target(s)
 info: Post-processing WebAssembly files
   Optimizing with wasm-opt
   Optimizing with wasm-opt
 ```
 
-#### Testing the server and client
+That's all it takes: on the first build, `cargo wasix` writes the [WASIX
+registry](/docs/language-guide/rust/patched-repos) config into
+`.cargo/config.toml`, and the WASIX forks — `tonic`, `tokio`, and the TLS
+stack underneath — resolve transparently as `+wasix.N` builds.
 
 <Callout type="info" emoji="ℹ️">
-In the client and server code you'll find this snippet.
-```rust
-let data_dir = if cfg!(target_os = "wasi") {
-    std::env::current_dir()?
-} else {
-    std::path::PathBuf::from(std::env!("CARGO_MANIFEST_DIR"))
-};
-```
-This code maps the `data_dir` to current directory if the `target_os` is **wasi**. This is **important** because _CARGO_MANIFEST_DIR_ is not available in WASIX.
+  Commit the generated `.cargo/config.toml` so that other checkouts and CI
+  build through the registry too.
 </Callout>
 
-##### Running the server
+#### Testing the server and client
+
+The binaries read the certificates from the `tls/` directory relative to
+their working directory, so mount it with `--volume`.
+
+In a terminal run the server.
 
 ```shell
-$ wasmer run target/wasm32-wasmer-wasi/release/helloworld-server.wasm --net --mapdir /tls:./tls
+$ wasmer run target/wasm32-wasmer-wasi/release/helloworld-server.wasm --net --enable-threads --volume ./tls:/tls
 Server listening on 127.0.0.1:50051
 ```
 
-##### Running the client
+Now, in another terminal run the client.
 
 ```shell
-$ wasmer run target/wasm32-wasmer-wasi/release/helloworld-client.wasm --net --mapdir /tls:./tls
-RESPONSE=Response \{ metadata: MetadataMap { headers: {"content-type": "application/grpc", "date": "Mon, 28 Aug 2023 15:01:09 GMT", "grpc-status": "0"} }, message: HelloReply { message: "hello Alice" }, extensions: Extensions }
+$ wasmer run target/wasm32-wasmer-wasi/release/helloworld-client.wasm --net --enable-threads --volume ./tls:/tls
+RESPONSE=Response \{ metadata: MetadataMap { headers: {"content-type": "application/grpc", "grpc-status": "0"} }, message: HelloReply { message: "hello Alice" }, extensions: {} }
 ```
 
-**Yup, works the same.**
-
-###### Flags Information
-
-- `--net` - enables networking support
-- `--mapdir /tls:./tls` - maps the `/tls` directory in the WASIX filesystem to the `./tls` directory in the host filesystem.
-
-To know more about the flags run `wasmer run --help`.
+gRPC over https, running under WASIX. 🎉
 
 </Steps>
 
-### 🤸🏼 Exercise Time
-
-- Try to implement a server streaming example with WASIX.
-- Try to implement a client streaming example with WASIX.
-- Try to implement a bidirectional streaming example with WASIX.
-
 ## Conclusion
 
-In this tutorial we learned:
+In this tutorial, we learned:
 
-- how to use gRPC with https in WASIX. We used the [tonic](https://crates.io/crates/tonic) crate to implement a simple gRPC server and client in Rust
-- how to compile the project to WASIX
-- how to run the gRPC server and client in WASIX
-- how to use the `--net` and `--mapdir` flags in Wasmer to enable networking support and map directories respectively.
-
-For the full example code, you can checkout the repository below.
+- How to build a gRPC server and client with **tonic** and compile them with **wasix**.
+- How to enable **https** with tonic's built-in TLS support.
+- How WASIX crate forks resolve automatically through the **WASIX registry**.
+- How to run wasix based `.wasm` files with **Wasmer**, including mounting
+  a directory for certificates.
 
 import { Card, Cards } from "nextra-theme-docs";
 
