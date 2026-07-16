@@ -40,7 +40,7 @@ Your `wasix-axum` directory structure should look like this:
 
 ```shell
 $ cd wasix-axum
-$ cargo add axum --features tokio
+$ cargo add axum
 $ cargo add tokio --features full
 ```
 
@@ -53,9 +53,16 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.6.18", features = ["tokio"] }
-tokio = { version = "1.28.1", features = ["full"] }
+axum = "0.8"
+tokio = { version = "1", features = ["full"] }
 ```
+
+<Callout type="info" emoji="ℹ️">
+  Plain versions from crates.io — no git URLs, no pins, no
+  `[patch.crates-io]` section. Crates that need WASIX-specific changes (like
+  `tokio`) resolve automatically through the [WASIX
+  registry](/docs/language-guide/rust/patched-repos).
+</Callout>
 
 ### Writing the Application
 
@@ -65,36 +72,35 @@ Now, let's stub out a basic `get` route that returns a string using a `handler` 
 
 ```rust copy filename="src/main.rs"
 use axum::{routing::get, Router};
-use std::net::SocketAddr;
 
 #[tokio::main]
 async fn main() {
     // Building our application with a single Route
     let app = Router::new().route("/", get(handler));
 
-    // Run the server with hyper on http://127.0.0.1:3000
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    axum::Server::bind(&addr)
-        .serve(app.into_make_service())
+    // Run the server on http://127.0.0.1:3000
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
         .await
         .unwrap();
+    println!("Listening on http://127.0.0.1:3000");
+    axum::serve(listener, app).await.unwrap();
 }
 
 async fn handler() -> &'static str {
     "Hello, Axum ❤️ WASIX!"
 }
-
 ```
 
 #### Running the Application
 
-Run the application with the `cargo`:
+Run the application with `cargo`:
 
 ```shell
 $ cargo run
    Compiling wasix-axum v0.1.0 (/wasix-axum)
-    Finished dev [unoptimized + debuginfo] target(s) in 1.41s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.41s
      Running `target/debug/wasix-axum`
+Listening on http://127.0.0.1:3000
 ```
 
 Now in a separate terminal, you can use `curl` to make a request to the server:
@@ -104,116 +110,44 @@ $ curl http://127.0.0.1:3000
 Hello, Axum ❤️ WASIX!%
 ```
 
-Hmm, but let's see does it work with wasix ? Let's try to build it with wasix:
-
-```shell
-$ cargo wasix build
-...
-    ::: .cargo/registry/src/index.crates.io/socket2-0.4.9/src/lib.rs:104:16
-     |
-104  |             fn from(socket: $from) -> $for {
-     |                ---- implicitly returns "()" as its body has no tail or `return` expression
-
-Some errors have detailed explanations: E0061, E0308, E0412, E0422, E0425, E0432, E0433, E0583, E0618.
-For more information about an error, try `rustc --explain E0061`.
-error: could not compile `socket2` (lib) due to 202 previous errors
-warning: build failed, waiting for other jobs to finish..
-...
-```
-
-Oh no, it doesn't work. But why ?
-
 #### Compiling with WASIX
 
-<Callout type="info" emoji="ℹ️">
-  For making certain features such as networking, sockets, threading, etc. work
-  with wasix we need patch dependencies for some crates that use those features.
-</Callout>
-
-Let's add the following patch to our `Cargo.toml`:
-
-```toml copy filename="Cargo.toml"
-[package]
-name = "wasix-axum"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-axum = { version = "=0.6.9", features = ["tokio"] } # ← Updated Line
-tokio = { version = "=1.24.2", default-features = false, features = ["full"] } # ← Updated Line
-parking_lot = { version = "=0.12.1", features = ["nightly"] } # ← Added Line
-
-[patch.crates-io]
-socket2 = { git = "https://github.com/wasix-org/socket2.git", branch = "v0.4.9" } # ← Added Line
-libc = { git = "https://github.com/wasix-org/libc.git" } # ← Added Line
-tokio = { git = "https://github.com/wasix-org/tokio.git", branch = "wasix-1.24.2" } # ← Added Line
-```
-
-<Callout type="info" emoji="ℹ️">
-  As you can see above the `parking_lot` crate works out of the box 🚀 with
-  wasix. It just needs the `nightly` feature to be enabled.
-</Callout>
-
-<Callout type="warning" emoji="🚧">
-  We need to pin and replace some dependencies to achieve wasix compatibility.
-  So, currently supported axum version is `0.6.9` and tokio version is `1.24.2`.
-</Callout>
-
-Now, let's try to build it with wasix again:
+Now let's build it for WASIX:
 
 ```shell
 $ cargo wasix build
-    Blocking waiting for file lock on package cache
-    Updating crates.io index
-    Blocking waiting for file lock on package cache
-    Blocking waiting for file lock on package cache
-   Compiling tokio v1.24.2 (https://github.com/wasix-org/tokio.git?branch=wasix-1.24.2#8ba16a72)
-   Compiling tower v0.4.13
-   Compiling hyper v0.14.26
-   Compiling tower-http v0.4.0
-   Compiling axum v0.6.9
+    Updating `.cargo/config.toml` to resolve crates through the WASIX registry
+   Compiling tokio v1.47.0+wasix.1
+   Compiling axum v0.8.6
+   ...
    Compiling wasix-axum v0.1.0 (/wasix-axum)
-    Finished dev [unoptimized + debuginfo] target(s) in 14.63s
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 14.63s
 info: Post-processing WebAssembly files
+  Optimizing with wasm-opt
 ```
 
-Yay, it builds! Now, let's try to run it:
+That's the whole setup: on the first build, `cargo wasix` writes the [WASIX
+registry](/docs/language-guide/rust/patched-repos) config into
+`.cargo/config.toml`, and the WASIX forks of low-level crates (note the
+`tokio v1.47.0+wasix.1` above) resolve transparently — everything else comes
+from crates.io as usual.
 
-<Callout type="error" emoji="🚨">
-  It could happen that the above command might fail for you, this is because of
-  dependencies not resolving correctly. You can easily fix this by running
-  `cargo update` and then running `cargo wasix build` again.
+<Callout type="info" emoji="ℹ️">
+  Commit the generated `.cargo/config.toml` so that other checkouts and CI
+  build through the registry too.
 </Callout>
 
-```shell
-$ cargo wasix run
-    Finished dev [unoptimized + debuginfo] target(s) in 0.23s
-     Running `/Users/xorcist/.cargo/bin/cargo-wasix target/wasm32-wasmer-wasi/debug/wasix-axum.wasm`
-info: Post-processing WebAssembly files
-     Running `target/wasm32-wasmer-wasi/debug/wasix-axum.wasm`
-thread 'main' panicked at 'error binding to 127.0.0.1:3000: error creating server listener: Not supported (os error 58)', .cargo/registry/src/index.crates.io-/hyper-0.14.26/src/server/server.rs:79:13
-note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
-error: failed to run `target/wasm32-wasmer-wasi/debug/wasix-axum.wasm`
-╰─▶ 1: RuntimeError: unreachable
-error: failed to execute "wasmer" "--enable-threads" "--" "target/wasm32-wasmer-wasi/debug/wasix-axum.wasm"
-    status: exit status: 134
-```
-
-<Callout type="warning" emoji="🚧">
-  Currently, we need to run it using `wasmer run`. See the
-  [issue](https://github.com/wasix-org/cargo-wasix/issues/13)
-</Callout>
-
-Let's try to run it with wasmer:
+#### Running the Application on WASIX
 
 ```shell copy
-$ wasmer run target/wasm32-wasmer-wasi/debug/wasix-axum.wasm --net --enable-threads
+$ cargo wasix run -W,--net
 ```
 
-Let's go through the flags we used above:
-
-1. `--net` - This flag enables networking support for wasm files.
-2. `--enable-threads` - This flag enables threading support for wasm files.
+`cargo wasix run` builds and runs the binary with the Wasmer runtime. The
+`-W,` prefix passes comma-separated flags through to the runtime — here
+`--net`, which enables networking support (see [passing runtime
+flags](/docs/language-guide/rust/usage#passing-runtime-flags-with--w) for
+details).
 
 Now in a separate terminal, you can use `curl` to make a request to the server:
 
@@ -237,9 +171,9 @@ Yay, it works! 🎉
 In this tutorial, we learned:
 
 - How to build a simple web server using axum and **compile it with wasix**.
-- How to **patch** dependencies add WASIX support until changes are adopted upstream.
+- How WASIX crate forks resolve automatically through the **WASIX registry**.
 - How to run wasix based `.wasm` files with **Wasmer**.
-- How to enable **networking** and **threading** support for wasm files.
+- How to pass runtime flags like `--net` through `cargo wasix run -W,`.
 
 import { Card, Cards } from "nextra-theme-docs";
 
