@@ -14,13 +14,13 @@ import { Callout } from "nextra-theme-docs";
 ### Running a binary
 
 ```shell copy
-$ cargo wasix run <path-to-wasm-file>
+$ cargo wasix run
 ```
 
 ### Testing a binary
 
 ```shell copy
-$ cargo wasix test <path-to-wasm-file>
+$ cargo wasix test
 ```
 
 ### Building a binary
@@ -32,8 +32,34 @@ $ cargo wasix build
 ### Benchmarking a binary
 
 ```shell copy
-$ cargo wasix bench <path-to-wasm-file>
+$ cargo wasix bench
 ```
+
+### Passing runtime flags with `-W,`
+
+`run`, `test`, and `bench` execute the built `.wasm` with the Wasmer
+runtime. To pass flags through to the runtime, use `-W,` followed by
+comma-separated arguments — the same idea as clang's `-Wl,`:
+
+```shell copy
+$ cargo wasix run -W,--net
+$ cargo wasix run -W,--net,--volume,./tls:/tls
+```
+
+The first passes `--net` to wasmer (enabling networking); the second
+additionally mounts the local `./tls` directory at `/tls` inside the
+sandbox. Anything after a standalone `--` is forwarded to your program (or
+the test harness) instead of the runtime:
+
+```shell copy
+$ cargo wasix run -W,--net -- --port 8080
+```
+
+See Wasmer's [runtime flags](https://docs.wasmer.io/ecosystem/wasmer/usage)
+for what can be passed. For `test` and `bench`, cargo-wasix also applies
+some defaults automatically (the package directory is mounted at
+`/project`, and the host temp directory at `/tmp`); set
+`CARGO_WASIX_NO_RUN_DEFAULTS=1` to disable them.
 
 ### Setting up a project
 
@@ -49,15 +75,16 @@ committing the config.
 
 ## `wasmer`
 
-`wasmer-cli` can also be used to run `wasix` binaries. As well as provide additional flags such as `--enable-bulk-memory`, `--enable-threads` and `--net`.
+`wasmer-cli` can also be used to run `wasix` binaries directly, as well as
+provide additional flags such as `--net` and `--volume`.
 
 ### Additional flags
 
 <Callout type="info" emoji="ℹ️">
   Some wasm files need extra flags that can be provided while running the file
-  with the runtime. For example, `wasmer run --enable-threads --net
-  ./target/wasix/debug/hello.wasm`. Learn more about Wasmer's [runtime
-  flags](https://docs.wasmer.io/ecosystem/wasmer/usage)
+  with the runtime. For example, `wasmer run --net
+  ./target/wasm32-wasmer-wasi/debug/hello.wasm`. Learn more about Wasmer's
+  [runtime flags](https://docs.wasmer.io/ecosystem/wasmer/usage)
 </Callout>
 
 ### The WASIX Registry

@@ -137,16 +137,17 @@ from crates.io as usual.
   build through the registry too.
 </Callout>
 
-#### Running the Application with Wasmer
+#### Running the Application on WASIX
 
 ```shell copy
-$ wasmer run target/wasm32-wasmer-wasi/debug/wasix-axum.wasm --net --enable-threads
+$ cargo wasix run -W,--net
 ```
 
-Let's go through the flags we used above:
-
-1. `--net` - This flag enables networking support for wasm files.
-2. `--enable-threads` - This flag enables threading support for wasm files.
+`cargo wasix run` builds and runs the binary with the Wasmer runtime. The
+`-W,` prefix passes comma-separated flags through to the runtime — here
+`--net`, which enables networking support (see [passing runtime
+flags](/docs/language-guide/rust/usage#passing-runtime-flags-with--w) for
+details).
 
 Now in a separate terminal, you can use `curl` to make a request to the server:
 
@@ -172,7 +173,7 @@ In this tutorial, we learned:
 - How to build a simple web server using axum and **compile it with wasix**.
 - How WASIX crate forks resolve automatically through the **WASIX registry**.
 - How to run wasix based `.wasm` files with **Wasmer**.
-- How to enable **networking** and **threading** support for wasm files.
+- How to pass runtime flags like `--net` through `cargo wasix run -W,`.
 
 import { Card, Cards } from "nextra-theme-docs";
 

@@ -411,19 +411,21 @@ stack underneath — resolve transparently as `+wasix.N` builds.
 #### Testing the server and client
 
 The binaries read the certificates from the `tls/` directory relative to
-their working directory, so mount it with `--volume`.
+their working directory, so mount it into the sandbox by passing `--volume`
+through to the runtime with `-W,` (see [passing runtime
+flags](/docs/language-guide/rust/usage#passing-runtime-flags-with--w)).
 
 In a terminal run the server.
 
 ```shell
-$ wasmer run target/wasm32-wasmer-wasi/release/helloworld-server.wasm --net --enable-threads --volume ./tls:/tls
+$ cargo wasix run --release --bin helloworld-server -W,--net,--volume,./tls:/tls
 Server listening on 127.0.0.1:50051
 ```
 
 Now, in another terminal run the client.
 
 ```shell
-$ wasmer run target/wasm32-wasmer-wasi/release/helloworld-client.wasm --net --enable-threads --volume ./tls:/tls
+$ cargo wasix run --release --bin helloworld-client -W,--net,--volume,./tls:/tls
 RESPONSE=Response \{ metadata: MetadataMap { headers: {"content-type": "application/grpc", "grpc-status": "0"} }, message: HelloReply { message: "hello Alice" }, extensions: {} }
 ```
 
