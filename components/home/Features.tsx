@@ -228,7 +228,7 @@ export default function Features({ id }: FeatureProps) {
     setHydrated(true);
   }, []);
   return (
-    <div id={id} className="h-[100slvh]">
+    <div id={id}>
       <h2 className="text-5xl md:text-7xl font-bold font-sans ml-4 mb-12 sm:ml-0 text-black dark:text-white">
         Features
       </h2>
