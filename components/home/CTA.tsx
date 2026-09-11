@@ -1,4 +1,5 @@
 import React from "react";
+import Link from "next/link";
 
 import { VscCommentDiscussion } from "react-icons/vsc";
 import { TbBook2 } from "react-icons/tb";
@@ -6,7 +7,7 @@ import { TbBook2 } from "react-icons/tb";
 export default function CTA() {
   return (
     <div className="mb-28">
-      <div className="relative isolate overflow-hidden  bg-opacity-100 bg-black dark:bg-opacity-90 dark:bg-white px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
+      <div className="relative isolate overflow-hidden  bg-black dark:bg-white/90 px-6 py-24 text-center shadow-2xl sm:rounded-3xl sm:px-16">
         <h2 className="mx-auto max-w-2xl text-3xl font-bold tracking-tight text-white sm:text-4xl dark:text-black">
           Get started with Wasix
         </h2>
@@ -16,16 +17,16 @@ export default function CTA() {
           projects.
         </p>
         <div className="mt-10 flex items-center justify-center gap-x-6">
-          <a
+          <Link
             href="/docs"
-            className="inline-flex items-center gap-x-1.5 rounded-md bg-white dark:bg-black px-3.5 py-2.5 text-sm font-semibold text-gray-900 dark:text-white shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="inline-flex items-center gap-x-1.5 rounded-md bg-white dark:bg-black px-3.5 py-2.5 text-sm font-semibold text-gray-900 dark:text-white shadow-xs hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <TbBook2 className="-ml-0.5 h-5 w-5" aria-hidden="true" />
             Documentation
-          </a>
+          </Link>
           <a
             href="https://github.com/orgs/wasix-org/discussions/1"
-            className="items-center gap-x-1.5 hidden md:inline-flex rounded-md bg-white dark:bg-black px-3.5 py-2.5 text-sm font-semibold text-gray-900 dark:text-white shadow-sm hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            className="items-center gap-x-1.5 hidden md:inline-flex rounded-md bg-white dark:bg-black px-3.5 py-2.5 text-sm font-semibold text-gray-900 dark:text-white shadow-xs hover:bg-gray-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             <VscCommentDiscussion
               className="-ml-0.5 h-5 w-5"

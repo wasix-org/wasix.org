@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useCallback } from "react";
 import WasixLogo from "./WasixLogo";
 import Features from "./Features";

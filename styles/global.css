@@ -1,12 +1,28 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "nextra-theme-docs/style.css";
 
-:global(.dark) .optimization {
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --animate-typing: typing 2s steps(500);
+
+  @keyframes typing {
+    0% {
+      width: 0%;
+      visibility: hidden;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+}
+
+.dark .optimization {
   background: linear-gradient(27deg, #3d3d3d, #252525);
 }
 
-.features-icon {
+.features-icon,
+.wasix-logo {
   mask-image: linear-gradient(
     60deg,
     black 25%,
@@ -16,7 +32,17 @@
   mask-size: 400%;
   mask-position: 0%;
 }
-.features-icon:hover {
+.features-icon:hover,
+.wasix-logo:hover {
   mask-position: 100%;
   transition: mask-position 1s ease, -webkit-mask-position 1s ease;
+}
+
+.wasix-logo {
+  display: inline-block;
+  padding: 0.5rem 0.5rem 0.5rem 0;
+}
+.wasix-logo svg {
+  width: 5rem;
+  height: 5rem;
 }

@@ -1,0 +1,291 @@
+import { Steps } from "nextra/components";
+import { Callout, FileTree } from "nextra/components";
+import CliVersionCallout from "../../../../../components/CliVersionCallout.mdx";
+
+## WASIX with Reqwest
+
+This is a sample project that shows how to use a `reqwest` client to build an outbound proxy and compile it to WASIX.
+
+### Prerequisites
+
+<CliVersionCallout />
+
+The project requires the following tools to be installed on your system:
+
+- [Rust](https://www.rust-lang.org/tools/install)
+- [WASIX](/docs/language-guide/rust/installation)
+
+<Steps>
+
+### Start a new project
+
+```shell
+$ cargo new --bin wasix-reqwest-proxy
+     Created binary (application) `wasix-reqwest-proxy` package
+```
+
+Your `wasix-reqwest-proxy` directory structure should look like this:
+
+<FileTree>
+  <FileTree.Folder name="wasix-reqwest-proxy" defaultOpen>
+    <FileTree.Folder name="src" defaultOpen>
+      <FileTree.File name="main.rs" />
+    </FileTree.Folder>
+    <FileTree.File name=".gitignore" />
+    <FileTree.File name="Cargo.toml" />
+  </FileTree.Folder>
+</FileTree>
+
+### Add dependencies
+
+```shell
+$ cd wasix-reqwest-proxy
+$ cargo add axum
+$ cargo add tokio --features rt-multi-thread,macros
+$ cargo add reqwest --no-default-features --features rustls-tls
+```
+
+Now your `Cargo.toml` should look like this:
+
+```toml filename="Cargo.toml"
+[package]
+name = "wasix-reqwest-proxy"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = "0.8"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
+```
+
+<Callout type="info" emoji="ℹ️">
+  Plain versions from crates.io — no git URLs, no pins, no
+  `[patch.crates-io]` section. `reqwest` and its whole TLS stack (`hyper`,
+  `rustls`, `ring`, …) resolve as WASIX-ready builds through the [WASIX
+  registry](/docs/language-guide/rust/patched-repos), transitively.
+</Callout>
+
+### Writing the Application
+
+Our outbound proxy application will have two parts:
+
+1. Listen for incoming requests using an `axum` server
+2. Forward the request to the destination using the `reqwest` client and return the response to the client
+
+#### Part 1. - Listening for incoming requests
+
+Let's set up a basic `axum` server that listens on port `3000` and sends every request to a `handle` function.
+
+```rust copy filename="src/main.rs"
+#[tokio::main]
+async fn main() {
+    // Send every request, whatever its path, to our handler...
+    let app = Router::new().fallback(any(handle));
+    //                                    ^^^^^^
+    // 🔦 Focus here - This handle function is what connects to the part 2 of our application.
+
+    // ...and serve on http://127.0.0.1:3000
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    println!("Listening on http://127.0.0.1:3000");
+    axum::serve(listener, app).await.unwrap();
+}
+```
+
+#### Part 2. - Forwarding the request to the destination
+
+Now let's write the `handle` function that will be called for each incoming request. This function will use the `reqwest` client to forward the request to the destination and return the response to the client.
+
+```rust copy filename="src/main.rs"
+async fn handle(req: Request) -> Response {
+    // Create the destination URL
+    let url = format!(
+        "https://www.rust-lang.org{}",
+        req.uri()
+            .path_and_query()
+            .map(|p| p.as_str())
+            .unwrap_or("/")
+    ); // ← 1.
+
+    let (status, body) = match fetch(&url).await {
+        Ok(body) => (StatusCode::OK, body),
+        Err(err) => (
+            err.status().unwrap_or(StatusCode::BAD_GATEWAY),
+            err.to_string(),
+        ),
+    }; // ← 2.
+
+    Response::builder()
+        .status(status)
+        .body(Body::from(body))
+        .unwrap() // ← 3.
+}
+
+async fn fetch(url: &str) -> Result<String, reqwest::Error> {
+    reqwest::get(url).await?.text().await
+}
+```
+
+Let's go through the code above:
+
+1. Create a `url` variable that contains the destination URL. We use `req.uri()` to get the request path and append it to the destination host.
+2. Use the `reqwest` client (via our little `fetch` helper) to make the request and read the response body. If the request fails, we use the error's status (or `BAD_GATEWAY`) and return the error message as the body.
+3. Build the response with the status and body and return it.
+
+Your `src/main.rs` should now look like this:
+
+```rust copy filename="src/main.rs"
+use axum::{
+    body::Body, extract::Request, http::StatusCode, response::Response, routing::any, Router,
+};
+
+async fn handle(req: Request) -> Response {
+    let url = format!(
+        "https://www.rust-lang.org{}",
+        req.uri()
+            .path_and_query()
+            .map(|p| p.as_str())
+            .unwrap_or("/")
+    );
+
+    let (status, body) = match fetch(&url).await {
+        Ok(body) => (StatusCode::OK, body),
+        Err(err) => (
+            err.status().unwrap_or(StatusCode::BAD_GATEWAY),
+            err.to_string(),
+        ),
+    };
+
+    Response::builder()
+        .status(status)
+        .body(Body::from(body))
+        .unwrap()
+}
+
+async fn fetch(url: &str) -> Result<String, reqwest::Error> {
+    reqwest::get(url).await?.text().await
+}
+
+#[tokio::main]
+async fn main() {
+    let app = Router::new().fallback(any(handle));
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000")
+        .await
+        .unwrap();
+    println!("Listening on http://127.0.0.1:3000");
+    axum::serve(listener, app).await.unwrap();
+}
+```
+
+#### Running the Application
+
+Let's compile the application to WASIX and run it:
+
+##### Compiling to WASIX
+
+```shell
+$ cargo wasix build
+    Updating `.cargo/config.toml` to resolve crates through the WASIX registry
+   Compiling tokio v1.47.0+wasix.1
+   Compiling reqwest v0.12.22+wasix.1
+   Compiling ring v0.17.14+wasix.1
+   ...
+   Compiling wasix-reqwest-proxy v0.1.0 (/wasix-reqwest-proxy)
+    Finished `dev` profile [unoptimized + debuginfo] target(s)
+info: Post-processing WebAssembly files
+  Optimizing with wasm-opt
+```
+
+Note the `+wasix.N` versions: on the first build, `cargo wasix` writes the
+[WASIX registry](/docs/language-guide/rust/patched-repos) config into
+`.cargo/config.toml`, and the WASIX forks — including the whole TLS stack
+that `reqwest` needs — resolve transparently.
+
+<Callout type="info" emoji="ℹ️">
+  Commit the generated `.cargo/config.toml` so that other checkouts and CI
+  build through the registry too.
+</Callout>
+
+##### Running the Application on WASIX
+
+```shell copy
+$ cargo wasix run -W,--net
+```
+
+`cargo wasix run` builds and runs the binary with the Wasmer runtime. The
+`-W,` prefix passes comma-separated flags through to the runtime — here
+`--net`, which enables networking support (see [passing runtime
+flags](/docs/language-guide/rust/usage#passing-runtime-flags-with--w) for
+details).
+
+Now in a separate terminal, you can use `curl` to make a request to the server:
+
+```shell
+$ curl localhost:3000
+<!doctype html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <title>
+        Rust Programming Language
+        ...
+```
+
+Congratulations! You have successfully built an outbound proxy server — with real outbound TLS — using axum, reqwest and wasix.
+
+</Steps>
+
+<Callout type="info" emoji="ℹ️">
+  You can also deploy your application to the edge. Checkout this
+  [tutorial](https://docs.wasmer.io/edge/quickstart/http-server) for deploying
+  your wasix-reqwest-proxy server to wasmer edge.
+</Callout>
+
+## Exercises
+
+### Exercise 1
+
+Try to take the destination URL as a query parameter.
+
+```shell
+$ curl localhost:3000?url=https://www.rust-lang.org
+```
+
+### Exercise 2
+
+Try to take the destination URL as a parameter for the `.wasm` file.
+
+```shell
+$ cargo wasix run -W,--net -- --url=https://www.rust-lang.org
+```
+
+<Callout type="default" emoji="💡">
+  You can use the `--` to pass arguments to the `.wasm` file and use the rust's
+  default `std::env::args` to parse the arguments.
+</Callout>
+
+## Conclusion
+
+In this tutorial, we learned:
+
+- How to build a simple outbound proxy server using `axum` and `reqwest`.
+- How WASIX crate forks — including the TLS stack — resolve automatically through the **WASIX registry**.
+- How to run wasix based `.wasm` files with **Wasmer**.
+- How to pass runtime flags like `--net` through `cargo wasix run -W,`.
+
+import { Cards } from "nextra/components";
+
+<Cards.Card
+  icon={
+    <svg viewBox="0 0 24 24" className=" transform scale-[120%] mr-2">
+      <path
+        fill="currentColor"
+        d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+      />
+    </svg>
+  }
+  title="wasix-rust-examples/wasix-reqwest-proxy"
+  href="https://github.com/wasix-org/wasix-rust-examples/tree/main/wasix-reqwest-proxy"
+/>
