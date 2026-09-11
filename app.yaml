@@ -1,8 +1,25 @@
 kind: wasmer.io/App.v0
 name: wasix-docs
+app_id: da_K6AIot5UVLy2
 owner: wasmer
 package: .
-app_id: da_K6AIot5UVLy2
 domains:
-  - wasmer--wasix-docs.wasmer.app
-  - wasix.org
+- wasmer--wasix-docs.wasmer.app
+- wasix.org
+annotations:
+  anybuild.run/config:
+    edgejs_enable: true
+    edgejs_precompile: true
+    name: out
+    node_build_command: pnpm run build
+    node_framework: next
+    node_install_inputs:
+    - package.json
+    node_package_manager: pnpm
+    node_package_name: wasix-docs
+    node_remove_native_binaries: true
+    node_server: node
+    static_dir: out
+  anybuild.run/provider: node-static
+  anybuild.run/version: 0.28.4
+  wasmer.io/version: 7.4.1
