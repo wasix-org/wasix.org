@@ -1,18 +1,15 @@
 ---
-title: WASIX - Docs
+title: WASIX Documentation — Start building
 ---
 
-# Introduction
+import QuickStart from "../../components/docs/QuickStart";
 
-Welcome to the WASIX documentation, your primary resource for understanding and working with this innovative extension to the WebAssembly System Interface (WASI).
+# Build with WASIX.
 
-Developed by the Wasmer team, WASIX is a transformative initiative designed to make WebAssembly (Wasm) more compatible with POSIX programs, enabling the seamless execution of more complex applications in both the browser and server environments. This documentation will provide you with an in-depth understanding of WASIX, its design philosophy, its capabilities, and its differences from WASI.
+Bring your C, C++, and Rust applications to WebAssembly. WASIX extends WASI with
+threads, networking, processes, and the system capabilities your code needs.
 
-WASIX is more than just an extension; it's a pathway towards widespread adoption of WebAssembly. By filling in the critical missing POSIX features in WASI, WASIX allows developers to use WebAssembly as a universal target, eliminating the need to adapt their programs specifically for it.
-
-This documentation is organized to provide comprehensive details on WASIX, from its basic concepts to more advanced features. You will learn about the WASIX toolchain, its runtime support, and the broad range of features it supports, including efficient multithreading, sockets, current directory support, subprocess spawning, TTY support, and more.
-
-Whether you are a seasoned developer, a system administrator, or a software enthusiast, this documentation will guide you on your journey to harness the power of WASIX in your applications. As WASIX paves the way for the future of universal applications, let this documentation be your compass.
+<QuickStart />
 
 ## What is WASI?
 
@@ -66,9 +63,7 @@ Writing programs that use WASIX is very similar to writing normal programs in la
 WASIX currently supports the following languages:
 
 - [Rust](/docs/language-guide/rust/installation)
-- [C](/docs/language-guide/c/installation)
-- Zig
-- AssemblyScript (Support coming soon)
+- [C / C++](/docs/language-guide/c/installation)
 
 ### How to run WASIX programs ?
 

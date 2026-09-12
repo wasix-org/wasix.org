@@ -10,8 +10,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "postbuild": "pagefind --site .next/server/app --output-path out/_pagefind",
-    "preview": "wasmer run . --net -- --port 8080",
+    "postbuild": "pagefind --site .next/server/app --output-path out/_pagefind && node scripts/generate-agent-pages.mjs && node scripts/check-agent-pages.mjs",
+    "test:markdown": "node --test scripts/agent-markdown.test.mjs",
+    "test:preview": "python3 -B scripts/preview_test.py",
+    "preview": "python3 scripts/preview.py",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
@@ -38,8 +40,14 @@
     "eslint-config-next": "^16.3.4",
     "pagefind": "^1.5.2",
     "postcss": "^8.5.28",
+    "rehype-parse": "^9.0.1",
+    "rehype-remark": "^10.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-parse": "^11.0.0",
+    "remark-stringify": "^11.0.0",
     "tailwindcss": "^4.3.3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "unified": "^11.0.5"
   },
   "pnpm": {
     "overrides": {

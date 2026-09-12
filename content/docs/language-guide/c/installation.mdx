@@ -1,10 +1,64 @@
-## WASIX installation for C
+---
+title: Install WASIX for C and C++
+description: Install wasixcc and compile C and C++ programs to WebAssembly with WASIX.
+---
 
-import { Callout } from "nextra/components";
+# Install WASIX for C and C++
 
-<Callout type="error" emoji="🚧">
-  We are working in a toolchain for C that will make a breeze compile your C
-  applications to WASIX. Meanwhile, you can use
-  [`wasix-libc`](https://github.com/wasix-org/wasix-libc) to compile your C/C++
-  programs to WASIX.
-</Callout>
+[wasixcc](https://github.com/wasix-org/wasixcc) is the C and C++ compiler driver for
+WASIX. It configures Clang, the WASIX sysroot, and WebAssembly optimization tools
+for you.
+
+## Install wasixcc
+
+On **macOS or Linux**, run the official installer:
+
+```sh
+curl -fsSL https://wasix.cc | sh
+```
+
+The installer places wasixcc and its dependencies in `~/.wasixcc`. Follow its
+instructions to update your `PATH`, or open a new terminal after installation.
+
+See the [wasixcc installation options](https://github.com/wasix-org/wasixcc#installation)
+for Cargo-based installation and CI setup.
+
+## Compile your first program
+
+Save this as `hello.c`:
+
+```c filename="hello.c"
+#include <stdio.h>
+
+int main(void) {
+    printf("Hello from WASIX!\n");
+    return 0;
+}
+```
+
+Compile it to a WebAssembly module:
+
+```sh
+wasixcc hello.c -o hello.wasm
+```
+
+For a C++ source file, use `wasix++`:
+
+```sh
+wasix++ hello.cpp -o hello.wasm
+```
+
+## Run with Wasmer
+
+[Install Wasmer](https://docs.wasmer.io/install), then run the compiled module:
+
+```sh
+wasmer run hello.wasm
+```
+
+## Next steps
+
+- Read the [wasixcc usage and build-system guide](https://github.com/wasix-org/wasixcc#usage)
+  for compiler flags, CMake, and Autotools integration.
+- Explore the [C examples](/docs/language-guide/c/examples).
+- Browse [WASIX builds](/builds) and the wasinix package collection.

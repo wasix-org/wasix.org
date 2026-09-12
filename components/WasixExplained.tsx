@@ -1,19 +1,41 @@
-import React from "react";
-// import image from Next.js
-import Image from "next/image";
+import {
+  LuArrowRight,
+  LuCpu,
+  LuFolderOpen,
+  LuGitBranch,
+  LuNetwork,
+} from "react-icons/lu";
+import { WasixMark } from "./Logo";
 
-import wasixExplained from "../assets/wasix-explained.png";
-
-function WasixExplained() {
+export default function WasixExplained() {
   return (
-    <div className="p-2 my-4 flex justify-center w-full">
-      <Image
-        className="w-full md:max-w-md"
-        alt={"WASIX Explained"}
-        src={wasixExplained}
-      />
-    </div>
+    <figure
+      className="docs-platform-diagram"
+      aria-label="WASIX extends the WASI foundation with system capabilities such as threads, networking, processes, and files."
+    >
+      <div className="docs-platform-top">
+        <span>THE WASIX PLATFORM</span>
+        <WasixMark />
+      </div>
+      <div className="docs-platform-features">
+        {[
+          { icon: LuCpu, label: "Threads" },
+          { icon: LuNetwork, label: "Networking" },
+          { icon: LuGitBranch, label: "Processes" },
+          { icon: LuFolderOpen, label: "Files & I/O" },
+        ].map(({ icon: Icon, label }) => (
+          <span key={label}>
+            <Icon />
+            {label}
+          </span>
+        ))}
+      </div>
+      <div className="docs-platform-base">
+        <strong>WASI foundation</strong>
+        <span>
+          Extended for real applications <LuArrowRight />
+        </span>
+      </div>
+    </figure>
   );
 }
-
-export default WasixExplained;

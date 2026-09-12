@@ -1,38 +1,59 @@
-## WASIX installation for Rust
+---
+title: Install WASIX for Rust
+description: Install cargo-wasix and build Rust applications for WASIX.
+---
 
-import { Callout } from "nextra/components";
+# Install WASIX for Rust
 
-<Callout type="default" emoji="⚙">
-  Wasix depends on the `rustup` toolchain manager. If you don't have `rustup`
-  installed, you can install it by following the instructions at
-  [rust-lang.org](https://www.rust-lang.org/tools/install).
-</Callout>
+[cargo-wasix](https://github.com/wasix-org/cargo-wasix) adds a `wasix` subcommand to
+Cargo, so you can build, run, and test Rust applications for WASIX with familiar
+commands.
 
-To install the Wasix toolchain for Rust, run the following command:
+## Prerequisites
 
-```console copy
-$ cargo install cargo-wasix
+Install Rust using [rustup](https://rustup.rs). Both `cargo` and `rustup` must be
+available in your terminal.
+
+## Install cargo-wasix
+
+```sh
+cargo install cargo-wasix
 ```
 
-The above command will install four things:
+The WASIX Rust toolchain downloads automatically the first time you run a command
+such as `cargo wasix build`. You do not need to install it separately.
 
-1. The `cargo-wasix` command-line tool
-2. The `wasix` toolchain for `rustup`
-3. The `wasix` target for `rustup`
-4. The `wasix` target for `rustc`
+Prebuilt installers for macOS, Linux, and Windows are also available in the
+[official installation guide](https://github.com/wasix-org/cargo-wasix#installation).
 
-#### Verifying the Installation
+## Verify installation
 
-Verify that the `cargo-wasix` command-line tool was installed correctly by
-
-```shell
-$ cargo wasix --version
-cargo-wasix 0.1.30
+```sh
+cargo wasix --version
 ```
 
-Check that the `wasix` toolchain was installed correctly by running:
+## Build your first project
 
-```shell
-$ rustup toolchain list | grep wasix
-wasix
+```sh
+cargo new hello-wasix
+cd hello-wasix
+cargo wasix build --release
 ```
+
+To run the project, [install Wasmer](https://docs.wasmer.io/install), then use:
+
+```sh
+cargo wasix run
+```
+
+You can also run your project's tests:
+
+```sh
+cargo wasix test
+```
+
+## Next steps
+
+- Read the [Rust usage guide](/docs/language-guide/rust/usage).
+- Explore the [Rust examples](/docs/language-guide/rust/examples).
+- Browse [WASIX builds](/builds) for package recipes and toolchains in wasinix.

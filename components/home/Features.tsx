@@ -208,7 +208,7 @@ const actions = [
           Wasmer
         </span>{" "}
         runtime, with expectations for more runtimes to join soon. WASIX
-        provides toolchains for Rust and C, including support for Zig.
+        provides toolchains for Rust and C / C++.
       </div>
     ),
     icon: BsGearFill,
