@@ -40,7 +40,20 @@ cd hello-wasix
 cargo wasix build --release
 ```
 
-To run the project, [install Wasmer](https://docs.wasmer.io/install), then use:
+## Run with Wasmer
+
+[Install Wasmer](https://docs.wasmer.io/install), then run the release build from
+the project directory:
+
+```sh
+wasmer run target/wasm32-wasmer-wasi/release/hello-wasix.wasm
+```
+
+Replace `hello-wasix` with your project's binary name if you are using an existing
+project. Cargo places WASIX release builds in `target/wasm32-wasmer-wasi/release/`
+by default.
+
+You can also build and run directly through cargo-wasix:
 
 ```sh
 cargo wasix run

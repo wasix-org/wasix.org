@@ -17,7 +17,7 @@ export const metadata: Metadata = {
     template: "%s",
   },
   description:
-    "The power of POSIX. The portability of WebAssembly. Compile C, C++, and Rust with WASIX: threads, networking, processes, and more.",
+    "The power of POSIX. The portability of WebAssembly. Build C, C++, Rust, and Python applications with WASIX: threads, networking, processes, and more.",
   applicationName: "WASIX",
   appleWebApp: { title: "WASIX" },
   openGraph: {

@@ -18,7 +18,7 @@ export default function RuntimeDiagram() {
     <div
       className="runtime-diagram"
       role="img"
-      aria-label="C, C++, and Rust compile to one WASIX application. An infinity mark inside a shield represents the WebAssembly sandbox, connected to three environments: Server, Edge, and Browser."
+      aria-label="C, C++, Rust, and Python applications target WASIX. An infinity mark inside a shield represents the WebAssembly sandbox, connected to three environments: Server, Edge, and Browser."
     >
       <div className="diagram-topline" aria-hidden="true">
         <span>ONE BUILD. EVERY ENVIRONMENT.</span>
@@ -85,15 +85,20 @@ export default function RuntimeDiagram() {
           <g fill="#f7f8f1" stroke="#b5bfa8" strokeWidth="1">
             <rect x="34" y="75" width="94" height="34" rx="3" />
             <rect x="432" y="75" width="94" height="34" rx="3" />
+            <rect x="233" y="3" width="94" height="34" rx="3" />
           </g>
           <g fill="none" stroke="#8c9a7c" strokeWidth="1">
-            <path d="M81 109v25l44 25M479 109v25l-44 25" />
+            <path d="M81 109v25l44 25M479 109v25l-44 25M280 37V62" />
           </g>
           <g fill="#c6ed68" stroke="#819957" strokeWidth="1">
             <circle cx="125" cy="159" r="3.2" />
             <circle cx="435" cy="159" r="3.2" />
+            <circle cx="280" cy="62" r="3.2" />
           </g>
           <g fill="#58634c" textAnchor="middle" className="runtime-svg-label">
+            <text x="280" y="25">
+              Python
+            </text>
             <text x="81" y="97">
               C / C++
             </text>

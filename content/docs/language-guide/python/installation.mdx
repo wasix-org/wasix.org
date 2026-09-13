@@ -1,0 +1,112 @@
+---
+title: Install Python packages for WASIX
+description: Install FastAPI, NumPy, and other Python packages for WebAssembly using pip and the WASIX Python package registry.
+---
+
+import { pythonRegistry } from "../../../../components/python-registry.mjs";
+
+# Install Python packages for WASIX
+
+Use familiar Python packages in WebAssembly. The [WASIX Python registry](https://python-registry.wasmer.app/)
+provides prebuilt wheels, including native extensions compiled for `wasix_wasm32`.
+
+The registry lists **{pythonRegistry.packageCount} packages**, checked on {pythonRegistry.checkedLabel}.
+Browse the [complete package index](https://python-registry.wasmer.app/all/simple/)
+for available packages and versions, including FastAPI, NumPy, pandas, Pydantic, and cryptography.
+
+## Install packages with pip
+
+Run this command on your development machine or in your build environment:
+
+```sh
+pip install fastapi \
+  --index-url https://python-registry.wasmer.app/all/simple/ \
+  --platform wasix_wasm32 \
+  --python-version 3.13 \
+  --only-binary=:all: \
+  --target ./wasix-packages
+```
+
+Replace `fastapi` with another package from the registry, or provide several
+package names. Packages are installed into `./wasix-packages` in your current
+host directory.
+
+| Option                      | Purpose                                                                                                                      |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `--index-url`               | Use the complete WASIX package index, including dependencies.                                                                |
+| `--platform wasix_wasm32`   | Select wheels for WASIX instead of your host operating system.                                                               |
+| `--python-version 3.13`     | Select wheels compatible with the target Python interpreter. Change this to match your WASIX Python version, such as `3.14`. |
+| `--only-binary=:all:`       | Install prebuilt wheels without attempting source builds on the host.                                                        |
+| `--target ./wasix-packages` | Put packages and dependencies in a directory to bundle with your application.                                                |
+
+The registry's `/all/simple/` index includes every published package and its
+packaged dependencies. Its `/simple/` index is a smaller selection of WASIX-specific
+packages intended for use alongside PyPI. Use `/all/simple/` for the self-contained
+installation command above.
+
+## Install from a requirements file
+
+Use the same options with your project's `requirements.txt`:
+
+```sh
+pip install -r requirements.txt \
+  --index-url https://python-registry.wasmer.app/all/simple/ \
+  --platform wasix_wasm32 \
+  --python-version 3.13 \
+  --only-binary=:all: \
+  --target ./wasix-packages
+```
+
+The registry publishes versions with a `+wasix.N` suffix identifying the WASIX
+build. Check the package's index page when pinning versions.
+
+## Run it with Wasmer
+
+After installing the packages, [install Wasmer 7 or newer](https://docs.wasmer.io/install)
+and run the [Python package](https://wasmer.io/python/python) from the same host
+directory where you ran pip:
+
+```sh
+wasmer run python/python@=3.13.19 \
+  --volume ./wasix-packages:/packages \
+  --env PYTHONPATH=/packages \
+  -- -c "import fastapi; print('FastAPI', fastapi.__version__)"
+```
+
+The command imports FastAPI inside WASIX Python and prints `FastAPI` followed
+by the installed version. A successful import verifies that Python can load the
+package and the dependencies it imports, including native extensions.
+
+- `--volume` maps the host directory from the pip install step to `/packages`
+  inside the sandbox. If you changed the installation directory, update the
+  host path before the colon too.
+- `--env PYTHONPATH=/packages` adds that guest directory to Python's import path.
+- `--` separates Wasmer options from Python's `-c` argument.
+- `python/python@=3.13.19` pins the registry package containing CPython 3.13,
+  matching the install command's `--python-version 3.13`.
+
+To run your own script, mount its directory too and pass its guest path instead
+of `-c`. For example, with `app.py` in the current directory:
+
+```sh
+wasmer run python/python@=3.13.19 \
+  --volume ./wasix-packages:/packages \
+  --volume .:/app \
+  --env PYTHONPATH=/packages \
+  -- /app/app.py
+```
+
+WASIX native extensions are intended for the WASIX interpreter; importing them
+with your host's macOS or Linux Python will not work. See the
+[Wasmer CLI reference](https://docs.wasmer.io/runtime/cli/) for more runtime options.
+
+If pip cannot find a matching distribution, check the package's published Python
+versions and platform tags, and make sure your requirements can be resolved from
+the registry. Package availability and supported Python versions vary by release.
+
+## Next steps
+
+- [Browse the Python package registry](https://python-registry.wasmer.app/).
+- [Explore WASIX builds](/builds).
+- Read how [Python and extension modules are built](https://github.com/wasix-org/wasinix/blob/main/docs/python.md).
+- Read the [wheel registry documentation](https://github.com/wasix-org/wasinix/blob/main/docs/registry.md#the-python-wheel-index).

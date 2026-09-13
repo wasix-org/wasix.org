@@ -624,7 +624,7 @@ body:has(.marketing-page) {
 }
 .language-tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   border-bottom: 1px solid #dfe4d7;
   background: #f4f6ef;
 }
@@ -632,8 +632,9 @@ body:has(.marketing-page) {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  padding: 18px 10px;
+  gap: 7px;
+  flex-wrap: wrap;
+  padding: 16px 8px;
   font-size: 13px;
   border-bottom: 2px solid transparent;
   color: #7a826f;
@@ -648,6 +649,7 @@ body:has(.marketing-page) {
   height: 20px;
 }
 .tab-tool {
+  flex-basis: 100%;
   font-family: var(--site-mono);
   font-size: 9px;
   color: #818875;
@@ -748,6 +750,10 @@ body:has(.marketing-page) {
 }
 .build-example > .command-box {
   margin-top: 8px;
+}
+.compiled-program-steps .install-note a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .install-card-body .text-link {
   font-size: 11px;
@@ -1719,4 +1725,138 @@ body:has(.marketing-page) {
 .dark body:not(:has(.marketing-page)) .footer-links a,
 .dark body:not(:has(.marketing-page)) .footer-bottom strong {
   color: #c5d1b6;
+}
+
+/* Python package installation shares the same command and registry details. */
+.command-box-multiline {
+  align-items: flex-start;
+}
+.command-box-multiline > code {
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.9;
+}
+.command-box-multiline > .command-prompt {
+  padding-top: 2px;
+  line-height: 1.9;
+}
+.python-package-count {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 16px;
+  border: 1px solid #dce5cf;
+  border-radius: 5px;
+  background: #f4f7ed;
+  margin-bottom: 24px;
+}
+.python-package-count > svg:first-child {
+  width: 27px;
+  height: 27px;
+  color: #6c873f;
+  flex-shrink: 0;
+}
+.python-package-count > span {
+  flex: 1;
+}
+.python-package-count strong {
+  display: block;
+  font-size: 17px;
+  font-weight: 500;
+}
+.python-package-count small {
+  display: block;
+  font-size: 10px;
+  color: #758166;
+  margin-top: 4px;
+  line-height: 1.6;
+}
+.python-package-count > svg:last-child {
+  flex-shrink: 0;
+}
+.python-packages-section {
+  display: grid;
+  grid-template-columns: 1fr 1.07fr;
+  gap: 65px;
+  align-items: center;
+  padding-top: 65px;
+  padding-bottom: 80px;
+  border-top: 1px solid var(--site-line);
+}
+.python-packages-intro > p {
+  margin-top: 22px;
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--site-muted);
+}
+.python-package-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 24px 0;
+}
+.python-package-tags > span {
+  padding: 6px 10px;
+  border: 1px solid var(--site-line);
+  border-radius: 4px;
+  font: 10px var(--site-mono);
+  color: var(--site-muted);
+}
+.python-packages-card {
+  min-width: 0;
+  border: 1px solid var(--site-line);
+  border-radius: 7px;
+  background: #fff;
+  padding: 25px;
+}
+.python-packages-card > h3 {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 13px;
+}
+.python-packages-card > p {
+  margin: 16px 0 22px;
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--site-muted);
+}
+.python-packages-card > p > code {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 900px) {
+  .python-packages-section {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+@media (max-width: 600px) {
+  .python-packages-section {
+    padding-top: 40px;
+    padding-bottom: 45px;
+  }
+  .python-packages-card {
+    padding: 20px 16px;
+  }
+  .python-package-count {
+    padding: 12px;
+    gap: 10px;
+  }
+  .python-package-count small {
+    font-size: 9px;
+  }
+}
+
+.python-run-step {
+  margin: 26px 0 24px;
+}
+.marketing-page .python-run-note {
+  margin-top: 12px;
+  font-size: 10px;
+  line-height: 1.8;
+  color: var(--site-muted);
+}
+.python-run-note a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

@@ -11,6 +11,7 @@ import {
   LuTerminal,
   LuX,
 } from "react-icons/lu";
+import PythonPackages from "../PythonPackages";
 import CopyCommand from "../CopyCommand";
 import {
   categories,
@@ -185,6 +186,7 @@ export default function Builds() {
           </p>
         </div>
       </section>
+      <PythonPackages />
       <section className="reproduce-section">
         <div className="site-container reproduce-grid">
           <div>
@@ -239,7 +241,7 @@ export default function Builds() {
         <LuCode />
         <div>
           <h2>Have code of your own?</h2>
-          <p>Get the C / C++ or Rust toolchain and start building for WASIX.</p>
+          <p>Get started with C / C++, Rust, or Python on WASIX.</p>
         </div>
         <Link className="site-button" href="/#install">
           Install WASIX <LuArrowUpRight />

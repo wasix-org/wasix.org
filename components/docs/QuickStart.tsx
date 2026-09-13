@@ -7,44 +7,56 @@ import {
   LuBoxes,
   LuTerminal,
 } from "react-icons/lu";
-import { SiRust } from "react-icons/si";
+import { SiPython, SiRust } from "react-icons/si";
 import CopyCommand from "../CopyCommand";
+import CompiledProgramSteps from "../CompiledProgramSteps";
+import { PythonCommand, PythonRunStep } from "../PythonPackages";
 import { toolchains } from "../toolchains.mjs";
 
 export default function QuickStart() {
   return (
     <div className="docs-quickstart">
       <div className="docs-toolchains">
-        {Object.entries(toolchains).map(([key, toolchain]) => (
+        {Object.entries(toolchains).map(([key, toolchain], index) => (
           <section
-            className="docs-toolchain"
+            className={`docs-toolchain${key === "python" ? " docs-python-toolchain" : ""}`}
             key={key}
             aria-label={`${toolchain.language} quick start`}
           >
             <div className="docs-card-kicker">
-              {key === "c" ? <LuBraces /> : <SiRust />}
+              {key === "c" ? (
+                <LuBraces />
+              ) : key === "rust" ? (
+                <SiRust />
+              ) : (
+                <SiPython />
+              )}
               <span>{toolchain.language}</span>
               <span className="docs-card-number">
-                {key === "c" ? "01" : "02"}
+                {String(index + 1).padStart(2, "0")}
               </span>
             </div>
             <Link className="docs-toolchain-title" href={toolchain.docs}>
               {toolchain.name}
               <LuArrowUpRight />
             </Link>
-            <p>
-              {key === "c"
-                ? "Bring your C and C++ projects to WebAssembly with a Clang-based toolchain."
-                : "Build, run, and test your Rust applications with familiar Cargo commands."}
-            </p>
-            <div className="command-box">
-              <span className="command-prompt">$</span>
-              <code>{toolchain.command}</code>
-              <CopyCommand
-                command={toolchain.command}
-                label={`Copy ${toolchain.name} installation command`}
-              />
-            </div>
+            <p>{toolchain.description}</p>
+            {key === "python" ? (
+              <PythonCommand />
+            ) : (
+              <div className="command-box">
+                <span className="command-prompt">$</span>
+                <code>{toolchain.command}</code>
+                <CopyCommand
+                  command={toolchain.command}
+                  label={`Copy ${toolchain.name} installation command`}
+                />
+              </div>
+            )}
+            {key === "python" && <PythonRunStep />}
+            {(key === "c" || key === "rust") && (
+              <CompiledProgramSteps language={key} />
+            )}
             <Link className="docs-card-link" href={toolchain.docs}>
               Get started with {toolchain.language}
               <LuArrowRight />

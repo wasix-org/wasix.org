@@ -873,3 +873,42 @@ body:has(.docs-layout) .copy-status {
   border-color: #4d3d59;
   border-left-color: #a88bbe;
 }
+
+.docs-python-toolchain {
+  grid-column: 1 / -1;
+}
+.docs-layout .docs-python-toolchain > p {
+  min-height: 0;
+}
+.docs-python-toolchain .command-box-multiline > code {
+  white-space: pre-wrap;
+}
+
+.docs-layout .python-run-step .install-step h3,
+.docs-layout .compiled-program-steps .install-step h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+.docs-layout .python-run-note {
+  margin-top: 12px;
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--docs-muted);
+}
+.docs-python-toolchain .python-run-step .command-box {
+  margin-top: 0;
+}
+.docs-toolchain .compiled-program-steps {
+  margin-top: 26px;
+}
+.docs-toolchain .compiled-program-steps > .command-box {
+  margin-top: 0;
+}
+.docs-layout .compiled-program-steps .install-note {
+  margin: 12px 0 24px;
+  font-size: 11px;
+  line-height: 1.8;
+  color: var(--docs-muted);
+}

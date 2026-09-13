@@ -94,8 +94,8 @@ export default function Home() {
           </p>
           <p className="hero-detail">
             WASIX extends WASI with the features real applications need. Bring
-            your C, C++, and Rust code to WebAssembly—with more of the tools you
-            already know.
+            your C, C++, Rust, and Python applications to WebAssembly—with the
+            tools you already know.
           </p>
           <div className="hero-buttons">
             <Link className="site-button" href="#install">

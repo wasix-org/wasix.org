@@ -16,7 +16,7 @@ Then open `http://localhost:3000/`.
 Docs live in `content/`. Sidebar order and titles come from the `_meta.ts` file
 in each folder.
 
-The homepage lives in `components/home/`, with C/C++ and Rust installation
+The homepage lives in `components/home/`, with C/C++, Rust, and Python installation
 instructions in `Install.tsx`. The `/builds` page lives in `components/builds/`;
 update `packages.ts` to maintain the curated wasinix recipe links. The catalog
 links to GitHub for current build activity rather than displaying cached status.

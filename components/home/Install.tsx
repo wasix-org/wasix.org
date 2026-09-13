@@ -2,9 +2,15 @@
 import { useState } from "react";
 import Link from "next/link";
 import { LuArrowUpRight, LuCheck, LuTerminal } from "react-icons/lu";
-import { SiRust } from "react-icons/si";
+import { SiPython, SiRust } from "react-icons/si";
 import CopyCommand from "../CopyCommand";
+import CompiledProgramSteps from "../CompiledProgramSteps";
 
+import {
+  PythonPackageCount,
+  PythonCommand,
+  PythonRunStep,
+} from "../PythonPackages";
 import { toolchains } from "../toolchains.mjs";
 
 export default function Install() {
@@ -16,12 +22,12 @@ export default function Install() {
         <div className="install-intro">
           <span className="eyebrow">03 / YOUR NEXT BUILD STARTS HERE</span>
           <h2>
-            Native code.
+            Your language.
             <br />
             New possibilities.
           </h2>
           <p>
-            Pick your language. Install your toolchain.
+            Pick your language. Bring your tools and packages.
             <br className="desktop-break" /> Make WebAssembly your next target.
           </p>
           <div className="install-perks">
@@ -37,7 +43,7 @@ export default function Install() {
           </Link>
         </div>
         <div className="install-card">
-          <div className="language-tabs" aria-label="Choose your toolchain">
+          <div className="language-tabs" aria-label="Choose your language">
             <button
               type="button"
               aria-pressed={language === "c"}
@@ -55,42 +61,45 @@ export default function Install() {
             >
               <SiRust /> Rust <span className="tab-tool">cargo-wasix</span>
             </button>
+            <button
+              type="button"
+              aria-pressed={language === "python"}
+              onClick={() => setLanguage("python")}
+            >
+              <SiPython /> Python <span className="tab-tool">pip</span>
+            </button>
           </div>
           <div className="install-card-body" key={language}>
+            {language === "python" && <PythonPackageCount />}
             <div className="install-step">
               <span>01</span>
-              <h3>Install {toolchain.name}</h3>
-              <a
-                href={toolchain.source}
-                aria-label={`${toolchain.name} on GitHub`}
-              >
+              <h3>
+                {language === "python"
+                  ? "Install Python packages"
+                  : `Install ${toolchain.name}`}
+              </h3>
+              <a href={toolchain.source} aria-label={toolchain.sourceLabel}>
                 <LuArrowUpRight />
               </a>
             </div>
-            <div className="command-box">
-              <span className="command-prompt">$</span>
-              <code>{toolchain.command}</code>
-              <CopyCommand
-                command={toolchain.command}
-                label={`Copy ${toolchain.name} installation command`}
-              />
-            </div>
-            <p className="install-note">{toolchain.note}</p>
-            <div className="install-step">
-              <span>02</span>
-              <h3>Compile something great</h3>
-            </div>
-            <div className="build-example">
-              <span># {toolchain.comment}</span>
+            {language === "python" ? (
+              <PythonCommand />
+            ) : (
               <div className="command-box">
                 <span className="command-prompt">$</span>
-                <code>{toolchain.build}</code>
+                <code>{toolchain.command}</code>
                 <CopyCommand
-                  command={toolchain.build}
-                  label="Copy build command"
+                  command={toolchain.command}
+                  label={`Copy ${toolchain.name} installation command`}
                 />
               </div>
-            </div>
+            )}
+            <p className="install-note">{toolchain.note}</p>
+            {language === "python" ? (
+              <PythonRunStep />
+            ) : (
+              <CompiledProgramSteps language={language} />
+            )}
             <Link className="text-link" href={toolchain.docs}>
               Full {toolchain.language} setup instructions <LuArrowUpRight />
             </Link>
@@ -98,7 +107,9 @@ export default function Install() {
           <div className="install-runtime">
             <LuTerminal />
             <span>
-              Run your .wasm with{" "}
+              {language === "python"
+                ? "Run with WASIX Python on "
+                : "Run your .wasm with "}
               <a href="https://docs.wasmer.io/install">
                 Wasmer <LuArrowUpRight />
               </a>
